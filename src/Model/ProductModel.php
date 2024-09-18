@@ -28,7 +28,7 @@ class ProductModel
 		return $this->entityManager->getRepository(Product::class)->findOneBy(['slug' => $slug]);
 	}
 
-	public function saveOrUpdateProduct(Product $product, ArrayCollection $originalColors): void
+	public function saveOrUpdateProduct(Product $product): void
 	{
 		$message = 'Product has been updated!';
 
@@ -40,18 +40,6 @@ class ProductModel
 
 		$this->onUpdateAt($product);
 
-		foreach ($originalColors as $color) {
-			if ($product->getColors()->contains($color) === false) {
-				$this->entityManager->remove($color);
-			}
-		}
-
-		foreach ($product->getColors() as $color) {
-			if (!$color->getId()) {
-				$this->entityManager->persist($color);
-			}
-		}
-
 		$this->entityManager->persist($product);
 		$this->entityManager->flush();
 
@@ -61,10 +49,6 @@ class ProductModel
 
 	public function deleteProduct(Product $product): void
 	{
-		foreach ($product->getColors() as $color) {
-			$this->entityManager->remove($color);
-		}
-
 		$this->entityManager->remove($product);
 		$this->entityManager->flush();
 

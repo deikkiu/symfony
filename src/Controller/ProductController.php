@@ -9,7 +9,6 @@ use App\Form\ProductSearchType;
 use App\Form\ProductType;
 use App\Model\ProductModel;
 use App\Repository\ProductRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends AbstractController
 {
-	public function store(Request $request, ProductModel $productModel, EntityManagerInterface $entityManager): Response
+	public function store(Request $request, ProductModel $productModel): Response
 	{
 		$slug = $request->get('slug');
 		$product = $productModel->getOrCreateProduct($slug);
@@ -26,19 +25,13 @@ class ProductController extends AbstractController
 			throw $this->createNotFoundException('Product not found for this slug: ' . $slug);
 		}
 
-		$originalColors = new ArrayCollection();
-
-		foreach ($product->getColors() as $color) {
-			$originalColors->add($color);
-		}
-
 		$form = $this->createForm(ProductType::class, $product);
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
 			$product = $form->getData();
 
-			$productModel->saveOrUpdateProduct($product, $originalColors);
+			$productModel->saveOrUpdateProduct($product);
 
 			return $this->redirectToRoute('product_list');
 		}

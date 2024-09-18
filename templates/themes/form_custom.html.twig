@@ -1,0 +1,33 @@
+{% block template_widget %}
+    <div class="flex g-10">
+        {{ form_widget(form) }}
+        {% if value is defined %}
+            <span>{{ value }}</span>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block _product_price_widget %}
+    {% set value = '¢' %}
+    {{ block('template_widget') }}
+{% endblock %}
+
+{% block _product_product_attr_length_widget %}
+    {% set value = 'cm' %}
+    {{ block('template_widget') }}
+{% endblock %}
+
+{% block _product_product_attr_width_widget %}
+    {% set value = 'cm' %}
+    {{ block('template_widget') }}
+{% endblock %}
+
+{% block _product_product_attr_height_widget %}
+    {% set value = 'cm' %}
+    {{ block('template_widget') }}
+{% endblock %}
+
+{% block _product_product_attr_weight_widget %}
+    {% set value = 'g' %}
+    {{ block('template_widget') }}
+{% endblock %}

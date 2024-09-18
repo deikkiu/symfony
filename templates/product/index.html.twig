@@ -4,7 +4,8 @@
 
 {% block content %}
     <h1>Filter product form:</h1>
-    {{ form(form) }}
+    {{ form_start(form) }}
+    {{ form_end(form) }}
     <a href="{{ path('product_list') }}">
         Reset
     </a>
