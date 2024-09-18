@@ -1,0 +1,40 @@
+<header id="header">
+    {% block header %}
+        <div>
+            <h1>Website</h1>
+        </div>
+        <nav class="nav">
+            <ul>
+                {% block links %}
+                    <li>
+                        <a href="{{ path('category_list') }}">
+                            Category list
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('category_create') }}">
+                            Category create
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('product_list') }}">
+                            Product list
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ path('product_create') }}">
+                            Product create
+                        </a>
+                    </li>
+                    {% if app.session.get('lastProduct') %}
+                        <li>
+                            <a href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">
+                                Last interacted product
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endblock %}
+            </ul>
+        </nav>
+    {% endblock %}
+</header>

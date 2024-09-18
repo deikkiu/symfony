@@ -1,0 +1,33 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Category list page{% endblock %}
+
+{% block content %}
+    <h1>Category list:</h1>
+    {% if categories %}
+        <ul>
+            {% for category in categories %}
+                <li>Id: {{ category.id }}</li>
+                <li>Name: {{ category.name }}</li>
+                <li>Slug: {{ category.slug }}</li>
+                {% if category.parent %}
+                    <li>Parent category: {{ category.parent.name }}</li>
+                {% endif %}
+                <li>
+                    <a href="{{ path('category_update', {'slug': category.slug}) }}">
+                        Update category
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('category_delete', {'id': category.id}) }}">
+                        Delete category
+                    </a>
+                </li>
+                <hr />
+                <br />
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>The list of categories is empty</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html.twig" %}
+
+{% block title %}product create page{% endblock %}
+
+{% block content %}
+    <h1>Product form</h1>
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.category) }}
+        <h3>{{ form_label(form.colors) }}</h3>
+        <ul class="colors"
+            data-index="{{ form.colors|length > 0 ? form.colors|last.vars.name + 1 : 0 }}"
+            data-prototype="{{ form_widget(form.colors.vars.prototype)|e('html_attr') }}">
+                {% for color in form.colors %}
+                    <li>
+                        {{ form_widget(color.name) }}
+                    </li>
+                {% endfor %}
+        </ul>
+        <button type="button" class="add_item_link" data-collection-holder-class="colors">Add a color</button>
+
+        {{ form_row(form.price) }}
+        {{ form_row(form.amount) }}
+        {{ form_row(form.descr) }}
+        {{ form_row(form.product_attr) }}
+        {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% include 'incs/head.html.twig' %}
+</head>
+<body>
+{% include 'incs/header.html.twig' %}
+
+{% block sidebar %}
+    {{ render(controller('App\\Controller\\CategoryController::recentCategories')) }}
+{% endblock %}
+
+<main id="main">
+    {% include 'incs/flash.html.twig' %}
+
+    {% block content %}{% endblock %}
+</main>
+
+{% include 'incs/footer.html.twig' %}
+
+{% block javascripts %}
+    <script src="{{ asset('script/index.js') }}"></script>
+{% endblock %}
+</body>
+</html>

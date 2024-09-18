@@ -1,0 +1,32 @@
+<div class="card">
+    <div>
+        <p>Id: {{ product.id }}</p>
+        <p>Name: {{ product.name }}</p>
+        <p>Category: {{ product.category.name }}</p>
+        {% if product.colors|length %}
+            <span>Colors:</span>
+            {% for color in product.colors %}
+                <span>{{ color.name }}</span>
+            {% endfor %}
+        {% endif %}
+        <p>Slug: {{ product.slug }}</p>
+        <p>Price: {{ product.price|price }}</p>
+        <p>Amount: {{ product.amount }}</p>
+        <p>Description: {{ product.descr }}</p>
+        <p>Product attributes</p>
+        <p>Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</p>
+        <p>Weight: {{ product.productAttr.weight }} g</p>
+    </div>
+    <div>
+        {% block buttons %}
+            <a href="{{ path('product_update', {'slug': product.slug}) }}">
+                Update product
+            </a>
+            <a href="{{ path('product_delete', {'id': product.id}) }}">
+                Delete product
+            </a>
+        {% endblock %}
+    </div>
+</div>
+
+

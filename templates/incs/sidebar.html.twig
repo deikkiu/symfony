@@ -1,0 +1,13 @@
+<div class="sidebar">
+    <h1>Category:</h1>
+
+    <div class="categories">
+        {% for category in categories %}
+            <a href="{{ path('product_list_category', {category: category.slug}) }}">
+                {{ category.name }}
+                |
+                {{ category.productCount }}
+            </a>
+        {% endfor %}
+    </div>
+</div>

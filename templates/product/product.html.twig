@@ -1,0 +1,25 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Product list page{% endblock %}
+
+{% block content %}
+    <h1>Product {{ product.name }}:</h1>
+    {% include 'incs/card.html.twig' %}
+
+    {% if categoryProducts %}
+        <h2>Products in category - {{ product.category.name }}</h2>
+    {% endif %}
+    <div class="cards">
+        {% for categoryProduct in categoryProducts %}
+            {% embed 'incs/card.html.twig' with {'product': categoryProduct} %}
+                {% block buttons %}
+                    <a href="{{ path('product', {'slug': product.slug}) }}">
+                        Open product
+                    </a>
+
+                    {{ parent('buttons') }}
+                {% endblock %}
+            {% endembed %}
+        {% endfor %}
+    </div>
+{% endblock %}

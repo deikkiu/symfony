@@ -1,0 +1,49 @@
+hello:
+  path: /hello/{name}
+  controller: App\Controller\HelloController::show
+  defaults:
+    name: ''
+
+# category
+category_list:
+  path: /category/list
+  controller: App\Controller\CategoryController::show
+
+category_delete:
+  path: /category/delete/{id}
+  controller: App\Controller\CategoryController::delete
+
+category_create:
+  path: /category
+  controller: App\Controller\CategoryController::store
+
+category_update:
+  path: /category/{slug}
+  controller: App\Controller\CategoryController::store
+
+# product
+product_list:
+  path: /product/list
+  controller: App\Controller\ProductController::showAll
+
+product_list_category:
+  path: /product/list/{category}
+  controller: App\Controller\ProductController::showAll
+
+product_create:
+  path: /product/store
+  controller: App\Controller\ProductController::store
+
+product_update:
+  path: /product/store/{slug}
+  controller: App\Controller\ProductController::store
+
+product_delete:
+  path: /product/delete/{id}
+  controller: App\Controller\ProductController::delete
+
+product:
+  path: /product/{slug}
+  controller: App\Controller\ProductController::show
+
+

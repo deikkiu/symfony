@@ -1,0 +1,32 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Product list page{% endblock %}
+
+{% block content %}
+    <h1>Filter product form:</h1>
+    {{ form(form) }}
+    <a href="{{ path('product_list') }}">
+        Reset
+    </a>
+
+    <br/>
+
+    <h1>Product list:</h1>
+    {% if products %}
+        <div class="cards">
+            {% for product in products %}
+                {% embed 'incs/card.html.twig' %}
+                    {% block buttons %}
+                        <a href="{{ path('product', {'slug': product.slug}) }}">
+                            Open product
+                        </a>
+
+                        {{ parent('buttons') }}
+                    {% endblock %}
+                {% endembed %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>The list of products is empty</p>
+    {% endif %}
+{% endblock %}
