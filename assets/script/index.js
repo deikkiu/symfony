@@ -24,15 +24,6 @@ function addFormToCollection(e) {
             collectionHolder.dataset.index
         );
 
-    let nameAttr =  item.children.item(0).getAttribute('name') + '[name]';
-    let idAttr =  item.children.item(0).getAttribute('id') + '_name';
-
-    item.children.item(0).setAttribute('name', nameAttr)
-    item.children.item(0).setAttribute('id', idAttr)
-    item.children.item(0).setAttribute('type','text')
-    item.children.item(0).setAttribute('required','required')
-    item.children.item(0).setAttribute('maxlength','255')
-
     addColorFormDeleteLink(item);
 
     collectionHolder.appendChild(item);

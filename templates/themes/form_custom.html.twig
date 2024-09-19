@@ -1,33 +1,56 @@
+{% use 'form_div_layout.html.twig' %}
+
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        <div class='errors'>
+            {% for error in errors %}
+                <span>{{ error.message }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block template_widget %}
-    <div class="flex g-10">
-        {{ form_widget(form) }}
-        {% if value is defined %}
-            <span>{{ value }}</span>
-        {% endif %}
+    <div class={{ class|default('flex-row') }}>
+        {% set type = type|default('integer') %}
+        {% block form_widget %}
+            {{ parent() }}
+
+            {% if unit is defined %}
+                <span>{{ unit }}</span>
+            {% endif %}
+        {% endblock %}
     </div>
 {% endblock %}
 
 {% block _product_price_widget %}
-    {% set value = '¢' %}
+    {% set unit = '¢' %}
     {{ block('template_widget') }}
 {% endblock %}
 
 {% block _product_product_attr_length_widget %}
-    {% set value = 'cm' %}
+    {% set unit = 'cm' %}
     {{ block('template_widget') }}
 {% endblock %}
 
 {% block _product_product_attr_width_widget %}
-    {% set value = 'cm' %}
+    {% set unit = 'cm' %}
     {{ block('template_widget') }}
 {% endblock %}
 
 {% block _product_product_attr_height_widget %}
-    {% set value = 'cm' %}
+    {% set unit = 'cm' %}
     {{ block('template_widget') }}
 {% endblock %}
 
 {% block _product_product_attr_weight_widget %}
-    {% set value = 'g' %}
+    {% set unit = 'g' %}
+    {{ block('template_widget') }}
+{% endblock %}
+
+{% block _product_colors_entry_name_widget %}
+    {% set class = 'flex-col' %}
+    {% set type = 'text' %}
+    {% set unit = 'Write color for this product' %}
     {{ block('template_widget') }}
 {% endblock %}

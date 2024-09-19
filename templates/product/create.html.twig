@@ -9,13 +9,14 @@
     {{ form_row(form.name) }}
     {{ form_row(form.category) }}
     <div>
-        <h3>Colors</h3>
+        <p>Colors</p>
         <ul class="colors"
             data-index="{{ form.colors|length > 0 ? form.colors|last.vars.name + 1 : 0 }}"
-            data-prototype="{{ form_widget(form.colors.vars.prototype)|e('html_attr') }}">
+            data-prototype="{{ form_widget(form.colors.vars.prototype.name)|e('html_attr') }}"
+            data-help="{{ form_help(form.colors.vars.prototype)|e('html_attr') }}">
             {% for color in form.colors %}
+                {{ form_errors(color.name) }}
                 <li>
-                    {{ form_errors(color.name) }}
                     {{ form_widget(color.name) }}
                 </li>
             {% endfor %}

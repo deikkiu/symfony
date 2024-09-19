@@ -40,6 +40,7 @@ class Product
 
 	#[ORM\ManyToOne(inversedBy: 'products')]
 	#[ORM\JoinColumn(nullable: false)]
+	#[Assert\NotNull]
 	private ?Category $category = null;
 
 	#[ORM\OneToOne(cascade: ['persist', 'remove'])]
@@ -75,7 +76,7 @@ class Product
 		return $this->name;
 	}
 
-	public function setName(string $name): static
+	public function setName(?string $name): static
 	{
 		$this->name = $name;
 

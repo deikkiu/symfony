@@ -1,15 +1,17 @@
 <div class="card">
-    <div>
+    <div class="card__info">
         <p>Id: {{ product.id }}</p>
         <p>Name: {{ product.name }}</p>
         <p>Category: {{ product.category.name }}</p>
-        {% if product.colors|length %}
-            <span>Colors:</span>
-            {% for color in product.colors %}
-                <span>{{ color.name }}</span>
-            {% endfor %}
-        {% endif %}
         <p>Slug: {{ product.slug }}</p>
+        {% if product.colors|length %}
+            <div class="card__colors">
+                <span>Colors:</span>
+                {% for color in product.colors %}
+                    <span>{{ color.name }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         <p>Price: {{ product.price|price }}</p>
         <p>Amount: {{ product.amount }}</p>
         <p>Description: {{ product.descr }}</p>

@@ -2,6 +2,17 @@
 
 {% block title %}Product list page{% endblock %}
 
+{% form_theme form _self %}
+
+{% block _product_search_isAmount_row %}
+    <div class="amount">
+        {{ form_label(form) }}
+        {{ form_widget(form) }}
+        {{ form_errors(form) }}
+    </div>
+{% endblock %}
+
+
 {% block content %}
     <h1>Filter product form:</h1>
     {{ form_start(form) }}
