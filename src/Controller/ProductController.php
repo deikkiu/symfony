@@ -90,7 +90,7 @@ class ProductController extends AbstractController
 
 		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch);
 
-		return $this->render('product/index.html.twig', [
+		return $this->render('product/login.html.twig', [
 			'form' => $form,
 			'products' => $products
 		]);

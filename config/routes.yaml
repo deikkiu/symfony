@@ -46,4 +46,11 @@ product:
   path: /product/{slug}
   controller: App\Controller\ProductController::show
 
+# user
+user_login:
+  path: /login
+  controller: App\Controller\UserController::login
 
+user_register:
+  path: /register
+  controller: App\Controller\UserController::register
