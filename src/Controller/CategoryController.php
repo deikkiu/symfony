@@ -67,6 +67,7 @@ class CategoryController extends AbstractController
 		]);
 	}
 
+	#[IsGranted('ROLE_USER')]
 	public function recentCategories(CategoryRepository $categoryRepository, EntityManagerInterface $entityManager): Response
 	{
 		$categories = $categoryRepository->findAll();
