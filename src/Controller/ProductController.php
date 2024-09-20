@@ -14,9 +14,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProductController extends AbstractController
 {
+	#[IsGranted('ROLE_MANAGER')]
 	public function store(Request $request, ProductModel $productModel): Response
 	{
 		$slug = $request->get('slug');
@@ -49,6 +51,7 @@ class ProductController extends AbstractController
 		]);
 	}
 
+	#[IsGranted('ROLE_MANAGER')]
 	public function delete(Request $request, EntityManagerInterface $entityManager, ProductModel $productModel): Response
 	{
 		$id = $request->get('id');
@@ -90,7 +93,7 @@ class ProductController extends AbstractController
 
 		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch);
 
-		return $this->render('product/login.html.twig', [
+		return $this->render('product/index.html.twig', [
 			'form' => $form,
 			'products' => $products
 		]);

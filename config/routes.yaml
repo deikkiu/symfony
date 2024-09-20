@@ -1,8 +1,6 @@
-hello:
-  path: /hello/{name}
-  controller: App\Controller\HelloController::show
-  defaults:
-    name: ''
+home:
+  path: /
+  controller: App\Controller\HomeController::show
 
 # category
 category_list:
@@ -49,8 +47,12 @@ product:
 # user
 user_login:
   path: /login
-  controller: App\Controller\UserController::login
+  controller: App\Controller\LoginController::login
+
+user_logout:
+  path: /logout
+  controller: App\Controller\LoginController::logout
 
 user_register:
   path: /register
-  controller: App\Controller\UserController::register
+  controller: App\Controller\RegistrationController::register

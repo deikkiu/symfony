@@ -21,12 +21,14 @@
     </div>
     <div>
         {% block buttons %}
-            <a href="{{ path('product_update', {'slug': product.slug}) }}">
-                Update product
-            </a>
-            <a href="{{ path('product_delete', {'id': product.id}) }}">
-                Delete product
-            </a>
+            {% if is_granted('ROLE_MANAGER') %}
+                <a href="{{ path('product_update', {'slug': product.slug}) }}">
+                    Update product
+                </a>
+                <a href="{{ path('product_delete', {'id': product.id}) }}">
+                    Delete product
+                </a>
+            {% endif %}
         {% endblock %}
     </div>
 </div>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% include 'incs/head.html.twig' %}
+    </head>
+    <body class="public">
+        <main id="main" class="form__main">
+            {% include 'incs/flash.html.twig' %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        {% block javascripts %}
+            <script src="{{ asset('script/index.js') }}"></script>
+        {% endblock %}
+    </body>
+</html>

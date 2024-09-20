@@ -29,13 +29,13 @@ class ProductRepository extends ServiceEntityRepository
 
 		if ($data->getMinPrice() !== null) {
 			$queryBuilder
-				->andWhere('p.price >= :min')
+				->andWhere('p.price / 100 >= :min')
 				->setParameter('min', $data->getMinPrice());
 		}
 
 		if ($data->getMaxPrice() !== null) {
 			$queryBuilder
-				->andWhere('p.price <= :max')
+				->andWhere('p.price / 100 <= :max')
 				->setParameter('max', $data->getMaxPrice());
 		}
 

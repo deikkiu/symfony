@@ -1,23 +1,24 @@
-{% extends 'base.html.twig' %}
+{% extends "base-public.html.twig" %}
+{% form_theme registrationForm   'themes/form_custom.html.twig' %}
 
 {% block title %}Register{% endblock %}
 
-{% block body %}
+{% block content %}
     {% for flash_error in app.flashes('verify_email_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
-    <h1>Register</h1>
-
-    {{ form_errors(registrationForm) }}
-
     {{ form_start(registrationForm) }}
+        <h1>Register</h1>
+        {{ form_errors(registrationForm) }}
+
         {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+        {{ form_row(registrationForm.plainPassword, { label: 'Password'}) }}
 
         <button type="submit" class="btn">Register</button>
+
+        <span>Click on the link to
+            <a href="{{ path('user_login') }}"><strong>login</strong></a>
+        </span>
     {{ form_end(registrationForm) }}
 {% endblock %}

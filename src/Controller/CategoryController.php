@@ -10,9 +10,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class CategoryController extends AbstractController
 {
+	#[IsGranted('ROLE_ADMIN')]
 	public function store(Request $request, CategoryModel $categoryModel): Response
 	{
 		$slug = $request->get('slug');
@@ -40,6 +42,7 @@ class CategoryController extends AbstractController
 		]);
 	}
 
+	#[IsGranted('ROLE_ADMIN')]
 	public function delete(Request $request, EntityManagerInterface $entityManager, CategoryModel $categoryModel): Response
 	{
 		$id = $request->get('id');
@@ -54,16 +57,17 @@ class CategoryController extends AbstractController
 		return $this->redirectToRoute('category_list');
 	}
 
+	#[IsGranted('ROLE_ADMIN')]
 	public function show(CategoryRepository $categoryRepository): Response
 	{
 		$categories = $categoryRepository->findAll();
 
-		return $this->render('category/login.html.twig', [
+		return $this->render('category/index.html.twig', [
 			'categories' => $categories,
 		]);
 	}
 
-	public function recentCategories(CategoryRepository $categoryRepository): Response
+	public function recentCategories(CategoryRepository $categoryRepository, EntityManagerInterface $entityManager): Response
 	{
 		$categories = $categoryRepository->findAll();
 

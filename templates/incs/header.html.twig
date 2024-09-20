@@ -1,39 +1,62 @@
 <header id="header">
     {% block header %}
         <div>
-            <h1>Website</h1>
+            <a href="{{ path('home') }}">
+                <h1 style="margin: 0;">Home</h1>
+            </a>
         </div>
         <nav class="nav">
             <ul>
                 {% block links %}
-                    <li>
-                        <a href="{{ path('category_list') }}">
-                            Category list
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ path('category_create') }}">
-                            Category create
-                        </a>
-                    </li>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li>
+                            <a href="{{ path('category_list') }}">
+                                Category list
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('category_create') }}">
+                                Category create
+                            </a>
+                        </li>
+                    {% endif %}
                     <li>
                         <a href="{{ path('product_list') }}">
                             Product list
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ path('product_create') }}">
-                            Product create
-                        </a>
-                    </li>
-                    {% if app.session.get('lastProduct') %}
+                    {% if is_granted('ROLE_MANAGER') %}
                         <li>
-                            <a href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">
-                                Last interacted product
+                            <a href="{{ path('product_create') }}">
+                                Product create
                             </a>
                         </li>
+                        {% if app.session.get('lastProduct') %}
+                            <li>
+                                <a href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">
+                                    Last interacted product
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 {% endblock %}
+            </ul>
+            <ul>
+                {% if app.user %}
+                    <li>
+                        {{ app.user.userIdentifier }}
+                    </li>
+                    <li>
+                        <a href="{{ path('user_logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ path('user_login') }}">Login</a>
+                    </li>
+                    <li>
+                        <a href="{{ path('user_register') }}">Register</a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
     {% endblock %}
