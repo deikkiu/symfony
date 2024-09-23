@@ -61,6 +61,13 @@ class Product
 	#[Assert\Valid]
 	private Collection $colors;
 
+	#[ORM\ManyToOne]
+	#[ORM\JoinColumn(nullable: false)]
+	private ?User $user = null;
+
+	#[ORM\Column(length: 255, nullable: true)]
+	private ?string $photoFilename = null;
+
 	public function __construct()
 	{
 		$this->colors = new ArrayCollection();
@@ -204,6 +211,30 @@ class Product
 				$color->setProduct(null);
 			}
 		}
+
+		return $this;
+	}
+
+	public function getUser(): ?User
+	{
+		return $this->user;
+	}
+
+	public function setUser(?User $user): static
+	{
+		$this->user = $user;
+
+		return $this;
+	}
+
+	public function getPhotoFilename(): ?string
+	{
+		return $this->photoFilename;
+	}
+
+	public function setPhotoFilename(?string $photoFilename): static
+	{
+		$this->photoFilename = $photoFilename;
 
 		return $this;
 	}

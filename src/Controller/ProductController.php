@@ -9,23 +9,29 @@ use App\Form\ProductSearchType;
 use App\Form\ProductType;
 use App\Model\ProductModel;
 use App\Repository\ProductRepository;
+use App\Security\Voter\ProductVoter;
+use App\Services\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProductController extends AbstractController
 {
-	#[IsGranted('ROLE_MANAGER')]
-	public function store(Request $request, ProductModel $productModel): Response
+	public function store(Request $request, ProductModel $productModel, FileUploader $fileUploader): Response
 	{
 		$slug = $request->get('slug');
 		$product = $productModel->getOrCreateProduct($slug);
 
 		if (!$product) {
 			throw $this->createNotFoundException('Product not found for this slug: ' . $slug);
+		}
+
+		if ($product->getId()) {
+			$this->denyAccessUnlessGranted(ProductVoter::EDIT, $product, 'You have not access to edit this product.');
+		} else {
+			$this->denyAccessUnlessGranted(ProductVoter::CREATE, $product, 'You have not access to create a new product.');
 		}
 
 		$colors = new ArrayCollection();
@@ -41,6 +47,12 @@ class ProductController extends AbstractController
 		if ($form->isSubmitted() && $form->isValid()) {
 			$product = $form->getData();
 
+			$photoFile = $form->get('photoFilename')->getData();
+
+			if ($photoFile) {
+				$product->setPhotoFilename($fileUploader->upload($photoFile));
+			}
+
 			$productModel->saveOrUpdateProduct($product, $colors);
 
 			return $this->redirectToRoute('product_list');
@@ -51,7 +63,6 @@ class ProductController extends AbstractController
 		]);
 	}
 
-	#[IsGranted('ROLE_MANAGER')]
 	public function delete(Request $request, EntityManagerInterface $entityManager, ProductModel $productModel): Response
 	{
 		$id = $request->get('id');
@@ -60,6 +71,8 @@ class ProductController extends AbstractController
 		if (!$product) {
 			throw $this->createNotFoundException('Product not found for id = ' . $id);
 		}
+
+		$this->denyAccessUnlessGranted(ProductVoter::DELETE, $product, 'You have not access to delete this product.');
 
 		$productModel->deleteProduct($product);
 

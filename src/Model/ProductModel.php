@@ -7,6 +7,7 @@ use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProductModel
@@ -15,6 +16,7 @@ class ProductModel
 		protected EntityManagerInterface $entityManager,
 		protected ProductRepository      $productRepository,
 		protected RequestStack           $requestStack,
+		protected Security               $security,
 	)
 	{
 	}
@@ -33,6 +35,8 @@ class ProductModel
 		$message = 'Product has been updated!';
 
 		if (!$product->getId()) {
+			$product->setUser($this->security->getUser());
+
 			$this->onCreateAt($product);
 
 			$message = 'Product has been created!';

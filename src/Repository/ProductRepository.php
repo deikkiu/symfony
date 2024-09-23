@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Form\Object\ProductSearch;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,7 +18,7 @@ class ProductRepository extends ServiceEntityRepository
 		parent::__construct($registry, Product::class);
 	}
 
-	public function findAllOrderedByAttr($data): array
+	public function findAllOrderedByAttr(ProductSearch $data): array
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
 

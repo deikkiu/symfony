@@ -171,10 +171,16 @@ form {
     flex-direction: column;
 
     row-gap: 20px;
+
+    font-size: 13px;
 }
 
 form input {
     width: 100%;
+}
+
+textarea {
+    font-size: 13px;
 }
 
 form > div {

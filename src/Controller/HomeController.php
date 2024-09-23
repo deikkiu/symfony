@@ -11,11 +11,9 @@ class HomeController extends AbstractController
 	public function show(Security $security): Response
 	{
 		$user = $security->getUser()->getUserIdentifier();
-		$roles = $security->getUser()->getRoles();
 
 		return $this->render('home.html.twig', [
-			'user' => $user,
-			'roles' => $roles,
+			'user' => $user
 		]);
 	}
 }
