@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card__info">
         {% if product.imagePath %}
-            <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+            <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
                  alt="{{ product.name }}">
         {% endif %}
         <p>Id: {{ product.id }}</p>

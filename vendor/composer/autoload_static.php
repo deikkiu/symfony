@@ -133,6 +133,14 @@ class ComposerStaticInit8116c249f0b4dbcd995d077b53ca826b
             'Monolog\\' => 8,
             'Masterminds\\' => 12,
         ),
+        'L' => 
+        array (
+            'Liip\\ImagineBundle\\' => 19,
+        ),
+        'I' => 
+        array (
+            'Imagine\\' => 8,
+        ),
         'G' => 
         array (
             'Gedmo\\' => 6,
@@ -527,6 +535,14 @@ class ComposerStaticInit8116c249f0b4dbcd995d077b53ca826b
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
+        ),
+        'Liip\\ImagineBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/liip/imagine-bundle',
+        ),
+        'Imagine\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/imagine/imagine/src',
         ),
         'Gedmo\\' => 
         array (

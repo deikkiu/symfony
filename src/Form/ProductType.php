@@ -49,13 +49,13 @@ class ProductType extends AbstractType
 				'label' => 'Description',
 				'required' => false,
 			])
-			->add('photoFilename', FileType::class, [
+			->add('imagePath', FileType::class, [
 				'label' => 'Photo of product',
 				'required' => false,
 				'mapped' => false,
 				'constraints' => [
 					new Image([
-						'maxSize' => '1024k',
+						'maxSize' => '2M',
 						'mimeTypes' => [
 							'image/*'
 						],

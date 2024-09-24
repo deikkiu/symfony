@@ -47,10 +47,10 @@ class ProductController extends AbstractController
 		if ($form->isSubmitted() && $form->isValid()) {
 			$product = $form->getData();
 
-			$photoFile = $form->get('photoFilename')->getData();
+			$imagePath = $form->get('imagePath')->getData();
 
-			if ($photoFile) {
-				$product->setPhotoFilename($fileUploader->upload($photoFile));
+			if ($imagePath) {
+				$product->setImagePath($fileUploader->upload($imagePath, 'products'));
 			}
 
 			$productModel->saveOrUpdateProduct($product, $colors);

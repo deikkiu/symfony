@@ -66,7 +66,7 @@ class Product
 	private ?User $user = null;
 
 	#[ORM\Column(length: 255, nullable: true)]
-	private ?string $photoFilename = null;
+	private ?string $imagePath = null;
 
 	public function __construct()
 	{
@@ -227,14 +227,14 @@ class Product
 		return $this;
 	}
 
-	public function getPhotoFilename(): ?string
+	public function getImagePath(): ?string
 	{
-		return $this->photoFilename;
+		return $this->imagePath;
 	}
 
-	public function setPhotoFilename(?string $photoFilename): static
+	public function setImagePath(?string $imagePath): static
 	{
-		$this->photoFilename = $photoFilename;
+		$this->imagePath = $imagePath;
 
 		return $this;
 	}

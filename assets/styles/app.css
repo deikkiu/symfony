@@ -302,6 +302,12 @@ footer {
     transition: 0.3s;
 }
 
+.card img {
+    image-resolution: from-image;
+
+    object-fit: contain;
+}
+
 .card__info {
     display: flex;
     flex-direction: column;

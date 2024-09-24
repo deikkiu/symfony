@@ -15,20 +15,24 @@ class FileUploader
 	{
 	}
 
-	public function upload(UploadedFile $file): string
+	public function upload(UploadedFile $file, string $folder = ''): string
 	{
+		$directory = $this->getTargetDirectory() . $folder;
+
+		$this->createFolder($directory);
+
 		$originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 		$safeFilename = $this->slugger->slug($originalFilename);
 
-		$fileName = $this->existFile($safeFilename, $file->guessExtension());
+		$fileName = $this->existFile($directory, $safeFilename, $file->guessExtension());
 
 		try {
-			$file->move($this->getTargetDirectory(), $fileName);
+			$file->move($directory, $fileName);
 		} catch (FileException $e) {
 			throw new FileException(sprintf('File upload error: %s', $e->getMessage()));
 		}
 
-		return $fileName;
+		return $folder . '/' . $fileName;
 	}
 
 	public function getTargetDirectory(): string
@@ -36,9 +40,18 @@ class FileUploader
 		return $this->targetDirectory;
 	}
 
-	public function existFile(string $fileName, string $extension): string
+	public function createFolder(string $directory): void
 	{
-		$fullPathFile = $this->getTargetDirectory() . $fileName . '.' . $extension;
+		if (is_dir($directory)) {
+			return;
+		}
+
+		mkdir($directory);
+	}
+
+	public function existFile(string $directory, string $fileName, string $extension): string
+	{
+		$fullPathFile = $directory . '/' . $fileName . '.' . $extension;
 
 		if (file_exists($fullPathFile)) {
 			return $fileName . '.' . $extension;

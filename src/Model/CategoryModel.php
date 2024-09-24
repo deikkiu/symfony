@@ -72,13 +72,7 @@ class CategoryModel
 
 		$products = $this->getCategoryProducts($category);
 
-		foreach ($products as $product) {
-			$product->setCategory($parentCategory);
-
-			$this->entityManager->persist($product);
-		}
-
-		$this->entityManager->flush();
+		$this->setCategoryProducts($products, $parentCategory);
 
 		$this->removeCategories($category);
 
@@ -95,6 +89,25 @@ class CategoryModel
 		}
 
 		return $products;
+	}
+
+	private function setCategoryProducts(array $products, Category $category): void
+	{
+		$batchSize = 20;
+		$i = 0;
+
+		foreach($products as $product) {
+			$product->setCategory($category);
+			$this->entityManager->persist($product);
+
+			++$i;
+			if (($i % $batchSize) === 0) {
+				$this->entityManager->flush();
+				$this->entityManager->clear();
+			}
+		}
+
+		$this->entityManager->flush();
 	}
 
 	private function removeCategories(Category $category): void
