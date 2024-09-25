@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Entity\Category;
+use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -44,15 +45,18 @@ class CategoryModel
 	{
 		$isCategoryDeleted = $this->removeCategory($category);
 
-		if (!$isCategoryDeleted) {
-			$this->addFlash('warning', 'Category can not be deleted, because category has a subcategories or products!');
-		} else {
+		if ($isCategoryDeleted) {
 			$this->addFlash('success', 'Category has been deleted!');
+		} else {
+			$this->addFlash('warning', 'Category can not be deleted, because category has a subcategories or products!');
 		}
 	}
 
 	public function updateCountProducts(Category $category): void
 	{
+		$productCountPublished = $this->categoryRepository->countPublishedProductsByCategory($category);
+		$category->setProductCountPublished($productCountPublished);
+
 		$productCount = $this->categoryRepository->countAllProductsByCategory($category);
 		$category->setProductCount($productCount);
 
@@ -79,6 +83,7 @@ class CategoryModel
 		return true;
 	}
 
+	// @TODO: batch
 	private function getCategoryProducts(Category $category): array
 	{
 		$products = $category->getProducts()->toArray();
@@ -91,12 +96,12 @@ class CategoryModel
 		return $products;
 	}
 
-	private function setCategoryProducts(array $products, Category $category): void
+	private function setCategoryProducts(array $products, ?Category $category): void
 	{
 		$batchSize = 20;
 		$i = 0;
 
-		foreach($products as $product) {
+		foreach ($products as $product) {
 			$product->setCategory($category);
 			$this->entityManager->persist($product);
 
@@ -110,6 +115,7 @@ class CategoryModel
 		$this->entityManager->flush();
 	}
 
+	// @TODO: batch
 	private function removeCategories(Category $category): void
 	{
 		$subCategories = $category->getCategories()->toArray();

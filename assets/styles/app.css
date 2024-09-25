@@ -98,6 +98,20 @@ button {
     cursor: pointer;
 }
 
+.submit {
+    display: flex;
+    flex-direction: row;
+    gap: 20px
+}
+
+.submit > div {
+    width: 100%;
+}
+
+.submit button {
+    width: 100%;
+}
+
 header {
     margin-left: 200px;
 
@@ -302,8 +316,12 @@ footer {
     transition: 0.3s;
 }
 
+.card.draft {
+    background-color: #dddcdc;
+}
+
 .card img {
-    image-resolution: from-image;
+    width: fit-content;
 
     object-fit: contain;
 }
@@ -334,7 +352,6 @@ footer {
 }
 
 .flash {
-
     width: 100%;
 
     margin: 10px 0;

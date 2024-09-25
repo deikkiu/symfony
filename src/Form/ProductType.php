@@ -29,6 +29,7 @@ class ProductType extends AbstractType
 				'choice_label' => 'name',
 				'placeholder' => 'Choose a category',
 				'label' => 'Category*',
+				'required' => false,
 			])
 			->add('colors', CollectionType::class, [
 				'entry_type' => ColorType::class,
@@ -44,10 +45,12 @@ class ProductType extends AbstractType
 			])
 			->add('amount', IntegerType::class, [
 				'label' => 'Amount*',
+				'required' => false,
 			])
 			->add('descr', TextareaType::class, [
 				'label' => 'Description',
 				'required' => false,
+				'empty_data' => null,
 			])
 			->add('imagePath', FileType::class, [
 				'label' => 'Photo of product',
@@ -62,18 +65,24 @@ class ProductType extends AbstractType
 						'mimeTypesMessage' => 'Please upload a valid image [png, jpg, jpeg, webp]',
 					])
 				]
-
 			])
 			->add('product_attr', ProductAttrType::class, [
-				'label' => 'Product Attribute'
+				'label' => 'Product Attribute',
+				'required' => false,
 			])
-			->add('submit', SubmitType::class);
+			->add('publish', SubmitType::class, [
+				'label' => 'Submit as publish'
+			])
+			->add('draft', SubmitType::class, [
+				'label' => 'Submit as draft',
+				'validation_groups' => ['draft'],
+			]);
 	}
 
 	public function configureOptions(OptionsResolver $resolver): void
 	{
 		$resolver->setDefaults([
-			'data_class' => Product::class,
+			'data_class' => Product::class
 		]);
 	}
 }

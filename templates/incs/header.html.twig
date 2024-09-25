@@ -39,6 +39,13 @@
                             </li>
                         {% endif %}
                     {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li>
+                            <a href="{{ path('product_import') }}">
+                                Import products
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endblock %}
             </ul>
             <ul>

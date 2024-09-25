@@ -30,7 +30,9 @@ class ProductListener
 			return;
 		}
 
-		$this->categoryModel->updateCountProducts($entity->getCategory());
+		if ($product->getCategory()) {
+			$this->categoryModel->updateCountProducts($entity->getCategory());
+		}
 	}
 
 	public function postUpdate(Product $product, PostUpdateEventArgs $eventArgs): void
@@ -47,10 +49,14 @@ class ProductListener
 		if (array_key_exists('category', $changes)) {
 			$oldCategory = $changes['category'][0];
 
-			$this->categoryModel->updateCountProducts($oldCategory);
+			if ($oldCategory) {
+				$this->categoryModel->updateCountProducts($oldCategory);
+			}
 		}
 
-		$this->categoryModel->updateCountProducts($entity->getCategory());
+		if ($product->getCategory()) {
+			$this->categoryModel->updateCountProducts($entity->getCategory());
+		}
 	}
 
 	public function postRemove(Product $product, PostRemoveEventArgs $eventArgs): void
@@ -61,7 +67,9 @@ class ProductListener
 			return;
 		}
 
-		$this->categoryModel->updateCountProducts($entity->getCategory());
+		if ($product->getCategory()) {
+			$this->categoryModel->updateCountProducts($entity->getCategory());
+		}
 	}
 }
 

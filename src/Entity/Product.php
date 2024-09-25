@@ -19,8 +19,8 @@ class Product
 	private ?int $id = null;
 
 	#[ORM\Column(length: 255)]
-	#[Assert\NotBlank]
-	#[Assert\Length(min: 2, max: 255)]
+	#[Assert\NotBlank(groups: ['Default', 'draft'])]
+	#[Assert\Length(min: 2, max: 255, groups: ['Default', 'draft'])]
 	private ?string $name = null;
 
 	#[ORM\Column(length: 255)]
@@ -28,10 +28,12 @@ class Product
 	private ?string $slug = null;
 
 	#[ORM\Column]
-	#[Assert\PositiveOrZero]
+	#[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
+	#[Assert\NotBlank(groups: ['Default', 'draft'])]
 	private ?int $price = null;
 
-	#[ORM\Column]
+	#[ORM\Column(nullable: true)]
+	#[Assert\NotBlank]
 	#[Assert\PositiveOrZero]
 	private ?int $amount = null;
 
@@ -39,12 +41,12 @@ class Product
 	private ?string $descr = null;
 
 	#[ORM\ManyToOne(inversedBy: 'products')]
-	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\NotNull]
 	private ?Category $category = null;
 
 	#[ORM\OneToOne(cascade: ['persist', 'remove'])]
-	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\Valid]
 	private ?ProductAttr $product_attr = null;
 
@@ -67,6 +69,9 @@ class Product
 
 	#[ORM\Column(length: 255, nullable: true)]
 	private ?string $imagePath = null;
+
+	#[ORM\Column]
+	private ?bool $isDraft = null;
 
 	public function __construct()
 	{
@@ -119,7 +124,7 @@ class Product
 		return $this->amount;
 	}
 
-	public function setAmount(int $amount): static
+	public function setAmount(?int $amount): static
 	{
 		$this->amount = $amount;
 
@@ -235,6 +240,18 @@ class Product
 	public function setImagePath(?string $imagePath): static
 	{
 		$this->imagePath = $imagePath;
+
+		return $this;
+	}
+
+	public function isDraft(): ?bool
+	{
+		return $this->isDraft;
+	}
+
+	public function setDraft(bool $isDraft): static
+	{
+		$this->isDraft = $isDraft;
 
 		return $this;
 	}

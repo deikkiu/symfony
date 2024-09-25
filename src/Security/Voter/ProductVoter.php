@@ -13,6 +13,7 @@ final class ProductVoter extends Voter
 	public const EDIT = 'EDIT';
 	public const DELETE = 'DELETE';
 	public const CREATE = 'CREATE';
+	public const SHOW = 'SHOW';
 
 	public function __construct(
 		protected Security $security,
@@ -24,7 +25,7 @@ final class ProductVoter extends Voter
 	{
 		// replace with your own logic
 		// https://symfony.com/doc/current/security/voters.html
-		return in_array($attribute, [self::EDIT, self::DELETE, self::CREATE]) && $subject instanceof \App\Entity\Product;
+		return in_array($attribute, [self::EDIT, self::DELETE, self::CREATE, self::SHOW]) && $subject instanceof \App\Entity\Product;
 	}
 
 	protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -43,6 +44,7 @@ final class ProductVoter extends Voter
 		return match ($attribute) {
 			self::EDIT, self::DELETE => $this->getAccess($product, $user),
 			self::CREATE => $this->canCreate($user),
+			self::SHOW => $this->canShow($user),
 			default => false,
 		};
 	}
@@ -55,5 +57,10 @@ final class ProductVoter extends Voter
 	private function canCreate(User $user): bool
 	{
 		return in_array('ROLE_MANAGER', $user->getRoles());
+	}
+
+	private function canShow(User $user): bool
+	{
+		return !in_array('ROLE_USER', $user->getRoles());
 	}
 }

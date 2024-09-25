@@ -2,6 +2,19 @@ home:
   path: /
   controller: App\Controller\HomeController::show
 
+# user
+user_login:
+  path: /login
+  controller: App\Controller\LoginController::login
+
+user_logout:
+  path: /logout
+  controller: App\Controller\LoginController::logout
+
+user_register:
+  path: /register
+  controller: App\Controller\RegistrationController::register
+
 # category
 category_list:
   path: /category/list
@@ -36,6 +49,10 @@ product_update:
   path: /product/store/{slug}
   controller: App\Controller\ProductController::store
 
+product_import:
+  path: /product/import
+  controller: App\Controller\ProductController::import
+
 product_delete:
   path: /product/delete/{id}
   controller: App\Controller\ProductController::delete
@@ -43,16 +60,3 @@ product_delete:
 product:
   path: /product/{slug}
   controller: App\Controller\ProductController::show
-
-# user
-user_login:
-  path: /login
-  controller: App\Controller\LoginController::login
-
-user_logout:
-  path: /logout
-  controller: App\Controller\LoginController::logout
-
-user_register:
-  path: /register
-  controller: App\Controller\RegistrationController::register

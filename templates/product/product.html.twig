@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Product {{ product.name }}:</h1>
-    {% include 'incs/product.html.twig' %}
+    {% include 'incs/card.html.twig' with {'big_image': 'true'} %}
 
     {% if categoryProducts %}
         <h2>Products in category - {{ product.category.name }}</h2>

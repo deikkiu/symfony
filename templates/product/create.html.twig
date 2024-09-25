@@ -28,7 +28,12 @@
     {{ form_row(form.descr) }}
     {{ form_row(form.imagePath) }}
     {{ form_row(form.product_attr) }}
-    {{ form_row(form.submit) }}
+
+    <div class="submit">
+        {{ form_row(form.publish) }}
+        {{ form_row(form.draft) }}
+    </div>
+
     {{ form_end(form) }}
 {% endblock %}
 

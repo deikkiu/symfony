@@ -6,7 +6,11 @@
             <a href="{{ path('product_list_category', {category: category.slug}) }}">
                 {{ category.name }}
                 |
-                {{ category.productCount }}
+                {% if isUser %}
+                    {{ category.productCountPublished }}
+                {% else %}
+                    {{ category.productCount }}
+                {% endif %}
             </a>
         {% endfor %}
     </div>

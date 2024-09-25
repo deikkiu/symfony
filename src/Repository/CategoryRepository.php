@@ -27,6 +27,18 @@ class CategoryRepository extends ServiceEntityRepository
 			->getSingleScalarResult();
 	}
 
+	public function countPublishedProductsByCategory(Category $category): int
+	{
+		return $this->createQueryBuilder('c')
+			->select('COUNT(p.id)')
+			->leftJoin('c.products', 'p')
+			->where('p.isDraft = 0')
+			->andWhere('c.id = :id')
+			->setParameter('id', $category->getId())
+			->getQuery()
+			->getSingleScalarResult();
+	}
+
 	public function findFirst(Category $category): ?Category
 	{
 		return $this->createQueryBuilder('c')
@@ -48,7 +60,6 @@ class CategoryRepository extends ServiceEntityRepository
 			->getQuery()
 			->getSingleScalarResult();
 	}
-
 
 	//    /**
 	//     * @return Category[] Returns an array of Category objects

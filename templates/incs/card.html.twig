@@ -1,14 +1,25 @@
-<div class="card">
+<div class="card {% if product.isDraft %}draft{% endif %}">
     <div class="card__info">
         {% if product.imagePath %}
-            <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
-                 alt="{{ product.name }}">
+            {% if big_image is defined %}
+                <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
+                     alt="{{ product.name }}">
+            {% else %}
+                <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+                     alt="{{ product.name }}">
+            {% endif %}
         {% endif %}
+
         <p>Id: {{ product.id }}</p>
         <p>Name: {{ product.name }}</p>
-        <p>Category: {{ product.category.name }}</p>
+
+        {% if product.category %}
+            <p>Category: {{ product.category.name }}</p>
+        {% endif %}
+
         <p>Slug: {{ product.slug }}</p>
         <p>User: {{ product.user.email }}</p>
+
         {% if product.colors|length %}
             <div class="card__colors">
                 <span>Colors:</span>
@@ -17,13 +28,31 @@
                 {% endfor %}
             </div>
         {% endif %}
+
         <p>Price: {{ product.price|price }}</p>
-        <p>Amount: {{ product.amount }}</p>
+
+        {% if product.amount %}
+            <p>Amount: {{ product.amount }}</p>
+        {% else %}
+            <p>Amount: 0</p>
+        {% endif %}
+
         <p>Description: {{ product.descr }}</p>
-        <p>Product attributes</p>
-        <p>Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</p>
-        <p>Weight: {{ product.productAttr.weight }} g</p>
+
+        {% if product.productAttr %}
+            <p>Product attributes</p>
+            <p>
+                Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}
+            </p>
+
+            {% if product.productAttr.weight %}
+                <p>Weight: {{ product.productAttr.weight }} g</p>
+            {% else %}
+                <p>Weight: 0 g</p>
+            {% endif %}
+        {% endif %}
     </div>
+
     <div>
         {% block buttons %}
             {% if is_granted('EDIT', product) %}

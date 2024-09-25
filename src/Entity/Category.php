@@ -49,6 +49,9 @@ class Category
     #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'parent')]
     private Collection $categories;
 
+    #[ORM\Column]
+    private ?int $productCountPublished = 0;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -164,6 +167,18 @@ class Category
                 $category->setParent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProductCountPublished(): ?int
+    {
+        return $this->productCountPublished;
+    }
+
+    public function setProductCountPublished(int $productCountPublished): static
+    {
+        $this->productCountPublished = $productCountPublished;
 
         return $this;
     }

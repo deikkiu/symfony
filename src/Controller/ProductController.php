@@ -14,8 +14,12 @@ use App\Services\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Constraints\File;
 
 class ProductController extends AbstractController
 {
@@ -46,6 +50,8 @@ class ProductController extends AbstractController
 
 		if ($form->isSubmitted() && $form->isValid()) {
 			$product = $form->getData();
+
+			$product->setDraft($form->get('draft')->isClicked());
 
 			$imagePath = $form->get('imagePath')->getData();
 
@@ -104,7 +110,10 @@ class ProductController extends AbstractController
 			$productSearch = $form->getData();
 		}
 
-		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch);
+		// @TODO
+		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
+
+		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch, $isUser);
 
 		return $this->render('product/index.html.twig', [
 			'form' => $form,
@@ -121,11 +130,52 @@ class ProductController extends AbstractController
 			throw $this->createNotFoundException('Product not found for slug = ' . $slug);
 		}
 
-		$categoryProducts = $productRepository->findProductsInCategory($product, 3);
+		if ($product->isDraft()) {
+			$this->denyAccessUnlessGranted(ProductVoter::SHOW, $product, 'You have not access to open this product.');
+		}
+
+		// @TODO
+		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
+
+		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);
 
 		return $this->render('product/product.html.twig', [
 			'product' => $product,
 			'categoryProducts' => $categoryProducts
+		]);
+	}
+
+
+	#[IsGranted('ROLE_ADMIN')]
+	public function import(Request $request, FileUploader $fileUploader): Response
+	{
+		$form = $this->createFormBuilder()
+			->add('file', FileType::class, [
+				'label' => 'Choose a file',
+				'help' => 'Format csv',
+				'constraints' => [
+					new File([
+						'maxSize' => '5M',
+						'mimeTypes' => [
+							'application/csv',
+						],
+						'mimeTypesMessage' => 'Please upload a valid CSV file.',
+					])
+				]
+			])
+			->add('import', SubmitType::class)
+			->getForm();
+
+		$form->handleRequest($request);
+
+		if ($form->isSubmitted() && $form->isValid()) {
+			$data = $form->getData();
+
+			dump($data);
+		}
+
+		return $this->render('product/import.html.twig', [
+			'form' => $form
 		]);
 	}
 }

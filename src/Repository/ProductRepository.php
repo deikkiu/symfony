@@ -18,9 +18,14 @@ class ProductRepository extends ServiceEntityRepository
 		parent::__construct($registry, Product::class);
 	}
 
-	public function findAllOrderedByAttr(ProductSearch $data): array
+	public function findAllOrderedByAttr(ProductSearch $data, bool $isUser = false): array
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
+
+		if ($isUser) {
+			$queryBuilder
+				->andWhere('p.isDraft = 0');
+		}
 
 		if ($data->getName() !== null) {
 			$queryBuilder
@@ -52,8 +57,10 @@ class ProductRepository extends ServiceEntityRepository
 				->setParameter('id', $data->getCategory()->getId());
 		}
 
-		$queryBuilder
-			->innerJoin('p.product_attr', 'a');
+		if ($data->getWeight() !== null || $data->getSort() !== null) {
+			$queryBuilder
+				->innerJoin('p.product_attr', 'a');
+		}
 
 		if ($data->getWeight() !== null) {
 			$queryBuilder
@@ -74,10 +81,18 @@ class ProductRepository extends ServiceEntityRepository
 		return $queryBuilder->getQuery()->getResult();
 	}
 
-	public function findProductsInCategory($product, ?int $limit = null): array
+	public function findProductsInCategory($product, bool $isUser = false, ?int $limit = null): array
 	{
-		$queryBuilder = $this->createQueryBuilder('p')
-			->where('p.category = :category')
+		$queryBuilder = $this->createQueryBuilder('p');
+
+		if ($isUser) {
+			$queryBuilder
+				->andWhere('p.isDraft = :draft')
+				->setParameter('draft', 0);
+		}
+
+		$queryBuilder
+			->andWhere('p.category = :category')
 			->andWhere('p.id <> :id')
 			->setParameter('category', $product->getCategory())
 			->setParameter('id', $product->getId());

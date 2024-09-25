@@ -15,19 +15,19 @@ class ProductAttr
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\PositiveOrZero]
+    #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
     private ?int $width = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\PositiveOrZero]
+    #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
     private ?int $height = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\PositiveOrZero]
+    #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
     private ?int $length = null;
 
-    #[ORM\Column]
-    #[Assert\PositiveOrZero]
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
     private ?int $weight = null;
 
     public function getId(): ?int
@@ -76,7 +76,7 @@ class ProductAttr
         return $this->weight;
     }
 
-    public function setWeight(int $weight): static
+    public function setWeight(?int $weight): static
     {
         $this->weight = $weight;
 
