@@ -49,6 +49,14 @@ li {
     color: red;
 }
 
+.errors.big {
+    margin: 10px 0;
+}
+
+.errors.big span {
+    font-size: 16px;
+}
+
 .flex-col {
     width: 100%;
 

@@ -11,6 +11,7 @@ use App\Model\ProductModel;
 use App\Repository\ProductRepository;
 use App\Security\Voter\ProductVoter;
 use App\Services\FileUploader;
+use App\Services\ProductImporter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class ProductController extends AbstractController
 {
@@ -145,21 +147,24 @@ class ProductController extends AbstractController
 		]);
 	}
 
-
 	#[IsGranted('ROLE_ADMIN')]
-	public function import(Request $request, FileUploader $fileUploader): Response
+	public function import(Request $request, ProductImporter $importer): Response
 	{
 		$form = $this->createFormBuilder()
 			->add('file', FileType::class, [
+				'required' => true,
 				'label' => 'Choose a file',
 				'help' => 'Format csv',
 				'constraints' => [
 					new File([
-						'maxSize' => '5M',
+						'maxSize' => '1M',
 						'mimeTypes' => [
-							'application/csv',
+							'text/csv'
 						],
-						'mimeTypesMessage' => 'Please upload a valid CSV file.',
+						'mimeTypesMessage' => 'Please upload a valid CSV file.'
+					]),
+					new NotNull([
+						'message' => 'Please upload a file'
 					])
 				]
 			])
@@ -169,9 +174,15 @@ class ProductController extends AbstractController
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-			$data = $form->getData();
+			$file = $form->get('file')->getData();
 
-			dump($data);
+			$isImported = $importer->import($file);
+
+			if (!$isImported) {
+				return $this->redirectToRoute('product_import');
+			}
+
+			return $this->redirectToRoute('product_list');
 		}
 
 		return $this->render('product/import.html.twig', [

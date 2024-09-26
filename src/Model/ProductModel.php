@@ -30,7 +30,26 @@ class ProductModel
 		return $this->entityManager->getRepository(Product::class)->findOneBy(['slug' => $slug]);
 	}
 
-	public function saveOrUpdateProduct(Product $product, ArrayCollection $colors): void
+	public function saveOrUpdateProduct(Product $product, ArrayCollection $colors = null): void
+	{
+		$message = $this->preSaveOrUpdateProduct($product);
+
+		if ($colors) {
+			foreach ($colors as $color) {
+				if ($product->getColors()->contains($color) === false) {
+					$this->entityManager->remove($color);
+				}
+			}
+		}
+
+		$this->entityManager->persist($product);
+		$this->entityManager->flush();
+
+		$this->setSessionAttribute('lastProduct', $product->getSlug());
+		$this->addFlash('success', $message);
+	}
+
+	public function preSaveOrUpdateProduct(Product $product): string
 	{
 		$message = 'Product has been updated!';
 
@@ -44,17 +63,7 @@ class ProductModel
 
 		$this->onUpdateAt($product);
 
-		foreach ($colors as $color) {
-			if ($product->getColors()->contains($color) === false) {
-				$this->entityManager->remove($color);
-			}
-		}
-
-		$this->entityManager->persist($product);
-		$this->entityManager->flush();
-
-		$this->setSessionAttribute('lastProduct', $product->getSlug());
-		$this->addFlash('success', $message);
+		return $message;
 	}
 
 	public function deleteProduct(Product $product): void
