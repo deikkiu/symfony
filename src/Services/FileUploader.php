@@ -11,8 +11,8 @@ class FileUploader
 {
 	public function __construct(
 		protected SluggerInterface $slugger,
-		protected string           $targetDirectory,
-		protected Filesystem       $filesystem
+		protected Filesystem       $filesystem,
+		protected string           $uploadsDirectory
 	)
 	{
 	}
@@ -20,13 +20,9 @@ class FileUploader
 	public function upload(UploadedFile $file, string $folder = ''): string
 	{
 		$directory = $this->getTargetDirectory() . $folder;
-
 		$this->filesystem->mkdir($directory);
 
-		$originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-		$safeFilename = $this->slugger->slug($originalFilename);
-
-		$fileName = $this->existFile($directory, $safeFilename, $file->guessExtension());
+		$fileName = $this->existFile($directory, uniqid() . '.' . $file->guessExtension());
 
 		try {
 			$file->move($directory, $fileName);
@@ -37,19 +33,35 @@ class FileUploader
 		return $folder . '/' . $fileName;
 	}
 
-	public function getTargetDirectory(): string
+	public function uploadAndDumpFile(string $content, string $extension, string $folder = ''): string
 	{
-		return $this->targetDirectory;
-	}
+		$directory = $this->getTargetDirectory() . $folder;
+		$this->filesystem->mkdir($directory);
 
-	public function existFile(string $directory, string $fileName, string $extension): string
-	{
-		$fullPathFile = $directory . '/' . $fileName . '.' . $extension;
+		$fileName = $this->existFile($directory, uniqid() . '.' . $extension);
 
-		if ($this->filesystem->exists($fullPathFile)) {
-			return $fileName . '-' . uniqid() . '.' . $extension;
+		try {
+			$this->filesystem->dumpFile($directory . '/' . $fileName, $content);
+		} catch (FileException $e) {
+			throw new FileException(sprintf('File upload error: %s', $e->getMessage()));
 		}
 
-		return $fileName . '.' . $extension;
+		return $folder . '/' . $fileName;
+	}
+
+	private function getTargetDirectory(): string
+	{
+		return $this->uploadsDirectory;
+	}
+
+	private function existFile(string $directory, string $fileName): string
+	{
+		$fullPathFile = $directory . '/' . $fileName;
+
+		if ($this->filesystem->exists($fullPathFile)) {
+			return uniqid() . '-' . $fileName;
+		}
+
+		return $fileName;
 	}
 }

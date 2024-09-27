@@ -329,7 +329,8 @@ footer {
 }
 
 .card img {
-    width: fit-content;
+    width: auto;
+    height: fit-content;
 
     object-fit: contain;
 }

@@ -13,18 +13,24 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ProductImporter
 {
-	private int $BATCH_SIZE = 2;
+	private int $BATCH_SIZE = 20;
 
 	public function __construct(
+		protected HttpClientInterface    $httpClient,
 		protected EntityManagerInterface $entityManager,
 		protected ValidatorInterface     $validator,
 		protected Filesystem             $filesystem,
 		protected RequestStack           $requestStack,
 		protected ProductModel           $productModel,
-		protected string                 $targetDirectory
+		protected FileUploader           $fileUploader
 	)
 	{
 	}
@@ -43,7 +49,7 @@ class ProductImporter
 		$this->entityManager->beginTransaction();
 
 		try {
-			while (($row = fgetcsv($fp, 1000, ",")) !== false) {
+			while (($row = fgetcsv($fp, 10000, ",")) !== false) {
 				$product = new Product();
 				$this->processRow($product, $row, $flag, $rowNumber);
 
@@ -69,7 +75,7 @@ class ProductImporter
 			$this->entityManager->flush();
 			$this->entityManager->commit();
 
-			$this->addFlashSuccess();
+			$this->addFlashSuccess($i);
 
 			return true;
 		} catch (\Exception $e) {
@@ -113,8 +119,12 @@ class ProductImporter
 			$product->setDescr($row[4]);
 		}
 
-		if (!empty($row[5]) && $this->filesystem->exists($this->targetDirectory . $row[5])) {
-			$product->setImagePath($row[5]);
+		if (!empty($row[5])) {
+			$imagePath = $this->fetchProductImage($row[5]);
+
+			if (!empty($imagePath)) {
+				$product->setImagePath($imagePath);
+			}
 		}
 
 		$this->setProductAttributes($product, $row);
@@ -146,14 +156,30 @@ class ProductImporter
 		}
 	}
 
+	private function fetchProductImage(string $url): string
+	{
+		try {
+			$response = $this->httpClient->request('GET', $url, [
+				'headers' => [
+					'Accept' => 'image/png, image/jpeg, image/webp, image/svg+xml',
+				]
+			]);
+
+			$content = $response->getContent();
+
+			return $this->fileUploader->uploadAndDumpFile($content, pathinfo($url, PATHINFO_EXTENSION), 'products');
+		} catch (Exception|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+			throw new Exception($e->getMessage());
+		}
+	}
+
+	private function addFlashSuccess(int $countImportedProducts): void
+	{
+		$this->requestStack->getSession()->getFlashBag()->add('success', "{$countImportedProducts} products imported successfully.");
+	}
+
 	private function addFlashWarning(string $message): void
 	{
 		$this->requestStack->getSession()->getFlashBag()->add('warning', $message);
 	}
-
-	private function addFlashSuccess(): void
-	{
-		$this->requestStack->getSession()->getFlashBag()->add('success', 'Products imported successfully.');
-	}
 }
-

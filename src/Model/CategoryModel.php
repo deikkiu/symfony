@@ -3,7 +3,6 @@
 namespace App\Model;
 
 use App\Entity\Category;
-use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;

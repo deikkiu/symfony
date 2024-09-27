@@ -4,10 +4,15 @@ namespace App\Model;
 
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Entity\User;
 use App\Repository\ProductRepository;
+use App\Services\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProductModel
@@ -17,6 +22,11 @@ class ProductModel
 		protected ProductRepository      $productRepository,
 		protected RequestStack           $requestStack,
 		protected Security               $security,
+		protected Filesystem             $filesystem,
+		protected CacheManager           $cacheManager,
+		protected FileUploader           $fileUploader,
+		protected string                 $uploadsDirectory,
+		protected string                 $uploadsFolder,
 	)
 	{
 	}
@@ -53,8 +63,11 @@ class ProductModel
 	{
 		$message = 'Product has been updated!';
 
+		// @TODO
+		$user = $this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
+
 		if (!$product->getId()) {
-			$product->setUser($this->security->getUser());
+			$product->setUser($user);
 
 			$this->onCreateAt($product);
 
@@ -71,6 +84,8 @@ class ProductModel
 		$this->entityManager->remove($product);
 		$this->entityManager->flush();
 
+		$this->deleteImage($product->getImagePath());
+
 		$lastProduct = $this->getSessionAttribute('lastProduct');
 
 		if ($lastProduct === $product->getSlug()) {
@@ -80,12 +95,33 @@ class ProductModel
 		$this->addFlash('success', 'Product has been deleted!');
 	}
 
-	public function onCreateAt(Product $product): void
+	private function deleteImage(string $path): void
+	{
+		$fullFilePath = $this->uploadsDirectory . $path;
+
+		if ($this->filesystem->exists($fullFilePath)) {
+			$this->filesystem->remove($fullFilePath);
+			$this->cacheManager->remove($this->uploadsFolder . $path);
+		}
+	}
+
+	public function setOrUpdateImage(Product $product, UploadedFile $file, string $folder): void
+	{
+		$existImage = $product->getImagePath();
+
+		if ($existImage) {
+			$this->deleteImage($existImage);
+		}
+
+		$product->setImagePath($this->fileUploader->upload($file, $folder));
+	}
+
+	private function onCreateAt(Product $product): void
 	{
 		$product->setCreatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
 	}
 
-	public function onUpdateAt(Product $product): void
+	private function onUpdateAt(Product $product): void
 	{
 		$product->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
 	}
@@ -95,25 +131,25 @@ class ProductModel
 		return $this->productRepository->countProductsByCategory($category);
 	}
 
-	public function setSessionAttribute(string $name, mixed $value): void
+	private function setSessionAttribute(string $name, mixed $value): void
 	{
 		$session = $this->requestStack->getSession();
 		$session->set($name, $value);
 	}
 
-	public function removeSessionAttribute(string $name): void
+	private function removeSessionAttribute(string $name): void
 	{
 		$session = $this->requestStack->getSession();
 		$session->remove($name);
 	}
 
-	public function getSessionAttribute(string $name): mixed
+	private function getSessionAttribute(string $name): mixed
 	{
 		$session = $this->requestStack->getSession();
 		return $session->get($name);
 	}
 
-	public function addFlash(string $type, string $message): void
+	private function addFlash(string $type, string $message): void
 	{
 		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
 	}

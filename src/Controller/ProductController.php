@@ -10,7 +10,6 @@ use App\Form\ProductType;
 use App\Model\ProductModel;
 use App\Repository\ProductRepository;
 use App\Security\Voter\ProductVoter;
-use App\Services\FileUploader;
 use App\Services\ProductImporter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,10 +24,12 @@ use Symfony\Component\Validator\Constraints\NotNull;
 
 class ProductController extends AbstractController
 {
-	public function store(Request $request, ProductModel $productModel, FileUploader $fileUploader): Response
+	public function store(Request $request, ProductModel $productModel): Response
 	{
 		$slug = $request->get('slug');
 		$product = $productModel->getOrCreateProduct($slug);
+
+		$uploadsFolder = 'products';
 
 		if (!$product) {
 			throw $this->createNotFoundException('Product not found for this slug: ' . $slug);
@@ -55,10 +56,10 @@ class ProductController extends AbstractController
 
 			$product->setDraft($form->get('draft')->isClicked());
 
-			$imagePath = $form->get('imagePath')->getData();
+			$image = $form->get('imagePath')->getData();
 
-			if ($imagePath) {
-				$product->setImagePath($fileUploader->upload($imagePath, 'products'));
+			if ($image) {
+				$productModel->setOrUpdateImage($product, $image, $uploadsFolder);
 			}
 
 			$productModel->saveOrUpdateProduct($product, $colors);
