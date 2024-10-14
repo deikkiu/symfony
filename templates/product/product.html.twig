@@ -4,7 +4,17 @@
 
 {% block content %}
     <h1>Product {{ product.name }}:</h1>
-    {% include 'incs/card.html.twig' with {'big_image': 'true'} %}
+    {% embed 'incs/card.html.twig' with {'big_image': 'true'} %}
+        {% block buttons %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('product_api', {'id': product.id}) }}" target="_blank">
+                    API
+                </a>
+            {% endif %}
+
+            {{ parent('buttons') }}
+        {% endblock %}
+    {% endembed %}
 
     {% if categoryProducts %}
         <h2>Products in category - {{ product.category.name }}</h2>
@@ -16,6 +26,12 @@
                     <a href="{{ path('product', {'slug': product.slug}) }}">
                         Open product
                     </a>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('product_api', {'id': product.id}) }}" target="_blank">
+                            API
+                        </a>
+                    {% endif %}
 
                     {{ parent('buttons') }}
                 {% endblock %}

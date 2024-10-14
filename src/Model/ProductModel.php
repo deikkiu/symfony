@@ -84,7 +84,9 @@ class ProductModel
 		$this->entityManager->remove($product);
 		$this->entityManager->flush();
 
-		$this->deleteImage($product->getImagePath());
+		if ($product->getImagePath()) {
+			$this->deleteImage($product->getImagePath());
+		}
 
 		$lastProduct = $this->getSessionAttribute('lastProduct');
 
