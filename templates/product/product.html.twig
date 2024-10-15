@@ -7,7 +7,7 @@
     {% embed 'incs/card.html.twig' with {'big_image': 'true'} %}
         {% block buttons %}
             {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('product_api', {'id': product.id}) }}" target="_blank">
+                <a href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
                     API
                 </a>
             {% endif %}
@@ -28,7 +28,7 @@
                     </a>
 
                     {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('product_api', {'id': product.id}) }}" target="_blank">
+                        <a href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
                             API
                         </a>
                     {% endif %}

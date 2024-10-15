@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Controller\Api;
+
+use App\Entity\Color;
+use App\Entity\Product;
+use App\Repository\ProductRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+
+class ProductController extends AbstractController
+{
+	public function getProduct(Request $request, ProductRepository $productRepository): JsonResponse
+	{
+		$id = $request->get('id');
+		$product = $productRepository->find($id);
+
+		if (!$product) {
+			return new JsonResponse([
+				'status' => 404,
+				'message' => 'Product not found',
+			], 404);
+		}
+
+		$context = $this->getContext();
+
+		return $this->json($product, context: $context);
+	}
+
+	public function setProduct(Request $request, SerializerInterface $serializer): JsonResponse
+	{
+		$file = $request->files->get('file');
+
+		$serialized = $serializer->deserialize($file, Product::class,'csv');
+
+		return new JsonResponse([
+			'status' => 200,
+			'message' => 'Test'
+		], 200);
+	}
+
+	private function getContext(): array
+	{
+		$colorsCallback = function (object $attributeValue): array {
+			return array_map(function ($color) {
+				return $color instanceof Color ? $color->getName() : null;
+			}, $attributeValue->toArray());
+		};
+
+		return [
+			AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object): ?int {
+				return $object->getId();
+			},
+			AbstractNormalizer::IGNORED_ATTRIBUTES => ['user', 'products', 'productCount', 'parent', 'categories', 'productCountPublished'],
+			AbstractNormalizer::CALLBACKS => ['colors' => $colorsCallback],
+			DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s',
+		];
+	}
+}
