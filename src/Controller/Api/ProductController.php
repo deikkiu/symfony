@@ -33,18 +33,11 @@ class ProductController extends AbstractController
 
 	private function getContext(): array
 	{
-		$colorsCallback = function (object $attributeValue): array {
-			return array_map(function ($color) {
-				return $color instanceof Color ? $color->getName() : null;
-			}, $attributeValue->toArray());
-		};
-
 		return [
-			AbstractNormalizer::GROUPS => ['serialize', 'category_basic'],
+			AbstractNormalizer::GROUPS => ['serialize', 'category_basic', 'colors_basic'],
 			AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object): ?int {
 				return $object->getId();
-			},
-			AbstractNormalizer::CALLBACKS => ['colors' => $colorsCallback],
+			}
 			DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s',
 		];
 	}
