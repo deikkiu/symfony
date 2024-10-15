@@ -66,10 +66,6 @@ api_get_product:
   path: /api/product/{id}
   controller: App\Controller\Api\ProductController::getProduct
 
-api_set_product:
-  path: /api/new-products
-  controller: App\Controller\Api\ProductController::setProduct
-
 api_login:
   path: /api/login
   controller: App\Controller\Api\LoginController::index
