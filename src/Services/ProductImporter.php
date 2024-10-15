@@ -58,7 +58,8 @@ class ProductImporter
                 ];
 
 		try {
-		    $product = $this->serializer->deserialize(json_encode($data), Product::class, 'json');
+		    $context = [AbstractNormalizer::GROUPS => ['deserialize']];
+                    $product = $this->serializer->deserialize(json_encode($data), Product::class, 'json', $context);
 		} catch (\Exception $e) {
 		    $this->addFlashWarning("Error deserializing row {$rowNumber}: " . $e->getMessage());
 		    $flag = false;
