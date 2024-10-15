@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation\Slug;
@@ -22,6 +23,7 @@ class Product
 	#[ORM\Column(length: 255)]
 	#[Assert\NotBlank(groups: ['Default', 'draft'])]
 	#[Assert\Length(min: 2, max: 255, groups: ['Default', 'draft'])]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?string $name = null;
 
 	#[ORM\Column(length: 255)]
@@ -31,30 +33,37 @@ class Product
 	#[ORM\Column]
 	#[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
 	#[Assert\NotBlank(groups: ['Default', 'draft'])]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?int $price = null;
 
 	#[ORM\Column(nullable: true)]
 	#[Assert\NotBlank]
 	#[Assert\PositiveOrZero]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?int $amount = null;
 
 	#[ORM\Column(type: Types::TEXT, nullable: true)]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?string $descr = null;
 
 	#[ORM\ManyToOne(inversedBy: 'products')]
 	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\NotNull]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?Category $category = null;
 
 	#[ORM\OneToOne(cascade: ['persist', 'remove'])]
 	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\Valid]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?ProductAttr $product_attr = null;
 
 	#[ORM\Column]
+	#[Groups(['serialize'])]
 	private ?\DateTime $created_at = null;
 
 	#[ORM\Column]
+	#[Groups(['serialize'])]
 	private ?\DateTime $updated_at = null;
 
 	/**
@@ -62,6 +71,7 @@ class Product
 	 */
 	#[ORM\OneToMany(targetEntity: Color::class, mappedBy: 'product', cascade: ['persist', 'remove'])]
 	#[Assert\Valid]
+	#[Groups(['serialize', 'deserialize'])]
 	private Collection $colors;
 
 	#[ORM\ManyToOne]
@@ -69,9 +79,11 @@ class Product
 	private ?User $user = null;
 
 	#[ORM\Column(length: 255, nullable: true)]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?string $imagePath = null;
 
 	#[ORM\Column]
+	#[Groups(['serialize', 'deserialize'])]
 	private ?bool $isDraft = null;
 
 	public function __construct()
