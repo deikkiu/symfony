@@ -40,10 +40,11 @@ class ProductController extends AbstractController
 		};
 
 		return [
+			AbstractNormalizer::GROUPS => ['serialize'],
 			AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object): ?int {
 				return $object->getId();
 			},
-			AbstractNormalizer::IGNORED_ATTRIBUTES => ['user', 'products', 'productCount', 'parent', 'categories', 'productCountPublished'],
+			AbstractNormalizer::IGNORED_ATTRIBUTES => ['products', 'productCount', 'parent', 'categories', 'productCountPublished'],
 			AbstractNormalizer::CALLBACKS => ['colors' => $colorsCallback],
 			DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s',
 		];
