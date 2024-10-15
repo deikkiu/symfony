@@ -34,7 +34,7 @@ class ProductController extends AbstractController
 	private function getContext(): array
 	{
 		return [
-			AbstractNormalizer::GROUPS => ['serialize', 'category_basic', 'colors_basic'],
+			AbstractNormalizer::GROUPS => ['serialize', 'category_basic', 'color_basic'],
 			AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function (object $object): ?int {
 				return $object->getId();
 			}
