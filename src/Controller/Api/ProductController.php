@@ -31,18 +31,6 @@ class ProductController extends AbstractController
 		return $this->json($product, context: $context);
 	}
 
-	public function setProduct(Request $request, SerializerInterface $serializer): JsonResponse
-	{
-		$file = $request->files->get('file');
-
-		$serialized = $serializer->deserialize($file, Product::class,'csv');
-
-		return new JsonResponse([
-			'status' => 200,
-			'message' => 'Test'
-		], 200);
-	}
-
 	private function getContext(): array
 	{
 		$colorsCallback = function (object $attributeValue): array {
