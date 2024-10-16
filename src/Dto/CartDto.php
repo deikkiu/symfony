@@ -2,29 +2,58 @@
 
 namespace App\Dto;
 
-class CartDto
+class ProductDto
 {
-	public function __construct(public array $products, public int $quantity)
+	public function __construct(
+		private readonly int $id, 
+		private readonly string $name,
+		private readonly string $slug,
+		private readonly string $category,
+		private readonly int $price, 
+		private readonly int $amount,
+		private readonly ?string $imagePath, 
+		private readonly ?array $colors
+	)
 	{
 	}
 
-	public function getProducts(): array
+	public function getId(): int
 	{
-		return $this->products;
+		return $this->id;
 	}
 
-	public function getQuantity(): int
+	public function getName(): string
 	{
-		return $this->quantity;
+		return $this->name;
 	}
 
-	public function setProducts(array $products): void
+	public function getSlug(): string
 	{
-		$this->products = $products;
+		return $this->slug;
 	}
 
-	public function setQuantity(int $quantity): void
+	public function getCategory(): string
 	{
-		$this->quantity = $quantity;
+		return $this->category;
+	}
+
+	public function getPrice(): int
+	{
+		return $this->price;
+	}
+
+	public function getAmount(): int
+	{
+		return $this->amount;
+	}
+
+	public function getImagePath(): ?string
+	{
+		return $this->imagePath;
+	}
+
+	public function getColors(): ?array
+	{
+		return $this->colors;
 	}
 }
