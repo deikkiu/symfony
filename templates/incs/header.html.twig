@@ -46,6 +46,11 @@
                             </a>
                         </li>
                     {% endif %}
+                    <li>
+                        <a href="{{ path('cart', {'cartDto': app.session.get('cart')}) }}">
+                            Shopping cart
+                        </a>
+                    </li>
                 {% endblock %}
             </ul>
             <ul>

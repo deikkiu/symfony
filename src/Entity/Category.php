@@ -7,8 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Gedmo\Mapping\Annotation\Slug;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
@@ -26,12 +26,12 @@ class Category
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 255)]
-    #[Groups(['category_basic'])]
+    #[Groups(['serialize'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Slug(fields: ['name'], unique: true)]
-    #[Groups(['category_basic'])]
+    #[Groups(['serialize'])]
     private ?string $slug = null;
 
     /**
@@ -41,10 +41,10 @@ class Category
     private Collection $products;
 
     #[ORM\Column]
+    #[Groups(['serialize'])]
     private ?int $productCount = 0;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'categories')]
-    #[Groups(['category_basic'])]
     private ?self $parent = null;
 
     /**

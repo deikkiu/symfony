@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductAttrRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductAttrRepository::class)]
@@ -16,18 +17,22 @@ class ProductAttr
 
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
+    #[Groups(['serialize'])]
     private ?int $width = null;
 
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
+    #[Groups(['serialize'])]
     private ?int $height = null;
 
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
+    #[Groups(['serialize'])]
     private ?int $length = null;
 
     #[ORM\Column(nullable: true)]
     #[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
+    #[Groups(['serialize'])]
     private ?int $weight = null;
 
     public function getId(): ?int

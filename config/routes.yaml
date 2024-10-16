@@ -61,6 +61,19 @@ product:
   path: /product/{slug}
   controller: App\Controller\ProductController::show
 
+# cart
+cart:
+  path: /cart
+  controller: App\Controller\CartController::show
+
+cart_add:
+  path: /cart/add/{id}
+  controller: App\Controller\CartController::add
+
+cart_delete:
+  path: /cart/delete/{id}
+  controller: App\Controller\CartController::delete
+
 # api
 api_get_product:
   path: /api/product/{id}

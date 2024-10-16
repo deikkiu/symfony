@@ -8,11 +8,14 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation\Slug;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[Context([AbstractObjectNormalizer::SKIP_NULL_VALUES => true])]
 class Product
 {
 	#[ORM\Id]
@@ -23,7 +26,7 @@ class Product
 	#[ORM\Column(length: 255)]
 	#[Assert\NotBlank(groups: ['Default', 'draft'])]
 	#[Assert\Length(min: 2, max: 255, groups: ['Default', 'draft'])]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?string $name = null;
 
 	#[ORM\Column(length: 255)]
@@ -33,37 +36,39 @@ class Product
 	#[ORM\Column]
 	#[Assert\PositiveOrZero(groups: ['Default', 'draft'])]
 	#[Assert\NotBlank(groups: ['Default', 'draft'])]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?int $price = null;
 
 	#[ORM\Column(nullable: true)]
 	#[Assert\NotBlank]
 	#[Assert\PositiveOrZero]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?int $amount = null;
 
 	#[ORM\Column(type: Types::TEXT, nullable: true)]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?string $descr = null;
 
 	#[ORM\ManyToOne(inversedBy: 'products')]
 	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\NotNull]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?Category $category = null;
 
 	#[ORM\OneToOne(cascade: ['persist', 'remove'])]
 	#[ORM\JoinColumn(nullable: true)]
 	#[Assert\Valid]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?ProductAttr $product_attr = null;
 
 	#[ORM\Column]
 	#[Groups(['serialize'])]
+	#[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s'])]
 	private ?\DateTime $created_at = null;
 
 	#[ORM\Column]
 	#[Groups(['serialize'])]
+	#[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s'])]
 	private ?\DateTime $updated_at = null;
 
 	/**
@@ -71,7 +76,7 @@ class Product
 	 */
 	#[ORM\OneToMany(targetEntity: Color::class, mappedBy: 'product', cascade: ['persist', 'remove'])]
 	#[Assert\Valid]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private Collection $colors;
 
 	#[ORM\ManyToOne]
@@ -79,11 +84,11 @@ class Product
 	private ?User $user = null;
 
 	#[ORM\Column(length: 255, nullable: true)]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?string $imagePath = null;
 
 	#[ORM\Column]
-	#[Groups(['serialize', 'deserialize'])]
+	#[Groups(['serialize'])]
 	private ?bool $isDraft = null;
 
 	public function __construct()

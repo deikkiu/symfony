@@ -1,0 +1,33 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Card{% endblock %}
+
+{% block content %}
+    <h1>Cart list:</h1>
+
+    <br/>
+
+    {% if quantity is defined and quantity is not empty %}
+        <h3>Quantity: {{ quantity }}</h3>
+    {% endif %}
+
+    {% if products is defined and products is not empty %}
+        <div class="cards">
+            {% for product in products %}
+                {% embed 'incs/card.html.twig' %}
+                    {% block buttons %}
+                        <a href="{{ path('product', {'slug': product.slug}) }}">
+                            Open product
+                        </a>
+                        <a href="{{ path('cart_delete', {'id': product.id}) }}">
+                            Delete from cart
+                        </a>
+                    {% endblock %}
+                {% endembed %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <br/>
+        <p>The list of products in cart is empty</p>
+    {% endif %}
+{% endblock %}

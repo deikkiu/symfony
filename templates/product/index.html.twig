@@ -32,6 +32,9 @@
                         <a href="{{ path('product', {'slug': product.slug}) }}">
                             Open product
                         </a>
+                        <a href="{{ path('cart_add', {'id': product.id}) }}">
+                            Add in cart
+                        </a>
 
                         {{ parent('buttons') }}
                     {% endblock %}
