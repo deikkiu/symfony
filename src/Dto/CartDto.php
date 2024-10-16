@@ -11,6 +11,7 @@ class ProductDto
 		private readonly string $category,
 		private readonly int $price, 
 		private readonly int $amount,
+		private readonly int $quantity,
 		private readonly ?string $imagePath, 
 		private readonly ?array $colors
 	)
@@ -45,6 +46,11 @@ class ProductDto
 	public function getAmount(): int
 	{
 		return $this->amount;
+	}
+
+	public function getQuantity(): int
+	{
+		return $this->quantity;
 	}
 
 	public function getImagePath(): ?string
