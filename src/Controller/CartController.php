@@ -37,13 +37,15 @@ class CartController extends AbstractController
 			throw $this->createNotFoundException("Product for this id: {$productId} not found!");
 		}
 
+		$productDto = $this->createProductDto($product);
+
 		$cart = $stack->getSession()->get('cart');
 
 		if (!$cart) {
-			$cart = new CartDto([$product], 1);
+			$cart = new Cart();
 		} else {
-			$products = $cart->getProducts();
-			$products[] = $product;
+			$products = $cart->getProducts();			
+			$products[] = $productDto;
 			$cart->setProducts($products);
 		}
 
@@ -78,5 +80,19 @@ class CartController extends AbstractController
 		$stack->getSession()->getFlashBag()->add('success', 'Product deleted from cart!');
 
 		return $this->redirectToRoute('cart');
+	}
+
+	private function createProductDto(Product $product): ProductDto
+	{
+		$id = $product->getId();
+		$name = $product->getName();
+		$slug = $product->getSlug();
+		$category = $product->getCategory()->getName();
+		$price = $product->getPrice();
+		$amount = $product->getAmount();
+		$imagePath = $product->getImagePath();
+		$colors = $product->getColors();
+		
+		return new ProductDto($id, $name, $slug, $category, $price, $amount, 1, $imagePath, $colors);
 	}
 }
