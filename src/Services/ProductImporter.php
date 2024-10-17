@@ -12,10 +12,6 @@ use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -66,7 +62,8 @@ class ProductImporter
 					'length' => $row[6] ?? null,
 					'width' => $row[7] ?? null,
 					'height' => $row[8] ?? null,
-					'weight' => $row[9] ?? null
+					'weight' => $row[9] ?? null,
+					'colors' => array_slice($row, 10) ?? []
 				];
 
 				try {
@@ -99,7 +96,9 @@ class ProductImporter
 
 			$this->entityManager->flush();
 			$this->entityManager->commit();
+
 			$this->addFlashSuccess($i);
+
 			return true;
 		} catch (\Exception $e) {
 			$this->entityManager->rollback();

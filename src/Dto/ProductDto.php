@@ -5,15 +5,15 @@ namespace App\Dto;
 class ProductDto
 {
 	public function __construct(
-		private readonly int $id, 
-		private readonly string $name,
-		private readonly string $slug,
-		private readonly string $category,
-		private readonly int $price, 
-		private readonly int $amount,
-		private readonly int $quantity,
-		private readonly ?string $imagePath, 
-		private readonly ?array $colors
+		public int     $id,
+		public string  $name,
+		public string  $slug,
+		public string  $category,
+		public int     $price,
+		public int     $amount,
+		public int     $quantity,
+		public ?string $imagePath,
+		public ?array  $colors
 	)
 	{
 	}
@@ -61,5 +61,10 @@ class ProductDto
 	public function getColors(): ?array
 	{
 		return $this->colors;
+	}
+
+	public function setQuantity(int $quantity): void
+	{
+		$this->quantity = $quantity;
 	}
 }

@@ -1,0 +1,50 @@
+<div class="card">
+    <div class="card__info">
+        {% if product.imagePath %}
+            <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}" alt="{{ product.name }}">
+        {% endif %}
+
+        <p>Id: {{ product.id }}</p>
+        <p>Name: {{ product.name }}</p>
+
+        {% if product.category %}
+            <p>Category: {{ product.category }}</p>
+        {% endif %}
+
+        <p>Slug: {{ product.slug }}</p>
+
+        {% if product.colors|length %}
+            <div class="card__colors">
+                <span>Colors:</span>
+                {% for color in product.colors %}
+                    <span>{{ color.name }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <p>Price: {{ product.price|price }}</p>
+
+        {% if product.amount %}
+            <p>Amount: {{ product.amount }}</p>
+        {% else %}
+            <p>Amount: 0</p>
+        {% endif %}
+
+        {% if product.quantity %}
+            <p>Quantity: {{ product.quantity }}</p>
+        {% endif %}
+    </div>
+
+    <div>
+        {% block buttons %}
+            <a href="{{ path('product', {'slug': product.slug}) }}">
+                Open product
+            </a>
+            <a href="{{ path('cart_delete', {'id': product.id}) }}">
+                Delete from cart
+            </a>
+        {% endblock %}
+    </div>
+</div>
+
+

@@ -1,17 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Dto;
 
 class Cart
 {
 	private array $products = [];
 	private int $quantity = 0;
-
-	public function __constructor()
-	{
-		$this->products = $products;
-		$this->quantity = $quantity;
-	}
 
 	public function getProducts(): array
 	{

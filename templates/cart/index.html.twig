@@ -14,16 +14,7 @@
     {% if products is defined and products is not empty %}
         <div class="cards">
             {% for product in products %}
-                {% embed 'incs/card.html.twig' %}
-                    {% block buttons %}
-                        <a href="{{ path('product', {'slug': product.slug}) }}">
-                            Open product
-                        </a>
-                        <a href="{{ path('cart_delete', {'id': product.id}) }}">
-                            Delete from cart
-                        </a>
-                    {% endblock %}
-                {% endembed %}
+                {% include 'incs/productCart.html.twig' %}
             {% endfor %}
         </div>
     {% else %}
