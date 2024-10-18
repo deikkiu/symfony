@@ -10,17 +10,21 @@ use App\Form\ProductType;
 use App\Model\ProductModel;
 use App\Repository\ProductRepository;
 use App\Security\Voter\ProductVoter;
+use App\Services\CartService;
 use App\Services\ProductImporter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Positive;
 
 class ProductController extends AbstractController
 {
@@ -124,7 +128,7 @@ class ProductController extends AbstractController
 		]);
 	}
 
-	public function show(Request $request, ProductRepository $productRepository): Response
+	public function show(Request $request, ProductRepository $productRepository, CartService $cartService): Response
 	{
 		$slug = $request->get('slug');
 		$product = $productRepository->findOneBy(['slug' => $slug]);
@@ -142,9 +146,41 @@ class ProductController extends AbstractController
 
 		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);
 
+		// $productQuantityInCart = $cartService->getProductQuantityInCart($product->getId());
+
+		$form = $this->createFormBuilder()
+			->add('quantity', NumberType::class, [
+				'required' => true,
+				'empty_data' => 1,
+				'data' => 1,
+				'attr' => ['readonly' => 'readonly', 'class' => 'quantity_count'],
+				'scale' => 0,
+				'constraints' => [
+					new Positive([
+						'message' => 'Quantity must be a positive number'
+					])
+				],
+			])
+			->add('save', SubmitType::class, [
+				'label' => 'Add in cart',
+			])
+			->getForm();
+
+		$form->handleRequest($request);
+
+		if ($form->isSubmitted() && $form->isValid()) {
+			$quantity = $form->get('quantity')->getData();;
+
+			return $this->redirectToRoute('cart_add', [
+				'id' => $product->getId(),
+				'quantity' => $quantity
+			]);
+		}
+
 		return $this->render('product/product.html.twig', [
 			'product' => $product,
-			'categoryProducts' => $categoryProducts
+			'categoryProducts' => $categoryProducts,
+			'form' => $form
 		]);
 	}
 

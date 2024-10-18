@@ -3,91 +3,136 @@
 namespace App\Services;
 
 use App\Dto\Cart;
-use App\Dto\ProductDto;
-use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService
 {
 	public function __construct(
-		protected RequestStack $stack
+		protected RequestStack        $stack,
+		protected ProductRepository   $productRepository
 	)
 	{
 	}
 
-	public function addProduct(Product $product): void
+	public function getCart(): Cart
 	{
-		$productDto = $this->createProductDto($product);
-
-		$cart = $this->stack->getSession()->get('cart');
-
-		if (!$cart) {
-			$cart = new Cart();
-			$cart->setProducts([$productDto]);
-		} else {
-			$productFound = false;
-			$products = $cart->getProducts();
-
-			foreach ($cart->getProducts() as $cartProduct) {
-				if ($cartProduct->getId() === $product->getId()) {
-					$cartProduct->setQuantity($cartProduct->getQuantity() + 1);
-					$productFound = true;
-					break;
-				}
-			}
-
-			if (!$productFound) {
-				$products[] = $productDto;
-				$cart->setProducts($products);
-			}
-		}
-
-		$cart->setQuantity($cart->getQuantity() + 1);
-
-		$this->stack->getSession()->set('cart', $cart);
-		$this->stack->getSession()->getFlashBag()->add('success', 'Product added to cart!');
+		$cart = $this->getCartFromSession();
+		$this->validateCart($cart);
+		return $cart;
 	}
 
-	public function deleteProduct(Product $product): void
+	public function addProduct(int $id, int $quantity): void
 	{
-		$cart = $this->stack->getSession()->get('cart');
+		$cart = $this->getCartFromSession();
+		$this->updateCartWithProduct($cart, $id, $quantity);
+		$this->saveCartToSession($cart);
+		$this->addFlashMessage('success', 'Product added to cart!');
+	}
+
+	public function deleteProduct(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$this->removeProductFromCart($cart, $id);
+		$this->saveCartToSession($cart);
+		$this->addFlashMessage('success', 'Product deleted from cart!');
+	}
+
+	private function validateCart(Cart $cart): void
+	{
 		$products = $cart->getProducts();
 
-		foreach ($products as $cartProduct) {
-			if ($cartProduct->getId() === $product->getId()) {
-				if ($cartProduct->getQuantity() > 1) {
-					$cartProduct->setQuantity($cartProduct->getQuantity() - 1);
-				} else {
-					$filteredProducts = array_filter($cart->getProducts(), function ($cartProduct) use ($product) {
-						return $cartProduct->getId() !== $product->getId();
-					});
+		if (!empty($products)) {
+			foreach ($products as $cartProduct) {
+				$product = $this->productRepository->find($cartProduct['id']);
 
-					$cart->setProducts($filteredProducts);
+				if (!$product) {
+					$products = array_filter($cart->getProducts(), fn($p) => $p['id'] !== $cartProduct['id']);
+					$cart->setProducts($products);
+					$cart->setQuantity($cart->getQuantity() - $cartProduct['quantity']);
+					$this->addFlashMessage('notice', "The store has run out of product with id: {$cartProduct['id']}. We apologize for the inconvenience!");
 				}
-
-				break;
 			}
 		}
 
-		$cart->setQuantity($cart->getQuantity() - 1);
-
-		$this->stack->getSession()->set('cart', $cart);
-		$this->stack->getSession()->getFlashBag()->add('success', 'Product deleted from cart!');
+		$this->countTotalPrice($cart);
 	}
 
-	private function createProductDto(Product $product): ProductDto
+	private function updateCartWithProduct(Cart $cart, int $id, int $quantity): void
 	{
-		return new ProductDto(
-			$product->getId(),
-			$product->getName(),
-			$product->getSlug(),
-			$product->getCategory()->getName(),
-			$product->getPrice(),
-			$product->getAmount(),
-			1,
-			$product->getImagePath(),
-			$product->getColors()->toArray()
-		);
+		$products = $cart->getProducts();
+		[$products, $addedQuantity] = $this->setQuantity($products, $id, $quantity);
+
+		$cart->setProducts($products);
+		$cart->setQuantity($cart->getQuantity() + $addedQuantity);
+	}
+
+	private function removeProductFromCart(Cart $cart, int $id): void
+	{
+		$products = $cart->getProducts();
+
+		if (isset($products[$id])) {
+			if ($products[$id]['quantity'] > 1) {
+				$products[$id]['quantity'] -= 1;
+			} else {
+				unset($products[$id]);
+			}
+
+			$cart->setProducts($products);
+			$cart->setQuantity($cart->getQuantity() - 1);
+		}
+	}
+
+	private function countTotalPrice(Cart $cart): void
+	{
+		$totalPrice = 0;
+
+		foreach ($cart->getProducts() as $cartProduct) {
+			$product = $this->productRepository->find($cartProduct['id']);
+			$totalPrice += $product->getPrice() * $cartProduct['quantity'];
+		}
+
+		$cart->setTotalPrice($totalPrice);
+	}
+
+	private function setQuantity(array $products, int $id, int $quantity): array
+	{
+		$productAmount = $this->productRepository->find($id)->getAmount();
+		$addedQuantity = 0;
+
+		if (isset($products[$id])) {
+			$productQuantity = min($products[$id]['quantity'] + $quantity, $productAmount);
+			$products[$id]['quantity'] = $productQuantity;
+			$addedQuantity = $productQuantity;
+		} else {
+			$products[$id] = ['id' => $id, 'quantity' => min($quantity, $productAmount)];
+			$addedQuantity = $products[$id]['quantity'];
+		}
+
+		return [$products, $addedQuantity];
+	}
+
+	public function getProductQuantityInCart(int $id): int
+	{
+		$cart = $this->getCartFromSession();
+		$products = $cart->getProducts();
+
+		return $products[$id]['quantity'] ?? 0;
+	}
+
+	private function getCartFromSession(): Cart
+	{
+		return $this->stack->getSession()->get('cart', new Cart());
+	}
+
+	private function saveCartToSession(Cart $cart): void
+	{
+		$this->stack->getSession()->set('cart', $cart);
+	}
+
+	private function addFlashMessage(string $type, string $message): void
+	{
+		$this->stack->getSession()->getFlashBag()->add($type, $message);
 	}
 }
 

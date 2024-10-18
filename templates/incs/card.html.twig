@@ -32,7 +32,7 @@
         <p>Price: {{ product.price|price }}</p>
 
         {% if product.amount %}
-            <p>Amount: {{ product.amount }}</p>
+            <p class="amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</p>
         {% else %}
             <p>Amount: 0</p>
         {% endif %}

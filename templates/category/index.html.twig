@@ -5,28 +5,24 @@
 {% block content %}
     <h1>Category list:</h1>
     {% if categories %}
-        <ul>
+        <div class="categories">
             {% for category in categories %}
-                <li>Id: {{ category.id }}</li>
-                <li>Name: {{ category.name }}</li>
-                <li>Slug: {{ category.slug }}</li>
-                {% if category.parent %}
-                    <li>Parent category: {{ category.parent.name }}</li>
-                {% endif %}
-                <li>
-                    <a href="{{ path('category_update', {'slug': category.slug}) }}">
-                        Update category
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ path('category_delete', {'id': category.id}) }}">
-                        Delete category
-                    </a>
-                </li>
-                <hr />
-                <br />
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <h6 class="card-subtitle mb-2">Id: {{ category.id }}</h6>
+                        <h6 class="card-subtitle mb-2">Slug: {{ category.slug }}</h6>
+
+                        {% if category.parent %}
+                            <h6>Parent category: {{ category.parent.name }}</h6>
+                        {% endif %}
+
+                        <a class="card-link" href="{{ path('category_update', {'slug': category.slug}) }}">Update category</a>
+                        <a class="card-link" href="{{ path('category_delete', {'id': category.id}) }}">Delete category</a>
+                    </div>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
         <p>The list of categories is empty</p>
     {% endif %}

@@ -2,42 +2,48 @@
 
 namespace App\Controller;
 
+use App\Dto\ProductDto;
 use App\Repository\ProductRepository;
 use App\Services\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends AbstractController
 {
-	public function show(RequestStack $stack): Response
+	public function show(CartService $cartService, ProductRepository $productRepository): Response
 	{
-		$cart = $stack->getSession()->get('cart', []);
+		$cart = $cartService->getCart();
 
-		if (!$cart) {
-			return $this->render('cart/index.html.twig');
+		$products = [];
+
+		foreach ($cart->getProducts() as $cartProduct) {
+			$product = $productRepository->find($cartProduct['id']);
+			$products[] = new ProductDTO($product, $cartProduct['quantity']);
 		}
 
-		$products = $cart->getProducts();
 		$quantity = $cart->getQuantity();
+		$totalPrice = $cart->getTotalPrice();
 
 		return $this->render('cart/index.html.twig', [
 			'products' => $products,
-			'quantity' => $quantity
+			'quantity' => $quantity,
+			'totalPrice' => $totalPrice,
 		]);
 	}
 
 	public function add(Request $request, CartService $cartService, ProductRepository $productRepository): Response
 	{
-		$productId = $request->get('id');
-		$product = $productRepository->find($productId);
+		$id = $request->get('id');
+		$quantity = $request->get('quantity');
+
+		$product = $productRepository->find($id);
 
 		if (!$product) {
-			throw $this->createNotFoundException("Product for this id: {$productId} not found!");
+			throw $this->createNotFoundException("Product for this id: {$id} not found!");
 		}
 
-		$cartService->addProduct($product);
+		$cartService->addProduct($id, $quantity);
 
 		return $this->redirectToRoute('product_list');
 	}
@@ -51,7 +57,7 @@ class CartController extends AbstractController
 			throw $this->createNotFoundException("Product for this id: {$productId} not found!");
 		}
 
-		$cartService->deleteProduct($product);
+		$cartService->deleteProduct($productId);
 
 		return $this->redirectToRoute('cart');
 	}

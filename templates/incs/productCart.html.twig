@@ -7,20 +7,7 @@
         <p>Id: {{ product.id }}</p>
         <p>Name: {{ product.name }}</p>
 
-        {% if product.category %}
-            <p>Category: {{ product.category }}</p>
-        {% endif %}
-
         <p>Slug: {{ product.slug }}</p>
-
-        {% if product.colors|length %}
-            <div class="card__colors">
-                <span>Colors:</span>
-                {% for color in product.colors %}
-                    <span>{{ color.name }}</span>
-                {% endfor %}
-            </div>
-        {% endif %}
 
         <p>Price: {{ product.price|price }}</p>
 

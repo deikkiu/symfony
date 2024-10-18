@@ -10,6 +10,12 @@ document
         addColorFormDeleteLink(color)
     })
 
+document
+    .querySelectorAll('ul.colors li')
+    .forEach((color) => {
+        addColorFormDeleteLink(color)
+    })
+
 function addFormToCollection(e) {
     const collectionHolder = document.querySelector('.' + e.currentTarget.dataset.collectionHolderClass);
 
@@ -41,4 +47,30 @@ function addColorFormDeleteLink(item) {
         e.preventDefault();
         item.remove();
     });
+}
+
+document.querySelector('.quantity_minus').addEventListener('click', minusQuantity);
+document.querySelector('.quantity_plus').addEventListener('click', plusQuantity);
+
+function minusQuantity() {
+    const quantityDiv = document.querySelector('.quantity_count');
+    let quantityCount = Number(quantityDiv.value);
+
+    if (quantityCount < 2) {
+        return;
+    }
+
+    quantityDiv.value = String(quantityCount - 1);
+}
+
+function plusQuantity() {
+    const amount = Number(document.querySelector('.amount').getAttribute('data-amount'));
+    const quantityDiv = document.querySelector('.quantity_count');
+    let quantityCount = Number(quantityDiv.value);
+
+    if(quantityCount >= amount) {
+        return;
+    }
+
+    quantityDiv.value = String(quantityCount + 1);
 }

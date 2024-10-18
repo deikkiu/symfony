@@ -7,11 +7,12 @@
 
     <br/>
 
-    {% if quantity is defined and quantity is not empty %}
-        <h3>Quantity: {{ quantity }}</h3>
+    {% if quantity is not empty %}
+        <h3>Total price: {{ totalPrice|price }}</h3>
+        <h4>Quantity: {{ quantity }}</h4>
     {% endif %}
 
-    {% if products is defined and products is not empty %}
+    {% if products is not empty %}
         <div class="cards">
             {% for product in products %}
                 {% include 'incs/productCart.html.twig' %}

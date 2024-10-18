@@ -1,75 +1,60 @@
-<header id="header">
-    {% block header %}
-        <div>
-            <a href="{{ path('home') }}">
-                <h1 style="margin: 0;">Home</h1>
-            </a>
-        </div>
-        <nav class="nav">
-            <ul>
+<header class="header">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ path('home') }}">Market</a>
+            <div class="navbar-collapse" id="navbarText">
                 {% block links %}
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <li>
-                            <a href="{{ path('category_list') }}">
-                                Category list
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ path('category_create') }}">
-                                Category create
-                            </a>
-                        </li>
-                    {% endif %}
-                    <li>
-                        <a href="{{ path('product_list') }}">
-                            Product list
-                        </a>
-                    </li>
-                    {% if is_granted('ROLE_MANAGER') %}
-                        <li>
-                            <a href="{{ path('product_create') }}">
-                                Product create
-                            </a>
-                        </li>
-                        {% if app.session.get('lastProduct') %}
-                            <li>
-                                <a href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">
-                                    Last interacted product
-                                </a>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('category_list') }}">Category list</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('category_create') }}">Category create</a>
                             </li>
                         {% endif %}
-                    {% endif %}
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <li>
-                            <a href="{{ path('product_import') }}">
-                                Import products
-                            </a>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('product_list') }}">Product list</a>
                         </li>
-                    {% endif %}
-                    <li>
-                        <a href="{{ path('cart', {'cartDto': app.session.get('cart')}) }}">
-                            Shopping cart
-                        </a>
-                    </li>
+
+                        {% if is_granted('ROLE_MANAGER') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('product_create') }}">Product create</a>
+                            </li>
+
+                            {% if app.session.get('lastProduct') %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">Last interacted product</a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('product_import') }}">Import products</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('cart') }}">Shopping cart</a>
+                        </li>
+                    </ul>
                 {% endblock %}
-            </ul>
-            <ul>
+
                 {% if app.user %}
-                    <li>
+                    <span class="navbar-text">
                         {{ app.user.userIdentifier }}
-                    </li>
-                    <li>
-                        <a href="{{ path('user_logout') }}">Logout</a>
-                    </li>
+                        <a class="nav-link" href="{{ path('user_logout') }}">Logout</a>
+                    </span>
                 {% else %}
-                    <li>
-                        <a href="{{ path('user_login') }}">Login</a>
-                    </li>
-                    <li>
-                        <a href="{{ path('user_register') }}">Register</a>
-                    </li>
+                    <span class="navbar-text">
+                        <a class="nav-link" href="{{ path('user_login') }}">Login</a>
+                        <a class="nav-link" href="{{ path('user_register') }}">Register</a>
+                    </span>
                 {% endif %}
-            </ul>
-        </nav>
-    {% endblock %}
+            </div>
+        </div>
+    </nav>
 </header>

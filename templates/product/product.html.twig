@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Product list page{% endblock %}
+{% block title %}Product page{% endblock %}
 
 {% block content %}
     <h1>Product {{ product.name }}:</h1>
@@ -13,12 +13,29 @@
             {% endif %}
 
             {{ parent('buttons') }}
+
+            {% if not product.isDraft %}
+                <div class="quantity">
+                    {{ form_start(form) }}
+                    <div class="quantity_wrapper">
+                        <div class="quantity_body">
+                            <span class="quantity_btn quantity_minus">-</span>
+                            {{ form_widget(form.quantity) }}
+                            <span class="quantity_btn quantity_plus">+</span>
+                        </div>
+
+                        {{ form_row(form.save) }}
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            {% endif %}
         {% endblock %}
     {% endembed %}
 
     {% if categoryProducts %}
         <h2>Products in category - {{ product.category.name }}</h2>
     {% endif %}
+
     <div class="cards">
         {% for categoryProduct in categoryProducts %}
             {% embed 'incs/card.html.twig' with {'product': categoryProduct} %}

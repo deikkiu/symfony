@@ -2,69 +2,49 @@
 
 namespace App\Dto;
 
-class ProductDto
+use App\Entity\Product;
+
+readonly class ProductDto
 {
 	public function __construct(
-		public int     $id,
-		public string  $name,
-		public string  $slug,
-		public string  $category,
-		public int     $price,
-		public int     $amount,
-		public int     $quantity,
-		public ?string $imagePath,
-		public ?array  $colors
+		private Product $product,
+		private int     $quantity,
 	)
 	{
 	}
 
-	public function getId(): int
+	public function getId(): ?int
 	{
-		return $this->id;
+		return $this->product->getId();
 	}
 
-	public function getName(): string
+	public function getName(): ?string
 	{
-		return $this->name;
+		return $this->product->getName();
 	}
 
-	public function getSlug(): string
+	public function getSlug(): ?string
 	{
-		return $this->slug;
+		return $this->product->getSlug();
 	}
 
-	public function getCategory(): string
+	public function getPrice(): ?int
 	{
-		return $this->category;
+		return $this->product->getPrice();
 	}
 
-	public function getPrice(): int
+	public function getAmount(): ?int
 	{
-		return $this->price;
+		return $this->product->getAmount();
 	}
 
-	public function getAmount(): int
-	{
-		return $this->amount;
-	}
-
-	public function getQuantity(): int
+	public function getQuantity(): ?int
 	{
 		return $this->quantity;
 	}
 
 	public function getImagePath(): ?string
 	{
-		return $this->imagePath;
-	}
-
-	public function getColors(): ?array
-	{
-		return $this->colors;
-	}
-
-	public function setQuantity(int $quantity): void
-	{
-		$this->quantity = $quantity;
+		return $this->product->getImagePath();
 	}
 }
