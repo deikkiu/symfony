@@ -75,8 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		fetch(url, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
-				'X-CSRF-TOKEN': csrfToken
+				'Content-Type': 'application/json'
 			}
 		})
 			.then(response => response.json())
