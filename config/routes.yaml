@@ -74,6 +74,10 @@ cart_delete:
   path: /cart/delete/{id}
   controller: App\Controller\CartController::delete
 
+cart_remove:
+  path: /cart/remove/{id}
+  controller: App\Controller\CartController::remove
+
 # api
 api_get_product:
   path: /api/product/{id}

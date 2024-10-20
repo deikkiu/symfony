@@ -1,37 +1,38 @@
-<div class="card">
-    <div class="card__info">
-        {% if product.imagePath %}
-            <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}" alt="{{ product.name }}">
-        {% endif %}
+<div class="card mt-3">
+    {% if product.imagePath %}
+        <img class="card-img-top card-img"
+             src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+             alt="{{ product.name }}">
+    {% endif %}
 
-        <p>Id: {{ product.id }}</p>
-        <p>Name: {{ product.name }}</p>
-
-        <p>Slug: {{ product.slug }}</p>
-
-        <p>Price: {{ product.price|price }}</p>
+    <div class="card-body">
+        <h4 class="card-title">{{ product.name }}</h4>
+        <h6 class="card-title">Slug: {{ product.slug }}</h6>
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">Price: {{ product.price|price }}</li>
 
         {% if product.amount %}
-            <p>Amount: {{ product.amount }}</p>
+            <li class="list-group-item amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</li>
         {% else %}
-            <p>Amount: 0</p>
+            <li class="list-group-item">Amount: 0</li>
         {% endif %}
-
-        {% if product.quantity %}
-            <p>Quantity: {{ product.quantity }}</p>
-        {% endif %}
-    </div>
-
-    <div>
+    </ul>
+    <div class="card-body card-btns">
         {% block buttons %}
-            <a href="{{ path('product', {'slug': product.slug}) }}">
+            <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
                 Open product
             </a>
-            <a href="{{ path('cart_delete', {'id': product.id}) }}">
-                Delete from cart
+
+            <a class="btn btn-danger" href="{{ path('cart_remove', {'id': product.id}) }}">
+                Remove from cart
             </a>
+
+            <div class="d-flex justify-content-center align-items-center mt-2" style="grid-column: span 2">
+                <button class="btn btn-outline-secondary decrease-btn" type="button" data-product-id="{{ product.id }}">-</button>
+                <input type="number" class="form-control text-center mx-2 product-quantity" id="product-quantity-{{ product.id }}" value="{{ product.quantity }}" readonly>
+                <button class="btn btn-outline-secondary increase-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
+            </div>
         {% endblock %}
     </div>
 </div>
-
-

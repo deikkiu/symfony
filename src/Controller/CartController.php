@@ -6,6 +6,7 @@ use App\Dto\ProductDto;
 use App\Repository\ProductRepository;
 use App\Services\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,33 +33,45 @@ class CartController extends AbstractController
 		]);
 	}
 
-	public function add(Request $request, CartService $cartService, ProductRepository $productRepository): Response
+	public function add(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
 	{
 		$id = $request->get('id');
-		$quantity = $request->get('quantity');
-
 		$product = $productRepository->find($id);
 
 		if (!$product) {
-			throw $this->createNotFoundException("Product for this id: {$id} not found!");
+			return $this->json(['success' => false, 'message' => 'Product not found!'], 404);
 		}
 
-		$cartService->addProduct($id, $quantity);
+		$cartService->addProduct($id);
 
-		return $this->redirectToRoute('product_list');
+		return $this->json(['success' => true]);
 	}
 
-	public function delete(Request $request, CartService $cartService, ProductRepository $productRepository): Response
+	public function delete(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
 	{
-		$productId = $request->get('id');
-		$product = $productRepository->find($productId);
+		$id = $request->get('id');
+		$product = $productRepository->find($id);
 
 		if (!$product) {
-			throw $this->createNotFoundException("Product for this id: {$productId} not found!");
+			return $this->json(['success' => false, 'message' => 'Product not found!'], 404);
 		}
 
-		$cartService->deleteProduct($productId);
+		$cartService->deleteProduct($id);
 
-		return $this->redirectToRoute('cart');
+		return $this->json(['success' => true]);
+	}
+
+	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
+	{
+		$id = $request->get('id');
+		$product = $productRepository->find($id);
+
+		if (!$product) {
+			return $this->json(['success' => false, 'message' => 'Product not found!'], 404);
+		}
+
+		$cartService->removeFromCart($id);
+
+		return $this->json(['success' => true, 'redirectUrl' => $this->generateUrl('cart')]);
 	}
 }

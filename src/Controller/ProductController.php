@@ -146,41 +146,12 @@ class ProductController extends AbstractController
 
 		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);
 
-		// $productQuantityInCart = $cartService->getProductQuantityInCart($product->getId());
-
-		$form = $this->createFormBuilder()
-			->add('quantity', NumberType::class, [
-				'required' => true,
-				'empty_data' => 1,
-				'data' => 1,
-				'attr' => ['readonly' => 'readonly', 'class' => 'quantity_count'],
-				'scale' => 0,
-				'constraints' => [
-					new Positive([
-						'message' => 'Quantity must be a positive number'
-					])
-				],
-			])
-			->add('save', SubmitType::class, [
-				'label' => 'Add in cart',
-			])
-			->getForm();
-
-		$form->handleRequest($request);
-
-		if ($form->isSubmitted() && $form->isValid()) {
-			$quantity = $form->get('quantity')->getData();;
-
-			return $this->redirectToRoute('cart_add', [
-				'id' => $product->getId(),
-				'quantity' => $quantity
-			]);
-		}
+		$productQuantityInCart = $cartService->getProductQuantityInCart($product->getId());
 
 		return $this->render('product/product.html.twig', [
 			'product' => $product,
 			'categoryProducts' => $categoryProducts,
-			'form' => $form
+			'productQuantityInCart' => $productQuantityInCart
 		]);
 	}
 

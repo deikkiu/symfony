@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class CartService
 {
 	public function __construct(
-		protected RequestStack        $stack,
-		protected ProductRepository   $productRepository
+		protected RequestStack      $stack,
+		protected ProductRepository $productRepository
 	)
 	{
 	}
@@ -22,12 +22,11 @@ class CartService
 		return $cart;
 	}
 
-	public function addProduct(int $id, int $quantity): void
+	public function addProduct(int $id): void
 	{
 		$cart = $this->getCartFromSession();
-		$this->updateCartWithProduct($cart, $id, $quantity);
+		$this->updateCartWithProduct($cart, $id);
 		$this->saveCartToSession($cart);
-		$this->addFlashMessage('success', 'Product added to cart!');
 	}
 
 	public function deleteProduct(int $id): void
@@ -35,7 +34,20 @@ class CartService
 		$cart = $this->getCartFromSession();
 		$this->removeProductFromCart($cart, $id);
 		$this->saveCartToSession($cart);
-		$this->addFlashMessage('success', 'Product deleted from cart!');
+	}
+
+	public function removeFromCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$products = $cart->getProducts();
+		$quantity = $products[$id]['quantity'];
+
+		unset($products[$id]);
+
+		$cart->setProducts($products);
+		$cart->setQuantity($cart->getQuantity() - $quantity);
+
+		$this->addFlashMessage('success', "Product was successfully delete!");
 	}
 
 	private function validateCart(Cart $cart): void
@@ -58,13 +70,16 @@ class CartService
 		$this->countTotalPrice($cart);
 	}
 
-	private function updateCartWithProduct(Cart $cart, int $id, int $quantity): void
+	private function updateCartWithProduct(Cart $cart, int $id): void
 	{
 		$products = $cart->getProducts();
-		[$products, $addedQuantity] = $this->setQuantity($products, $id, $quantity);
+		[$products, $added] = $this->setQuantity($products, $id);
 
 		$cart->setProducts($products);
-		$cart->setQuantity($cart->getQuantity() + $addedQuantity);
+
+		if ($added) {
+			$cart->setQuantity($cart->getQuantity() + 1);
+		}
 	}
 
 	private function removeProductFromCart(Cart $cart, int $id): void
@@ -95,21 +110,25 @@ class CartService
 		$cart->setTotalPrice($totalPrice);
 	}
 
-	private function setQuantity(array $products, int $id, int $quantity): array
+	private function setQuantity(array $products, int $id): array
 	{
 		$productAmount = $this->productRepository->find($id)->getAmount();
-		$addedQuantity = 0;
+		$flag = true;
 
 		if (isset($products[$id])) {
-			$productQuantity = min($products[$id]['quantity'] + $quantity, $productAmount);
-			$products[$id]['quantity'] = $productQuantity;
-			$addedQuantity = $productQuantity;
+			$productQuantity = $products[$id]['quantity'] + 1;
+
+			if ($productQuantity > $productAmount) {
+				$flag = false;
+			} else {
+				$products[$id]['quantity'] = $productQuantity;
+			}
+
 		} else {
-			$products[$id] = ['id' => $id, 'quantity' => min($quantity, $productAmount)];
-			$addedQuantity = $products[$id]['quantity'];
+			$products[$id] = ['id' => $id, 'quantity' => 1];
 		}
 
-		return [$products, $addedQuantity];
+		return [$products, $flag];
 	}
 
 	public function getProductQuantityInCart(int $id): int
@@ -135,4 +154,3 @@ class CartService
 		$this->stack->getSession()->getFlashBag()->add($type, $message);
 	}
 }
-

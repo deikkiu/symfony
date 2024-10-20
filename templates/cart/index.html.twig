@@ -3,13 +3,13 @@
 {% block title %}Card{% endblock %}
 
 {% block content %}
-    <h1>Cart list:</h1>
+    <h1>Cart</h1>
 
     <br/>
 
     {% if quantity is not empty %}
-        <h3>Total price: {{ totalPrice|price }}</h3>
-        <h4>Quantity: {{ quantity }}</h4>
+        <h4>Total price: {{ totalPrice|price }}</h4>
+        <h5 class="mt-1">Quantity: {{ quantity }}</h5>
     {% endif %}
 
     {% if products is not empty %}

@@ -1,67 +1,60 @@
-<div class="card {% if product.isDraft %}draft{% endif %}">
-    <div class="card__info">
-        {% if product.imagePath %}
+<div class="card mt-3 mb-3 {% if product.isDraft %}draft{% endif %}">
+    {% if product.imagePath %}
+        <div class="card-img-p">
             {% if big_image is defined %}
-                <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
+                <img class="card-img-top card-img-big"
+                     src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
                      alt="{{ product.name }}">
             {% else %}
-                <img src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+                <img class="card-img-top card-img"
+                     src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
                      alt="{{ product.name }}">
             {% endif %}
-        {% endif %}
+        </div>
+    {% endif %}
 
-        <p>Id: {{ product.id }}</p>
-        <p>Name: {{ product.name }}</p>
-
-        {% if product.category %}
-            <p>Category: {{ product.category.name }}</p>
-        {% endif %}
-
-        <p>Slug: {{ product.slug }}</p>
-        <p>User: {{ product.user.email }}</p>
-
-        {% if product.colors|length %}
-            <div class="card__colors">
-                <span>Colors:</span>
-                {% for color in product.colors %}
-                    <span>{{ color.name }}</span>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <p>Price: {{ product.price|price }}</p>
-
-        {% if product.amount %}
-            <p class="amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</p>
-        {% else %}
-            <p>Amount: 0</p>
-        {% endif %}
-
-        <p>Description: {{ product.descr }}</p>
-
-        {% if product.productAttr %}
-            <p>Product attributes</p>
-            <p>
-                Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}
-            </p>
-
-            {% if product.productAttr.weight %}
-                <p>Weight: {{ product.productAttr.weight }} g</p>
-            {% else %}
-                <p>Weight: 0 g</p>
-            {% endif %}
-        {% endif %}
+    <div class="card-body">
+        <h4 class="card-title">{{ product.name }}</h4>
+        <p class="card-text">{{ product.descr }}</p>
     </div>
 
-    <div>
+    <ul class="list-group list-group-flush">
+        {% block list %}
+            {% if product.category %}
+                <li class="list-group-item">Category: {{ product.category.name }}</li>
+            {% endif %}
+
+            <li class="list-group-item">Slug: {{ product.slug }}</li>
+            <li class="list-group-item">User: {{ product.user.email }}</li>
+
+            <li class="list-group-item">Price: {{ product.price|price }}</li>
+
+            {% if product.amount %}
+                <li class="list-group-item amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</li>
+            {% else %}
+                <li class="list-group-item">Amount: 0</li>
+            {% endif %}
+
+            {% if product.colors|length %}
+                <li class="list-group-item">
+                    Colors:
+                    {% for color in product.colors %}
+                        {{ color.name }}&nbsp;
+                    {% endfor %}
+                </li>
+            {% endif %}
+        {% endblock %}
+    </ul>
+
+    <div class="card-body card-btns">
         {% block buttons %}
             {% if is_granted('EDIT', product) %}
-                <a href="{{ path('product_update', {'slug': product.slug}) }}">
+                <a class="btn btn-success" href="{{ path('product_update', {'slug': product.slug}) }}">
                     Update product
                 </a>
             {% endif %}
             {% if is_granted('DELETE', product) %}
-                <a href="{{ path('product_delete', {'id': product.id}) }}">
+                <a class="btn btn-danger" href="{{ path('product_delete', {'id': product.id}) }}">
                     Delete product
                 </a>
             {% endif %}

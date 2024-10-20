@@ -20,62 +20,62 @@ class AppFixtures extends Fixture
 	}
 
 	public function load(ObjectManager $manager): void
-    {
-	    $categories = [];
+	{
+		$categories = [];
 		$users = [];
 
-	    $user = new User();
-	    $user->setEmail("user@mail.com");
-	    $password = $this->hasher->hashPassword($user, '123456');
-	    $user->setPassword($password);
+		$user = new User();
+		$user->setEmail("user@mail.com");
+		$password = $this->hasher->hashPassword($user, '123456');
+		$user->setPassword($password);
 
-	    $manager->persist($user);
+		$manager->persist($user);
 
-	    $user = new User();
-	    $user->setEmail("manager1@mail.com");
-	    $user->setRoles(['ROLE_MANAGER']);
-	    $password = $this->hasher->hashPassword($user, '123456');
-	    $user->setPassword($password);
+		$user = new User();
+		$user->setEmail("manager1@mail.com");
+		$user->setRoles(['ROLE_MANAGER']);
+		$password = $this->hasher->hashPassword($user, '123456');
+		$user->setPassword($password);
 
-	    $manager->persist($user);
+		$manager->persist($user);
 
-	    $users[] = $user;
+		$users[] = $user;
 
-	    $user = new User();
-	    $user->setEmail("manager2@mail.com");
-	    $user->setRoles(['ROLE_MANAGER']);
-	    $password = $this->hasher->hashPassword($user, '123456');
-	    $user->setPassword($password);
+		$user = new User();
+		$user->setEmail("manager2@mail.com");
+		$user->setRoles(['ROLE_MANAGER']);
+		$password = $this->hasher->hashPassword($user, '123456');
+		$user->setPassword($password);
 
-	    $manager->persist($user);
+		$manager->persist($user);
 
-	    $users[] = $user;
+		$users[] = $user;
 
-	    $user = new User();
-	    $user->setEmail("admin@mail.com");
-	    $user->setRoles(['ROLE_ADMIN']);
-	    $password = $this->hasher->hashPassword($user, '123456');
-	    $user->setPassword($password);
+		$user = new User();
+		$user->setEmail("admin@mail.com");
+		$user->setRoles(['ROLE_ADMIN']);
+		$password = $this->hasher->hashPassword($user, '123456');
+		$user->setPassword($password);
 
-	    $manager->persist($user);
-	    $manager->flush();
+		$manager->persist($user);
+		$manager->flush();
 
-	    $users[] = $user;
+		$users[] = $user;
 
-	    for ($i = 1; $i <= 5; $i++) {
-		    $category = new Category();
-		    $category->setName('Category-' . $i);
-		    $category->setProductCount(0);
+		for ($i = 1; $i <= 5; $i++) {
+			$category = new Category();
+			$category->setName('Category-' . $i);
+			$category->setProductCount(0);
 
-		    $categories[] = $category;
+			$categories[] = $category;
 
-		    $manager->persist($category);
-	    }
+			$manager->persist($category);
+		}
 
-	    for ($i = 1; $i <= 20; $i++) {
-		    $product = new Product();
-		    $product->setName('product '.$i);
-		    $product->setPrice(mt_rand(100, 1000000));
+		for ($i = 1; $i <= 20; $i++) {
+			$product = new Product();
+			$product->setName('product ' . $i);
+			$product->setPrice(mt_rand(100, 1000000));
 			$product->setAmount(mt_rand(0, 50));
 			$product->setCreatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
 			$product->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
@@ -88,9 +88,11 @@ class AppFixtures extends Fixture
 
 			$product->setProductAttr($productAttr);
 
-		    $manager->persist($product);
-	    }
+			$product->setDraft(true);
 
-	    $manager->flush();
-    }
+			$manager->persist($product);
+		}
+
+		$manager->flush();
+	}
 }

@@ -5,9 +5,25 @@
 {% block content %}
     <h1>Product {{ product.name }}:</h1>
     {% embed 'incs/card.html.twig' with {'big_image': 'true'} %}
+
+        {% block list %}
+            {{ parent('list') }}
+
+            {% if product.productAttr %}
+                <li class="list-group-item">Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</li>
+
+                {% if product.amount %}
+                    <li class="list-group-item">Weight: {{ product.productAttr.weight }} g</li>
+                {% else %}
+                    <li class="list-group-item">Weight: 0 g</li>
+                {% endif %}
+
+            {% endif %}
+        {% endblock %}
+
         {% block buttons %}
             {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
+                <a class="btn btn-dark" href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
                     API
                 </a>
             {% endif %}
@@ -15,20 +31,20 @@
             {{ parent('buttons') }}
 
             {% if not product.isDraft %}
-                <div class="quantity">
-                    {{ form_start(form) }}
-                    <div class="quantity_wrapper">
-                        <div class="quantity_body">
-                            <span class="quantity_btn quantity_minus">-</span>
-                            {{ form_widget(form.quantity) }}
-                            <span class="quantity_btn quantity_plus">+</span>
-                        </div>
-
-                        {{ form_row(form.save) }}
+                {% if productQuantityInCart > 0 %}
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-outline-secondary" type="button" id="decreaseBtn" data-product="{{ product.id }}" data-amount="{{ product.amount }}">-</button>
+                        <input type="number" class="form-control text-center mx-2" id="counterInput" value="{{ productQuantityInCart }}" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="increaseBtn" data-product="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
                     </div>
-                    {{ form_end(form) }}
-                </div>
+
+                {% else %}
+                    <button type="button" id="addProductToCart" class="btn btn-secondary" data-product="{{ product.id }}">
+                        Add product in cart
+                    </button>
+                {% endif %}
             {% endif %}
+
         {% endblock %}
     {% endembed %}
 
@@ -40,12 +56,12 @@
         {% for categoryProduct in categoryProducts %}
             {% embed 'incs/card.html.twig' with {'product': categoryProduct} %}
                 {% block buttons %}
-                    <a href="{{ path('product', {'slug': product.slug}) }}">
+                    <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
                         Open product
                     </a>
 
                     {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
+                        <a class="btn btn-dark" href="{{ path('api_get_product', {'id': product.id}) }}" target="_blank">
                             API
                         </a>
                     {% endif %}
