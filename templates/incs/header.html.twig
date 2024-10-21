@@ -8,7 +8,8 @@
 
                         {% if is_granted('ROLE_ADMIN') %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
                                     Category
                                 </a>
                                 <ul class="dropdown-menu">
@@ -16,33 +17,44 @@
                                         <a class="dropdown-item" href="{{ path('category_list') }}">Category list</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ path('category_create') }}">Category create</a>
+                                        <a class="dropdown-item" href="{{ path('category_create') }}">Category
+                                            create</a>
                                     </li>
                                 </ul>
                             </li>
                         {% endif %}
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('product_list') }}">Product list</a>
-                        </li>
-
-                        {% if is_granted('ROLE_MANAGER') %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('product_create') }}">Product create</a>
-                            </li>
-
-                            {% if app.session.get('lastProduct') %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">Last interacted product</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                Product
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('product_list') }}">Product list</a>
                                 </li>
-                            {% endif %}
-                        {% endif %}
 
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ path('product_import') }}">Import products</a>
-                            </li>
-                        {% endif %}
+                                {% if is_granted('ROLE_MANAGER') %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('product_create') }}">Product create</a>
+                                    </li>
+
+                                    {% if app.session.get('lastProduct') %}
+                                        <li>
+                                            <a class="dropdown-item"
+                                               href="{{ path('product', {'slug': app.session.get('lastProduct')}) }}">Last
+                                                interacted product</a>
+                                        </li>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ path('product_import') }}">Import products</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </li>
 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('cart') }}">Shopping cart</a>

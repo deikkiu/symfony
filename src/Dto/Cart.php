@@ -6,7 +6,6 @@ class Cart
 {
 	private array $products = [];
 	private int $quantity = 0;
-	private int $totalPrice = 0;
 
 	public function getProducts(): array
 	{
@@ -26,15 +25,5 @@ class Cart
 	public function setQuantity(int $quantity): void
 	{
 		$this->quantity = $quantity;
-	}
-
-	public function getTotalPrice(): int
-	{
-		return $this->totalPrice;
-	}
-
-	public function setTotalPrice(int $totalPrice): void
-	{
-		$this->totalPrice = $totalPrice;
 	}
 }

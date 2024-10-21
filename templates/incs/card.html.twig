@@ -53,7 +53,8 @@
                     Update product
                 </a>
             {% endif %}
-            {% if is_granted('DELETE', product) %}
+
+            {% if is_granted('ROLE_ADMIN') %}
                 <a class="btn btn-danger" href="{{ path('product_delete', {'id': product.id}) }}">
                     Delete product
                 </a>

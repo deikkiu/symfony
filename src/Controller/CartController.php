@@ -17,14 +17,15 @@ class CartController extends AbstractController
 		$cart = $cartService->getCart();
 
 		$products = [];
+		$totalPrice = 0;
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			$product = $productRepository->find($cartProduct['id']);
+			$totalPrice += $product->getPrice() * $cartProduct['quantity'];
 			$products[] = new ProductDTO($product, $cartProduct['quantity']);
 		}
 
 		$quantity = $cart->getQuantity();
-		$totalPrice = $cart->getTotalPrice();
 
 		return $this->render('cart/index.html.twig', [
 			'products' => $products,
@@ -44,7 +45,7 @@ class CartController extends AbstractController
 
 		$cartService->addProduct($id);
 
-		return $this->json(['success' => true]);
+		return $this->json(['success' => true, 'message' => 'Product added to cart successfully!']);
 	}
 
 	public function delete(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
@@ -58,20 +59,20 @@ class CartController extends AbstractController
 
 		$cartService->deleteProduct($id);
 
-		return $this->json(['success' => true]);
+		return $this->json(['success' => true, 'message' => 'Product deleted successfully!']);
 	}
 
-	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
+	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): Response
 	{
 		$id = $request->get('id');
 		$product = $productRepository->find($id);
 
 		if (!$product) {
-			return $this->json(['success' => false, 'message' => 'Product not found!'], 404);
+			$this->createNotFoundException('Product not found!');
 		}
 
 		$cartService->removeFromCart($id);
 
-		return $this->json(['success' => true, 'redirectUrl' => $this->generateUrl('cart')]);
+		return $this->redirectToRoute('cart');
 	}
 }

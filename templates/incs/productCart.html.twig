@@ -1,8 +1,10 @@
 <div class="card mt-3">
     {% if product.imagePath %}
-        <img class="card-img-top card-img"
-             src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
-             alt="{{ product.name }}">
+        <div class="card-img-p">
+            <img class="card-img-top card-img"
+                 src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+                 alt="{{ product.name }}">
+        </div>
     {% endif %}
 
     <div class="card-body">
@@ -13,7 +15,7 @@
         <li class="list-group-item">Price: {{ product.price|price }}</li>
 
         {% if product.amount %}
-            <li class="list-group-item amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</li>
+            <li class="list-group-item amount">Amount: {{ product.amount }}</li>
         {% else %}
             <li class="list-group-item">Amount: 0</li>
         {% endif %}
@@ -29,7 +31,7 @@
             </a>
 
             <div class="d-flex justify-content-center align-items-center mt-2" style="grid-column: span 2">
-                <button class="btn btn-outline-secondary decrease-btn" type="button" data-product-id="{{ product.id }}">-</button>
+                <button class="btn btn-outline-secondary decrease-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">-</button>
                 <input type="number" class="form-control text-center mx-2 product-quantity" id="product-quantity-{{ product.id }}" value="{{ product.quantity }}" readonly>
                 <button class="btn btn-outline-secondary increase-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
             </div>

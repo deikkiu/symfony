@@ -97,6 +97,15 @@ body {
     color: #606060;
 }
 
+ul.colors {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
 ul.colors li {
     display: flex;
     align-items: start;

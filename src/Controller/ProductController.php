@@ -16,15 +16,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotNull;
-use Symfony\Component\Validator\Constraints\Positive;
 
 class ProductController extends AbstractController
 {
@@ -71,11 +68,12 @@ class ProductController extends AbstractController
 			return $this->redirectToRoute('product_list');
 		}
 
-		return $this->render('product/create.html.twig', [
+		return $this->render('product/store.html.twig', [
 			'form' => $form
 		]);
 	}
 
+	#[IsGranted('ROLE_ADMIN')]
 	public function delete(Request $request, EntityManagerInterface $entityManager, ProductModel $productModel): Response
 	{
 		$id = $request->get('id');
@@ -84,8 +82,6 @@ class ProductController extends AbstractController
 		if (!$product) {
 			throw $this->createNotFoundException('Product not found for id = ' . $id);
 		}
-
-		$this->denyAccessUnlessGranted(ProductVoter::DELETE, $product, 'You have not access to delete this product.');
 
 		$productModel->deleteProduct($product);
 

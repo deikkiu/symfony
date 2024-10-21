@@ -1,7 +1,4 @@
 import './bootstrap.js';
-import './script/color.js';
-import './script/cart.js';
-import './script/product-cart.js';
 
 /*
  * Welcome to your app's main JavaScript file!

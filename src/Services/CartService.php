@@ -19,6 +19,7 @@ class CartService
 	{
 		$cart = $this->getCartFromSession();
 		$this->validateCart($cart);
+
 		return $cart;
 	}
 
@@ -66,14 +67,18 @@ class CartService
 				}
 			}
 		}
-
-		$this->countTotalPrice($cart);
 	}
 
 	private function updateCartWithProduct(Cart $cart, int $id): void
 	{
 		$products = $cart->getProducts();
-		[$products, $added] = $this->setQuantity($products, $id);
+		$added = true;
+
+		if (isset($products[$id])) {
+			[$products, $added] = $this->setQuantity($products, $id);
+		} else {
+			$products[$id] = ['id' => $id, 'quantity' => 1];
+		}
 
 		$cart->setProducts($products);
 
@@ -98,34 +103,17 @@ class CartService
 		}
 	}
 
-	private function countTotalPrice(Cart $cart): void
-	{
-		$totalPrice = 0;
-
-		foreach ($cart->getProducts() as $cartProduct) {
-			$product = $this->productRepository->find($cartProduct['id']);
-			$totalPrice += $product->getPrice() * $cartProduct['quantity'];
-		}
-
-		$cart->setTotalPrice($totalPrice);
-	}
-
 	private function setQuantity(array $products, int $id): array
 	{
 		$productAmount = $this->productRepository->find($id)->getAmount();
 		$flag = true;
 
-		if (isset($products[$id])) {
-			$productQuantity = $products[$id]['quantity'] + 1;
+		$productQuantity = $products[$id]['quantity'] + 1;
 
-			if ($productQuantity > $productAmount) {
-				$flag = false;
-			} else {
-				$products[$id]['quantity'] = $productQuantity;
-			}
-
+		if ($productQuantity > $productAmount) {
+			$flag = false;
 		} else {
-			$products[$id] = ['id' => $id, 'quantity' => 1];
+			$products[$id]['quantity'] = $productQuantity;
 		}
 
 		return [$products, $flag];
@@ -133,8 +121,7 @@ class CartService
 
 	public function getProductQuantityInCart(int $id): int
 	{
-		$cart = $this->getCartFromSession();
-		$products = $cart->getProducts();
+		$products = $this->getCartFromSession()->getProducts();
 
 		return $products[$id]['quantity'] ?? 0;
 	}

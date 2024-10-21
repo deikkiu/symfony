@@ -29,9 +29,15 @@
             {% for product in products %}
                 {% embed 'incs/card.html.twig' %}
                     {% block buttons %}
-                        <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}">
-                            Open product
-                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}">
+                                Open product
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
+                                Open product
+                            </a>
+                        {% endif %}
 
                         {{ parent('buttons') }}
                     {% endblock %}
