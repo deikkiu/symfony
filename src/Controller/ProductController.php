@@ -32,7 +32,7 @@ class ProductController extends AbstractController
 
 		$uploadsFolder = 'products';
 
-		if (!$product) {
+		if (!$product || $product->getDeletedAt() !== null) {
 			throw $this->createNotFoundException('Product not found for this slug: ' . $slug);
 		}
 
@@ -79,7 +79,7 @@ class ProductController extends AbstractController
 		$id = $request->get('id');
 		$product = $entityManager->getRepository(Product::class)->find($id);
 
-		if (!$product) {
+		if (!$product || $product->getDeletedAt() !== null) {
 			throw $this->createNotFoundException('Product not found for id = ' . $id);
 		}
 
@@ -129,7 +129,7 @@ class ProductController extends AbstractController
 		$slug = $request->get('slug');
 		$product = $productRepository->findOneBy(['slug' => $slug]);
 
-		if (!$product) {
+		if (!$product || $product->getDeletedAt() !== null) {
 			throw $this->createNotFoundException('Product not found for slug = ' . $slug);
 		}
 

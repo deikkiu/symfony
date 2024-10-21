@@ -13,9 +13,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation\Slug;
+use Gedmo\Mapping\Annotation\SoftDeleteable;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[Context([AbstractObjectNormalizer::SKIP_NULL_VALUES => true])]
+#[SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: true)]
 class Product
 {
 	#[ORM\Id]
@@ -90,6 +92,9 @@ class Product
 	#[ORM\Column]
 	#[Groups(['serialize'])]
 	private ?bool $isDraft = null;
+
+	#[ORM\Column(nullable: true)]
+	private ?\DateTimeImmutable $deletedAt = null;
 
 	public function __construct()
 	{
@@ -270,6 +275,18 @@ class Product
 	public function setDraft(bool $isDraft): static
 	{
 		$this->isDraft = $isDraft;
+
+		return $this;
+	}
+
+	public function getDeletedAt(): ?\DateTimeImmutable
+	{
+		return $this->deletedAt;
+	}
+
+	public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+	{
+		$this->deletedAt = $deletedAt;
 
 		return $this;
 	}

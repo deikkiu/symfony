@@ -27,6 +27,7 @@ class ProductModel
 		protected FileUploader           $fileUploader,
 		protected string                 $uploadsDirectory,
 		protected string                 $uploadsFolder,
+		protected CategoryModel          $categoryModel
 	)
 	{
 	}
@@ -92,6 +93,10 @@ class ProductModel
 
 		if ($lastProduct === $product->getSlug()) {
 			$this->removeSessionAttribute('lastProduct');
+		}
+
+		if ($product->getCategory()) {
+			$this->categoryModel->updateCountProducts($product->getCategory());
 		}
 
 		$this->addFlash('success', 'Product has been deleted!');

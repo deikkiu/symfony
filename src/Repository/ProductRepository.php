@@ -21,6 +21,7 @@ class ProductRepository extends ServiceEntityRepository
 	public function findAllOrderedByAttr(ProductSearch $data, bool $isUser = false): array
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
+		$queryBuilder->andWhere('p.deletedAt is null');
 
 		if ($isUser) {
 			$queryBuilder

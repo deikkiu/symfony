@@ -22,6 +22,7 @@ class CategoryRepository extends ServiceEntityRepository
 			->select('COUNT(p.id)')
 			->leftJoin('c.products', 'p')
 			->where('c.id = :id')
+			->andWhere('p.deletedAt is null')
 			->setParameter('id', $category->getId())
 			->getQuery()
 			->getSingleScalarResult();
@@ -33,6 +34,7 @@ class CategoryRepository extends ServiceEntityRepository
 			->select('COUNT(p.id)')
 			->leftJoin('c.products', 'p')
 			->where('p.isDraft = 0')
+			->andWhere('p.deletedAt is null')
 			->andWhere('c.id = :id')
 			->setParameter('id', $category->getId())
 			->getQuery()

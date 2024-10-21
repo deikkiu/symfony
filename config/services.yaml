@@ -45,3 +45,12 @@ services:
             - { name: doctrine.event_listener, event: 'prePersist' }
         calls:
             - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
+
+    gedmo.listener.soft_deleteable:
+        class: Gedmo\SoftDeleteable\SoftDeleteableListener
+        tags:
+            - { name: doctrine.event_listener, event: 'loadClassMetadata' }
+            - { name: doctrine.event_listener, event: 'onFlush' }
+        calls:
+            - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
+            - [ setClock, [ '@clock' ] ]
