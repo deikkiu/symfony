@@ -18,7 +18,13 @@ class CartService
 	public function getCart(): Cart
 	{
 		$cart = $this->getCartFromSession();
-		$this->validateCart($cart);
+
+		$validationResult = $this->validateCart($cart);
+
+		if (!$validationResult['isValid']) {
+			$message = $this->generateCartUpdateMessage($validationResult['updatedProducts']);
+			throw new \Exception($message);
+		}
 
 		return $cart;
 	}
@@ -51,22 +57,71 @@ class CartService
 		$this->addFlashMessage('success', "Product was successfully delete!");
 	}
 
-	private function validateCart(Cart $cart): void
+	public function validateCart(Cart $cart): array
 	{
 		$products = $cart->getProducts();
+		$updatedProducts = [];
+		$isValid = true;
 
 		if (!empty($products)) {
-			foreach ($products as $cartProduct) {
+			foreach ($products as $key => $cartProduct) {
 				$product = $this->productRepository->find($cartProduct['id']);
 
 				if (!$product) {
-					$products = array_filter($cart->getProducts(), fn($p) => $p['id'] !== $cartProduct['id']);
-					$cart->setProducts($products);
-					$cart->setQuantity($cart->getQuantity() - $cartProduct['quantity']);
-					$this->addFlashMessage('notice', "The store has run out of product with id: {$cartProduct['id']}. We apologize for the inconvenience!");
+					$this->filterCart($cart, $cartProduct);
+					$isValid = false;
+					continue;
+				}
+
+				if ($cartProduct['quantity'] > $product->getAmount()) {
+					$isValid = false;
+					$cartProduct['quantity'] = $product->getAmount();
+					$updatedProducts[] = $this->createUpdatedProductMessage($product, $cartProduct['quantity']);
 				}
 			}
 		}
+
+		return [
+			'isValid' => $isValid,
+			'updatedProducts' => $updatedProducts
+		];
+	}
+
+	private function filterCart(Cart $cart, array $cartProduct): void
+	{
+		$products = array_filter($cart->getProducts(), fn($p) => $p['id'] !== $cartProduct['id']);
+		$cart->setProducts($products);
+		$cart->setQuantity($cart->getQuantity() - $cartProduct['quantity']);
+		$this->addFlashMessage('notice', "Product with ID: {$cartProduct['id']} is no longer available. We apologize for the inconvenience!");
+	}
+
+	private function createUpdatedProductMessage($product, int $requestedQuantity): array
+	{
+		return [
+			'product' => $product->getName(),
+			'available' => $product->getAmount(),
+			'requested' => $requestedQuantity
+		];
+	}
+
+	public function generateCartUpdateMessage(array $updatedProducts): string
+	{
+		if (empty($updatedProducts)) {
+			return '';
+		}
+
+		$message = "Some items have been modified due to insufficient stock:\n";
+
+		foreach ($updatedProducts as $updatedProduct) {
+			$message .= sprintf(
+				"Product: %s - Available: %d, Requested: %d\n",
+				$updatedProduct['product'],
+				$updatedProduct['available'],
+				$updatedProduct['requested']
+			);
+		}
+
+		return $message;
 	}
 
 	private function updateCartWithProduct(Cart $cart, int $id): void
@@ -129,6 +184,11 @@ class CartService
 	private function getCartFromSession(): Cart
 	{
 		return $this->stack->getSession()->get('cart', new Cart());
+	}
+
+	public function clearCart(): void
+	{
+		$this->stack->getSession()->remove('cart');
 	}
 
 	private function saveCartToSession(Cart $cart): void

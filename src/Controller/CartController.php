@@ -15,18 +15,22 @@ class CartController extends AbstractController
 {
 	public function show(CartService $cartService, ProductRepository $productRepository): Response
 	{
-		$cart = $cartService->getCart();
+		try {
+			$cart = $cartService->getCart();
+		} catch (\Exception $e) {
+			$this->addFlash('notice', $e->getMessage());
+			return $this->redirectToRoute('cart');
+		}
 
 		$products = [];
+		$quantity = $cart->getQuantity();
 		$totalPrice = 0;
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			$product = $productRepository->find($cartProduct['id']);
-			$totalPrice += $product->getPrice() * $cartProduct['quantity'];
 			$products[] = new ProductDTO($product, $cartProduct['quantity']);
+			$totalPrice += $product->getPrice() * $cartProduct['quantity'];
 		}
-
-		$quantity = $cart->getQuantity();
 
 		return $this->render('cart/index.html.twig', [
 			'products' => $products,

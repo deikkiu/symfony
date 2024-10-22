@@ -7,33 +7,50 @@ use App\Entity\Order;
 use App\Entity\OrderProduct;
 use App\Entity\User;
 use App\Repository\ProductRepository;
+use App\Services\CartService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class OrderModel
 {
-
 	public function __construct(
-		protected ProductRepository $productRepository,
+		protected ProductRepository      $productRepository,
+		protected EntityManagerInterface $entityManager,
+		protected Security               $security,
+		protected CartService            $cartService
 	)
 	{
 	}
 
-	public function createOrder(Cart $cart, User $user): void
+	public function createOrder(Cart $cart): void
 	{
+		$validationResult = $this->cartService->validateCart($cart);
+
+		if (!$validationResult['isValid']) {
+			$message = $this->cartService->generateCartUpdateMessage($validationResult['updatedProducts']);
+			throw new \Exception($message);
+		}
+
 		$order = new Order();
 
-		$order->setOwner($user);
+		$order->setOwner($this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId()));
 		$order->setStatus(1);
 		$order->setDeleted(false);
 
 		$this->setOrderDate($order);
-
 		$this->setOrderProducts($order, $cart);
 
+		$this->entityManager->persist($order);
+		$this->entityManager->flush();
 
+		$this->updateProductStock($cart);
+
+		$this->cartService->clearCart();
 	}
 
 	private function setOrderProducts(Order $order, Cart $cart): void
 	{
+		$totalPrice = 0;
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct['id']);
@@ -41,8 +58,27 @@ class OrderModel
 			$orderProduct = new OrderProduct();
 			$orderProduct->setAppOrder($order);
 			$orderProduct->setPriceForOne($product->getPrice());
-			$orderProduct->setProduct($cartProduct);
+			$orderProduct->setQuantity($cartProduct['quantity']);
+			$orderProduct->setProduct($product);
+
+			$totalPrice += $cartProduct['quantity'] * $product->getPrice();
+			$order->setTotalPrice($totalPrice);
+
+			$this->entityManager->persist($orderProduct);
 		}
+	}
+
+	private function updateProductStock(Cart $cart): void
+	{
+		foreach ($cart->getProducts() as $cartProduct) {
+			$product = $this->productRepository->find($cartProduct['id']);
+			$newAmount = $product->getAmount() - $cartProduct['quantity'];
+			$product->setAmount($newAmount);
+
+			$this->entityManager->persist($product);
+		}
+
+		$this->entityManager->flush();
 	}
 
 	private function setOrderDate(Order $order): void

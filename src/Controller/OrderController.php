@@ -25,14 +25,19 @@ class OrderController extends AbstractController
 			return $this->redirectToRoute('login');
 		}
 
-		$cart = $cartService->getCart();
+		try {
+			$cart = $cartService->getCart();
 
-		if ($cart->getQuantity() < 1) {
-			$this->addFlash('notice', 'Your cart is empty! Add some products for order.');
-			return $this->redirectToRoute('product_list');
+			if ($cart->getQuantity() < 1) {
+				$this->addFlash('notice', 'Your cart is empty! Add some products for order.');
+				return $this->redirectToRoute('product_list');
+			}
+
+			$orderModel->createOrder($cart);
+		} catch (\Exception $e) {
+			$this->addFlash('notice', $e->getMessage());
+			return $this->redirectToRoute('cart');
 		}
-
-		$orderModel->createOrder($cart, $user);
 
 		return $this->redirectToRoute('order');
 	}

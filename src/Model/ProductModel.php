@@ -27,6 +27,7 @@ class ProductModel
 		protected FileUploader           $fileUploader,
 		protected string                 $uploadsDirectory,
 		protected string                 $uploadsFolder,
+		protected CategoryModel          $categoryModel
 	)
 	{
 	}
