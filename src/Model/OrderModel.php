@@ -40,10 +40,9 @@ class OrderModel
 
 			$orderProduct = new OrderProduct();
 			$orderProduct->setAppOrder($order);
-			$orderProduct->setPriceForOne()
+			$orderProduct->setPriceForOne($product->getPrice());
 			$orderProduct->setProduct($cartProduct);
 		}
-
 	}
 
 	private function setOrderDate(Order $order): void
