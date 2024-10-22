@@ -13,9 +13,11 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation\Slug;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[Context([AbstractObjectNormalizer::SKIP_NULL_VALUES => true])]
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: true)]
 class Product
 {
 	#[ORM\Id]
@@ -91,9 +93,19 @@ class Product
 	#[Groups(['serialize'])]
 	private ?bool $isDraft = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
+
+    /**
+     * @var Collection<int, OrderProduct>
+     */
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
+    private Collection $orderProducts;
+
 	public function __construct()
 	{
 		$this->colors = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
 	}
 
 	public function getId(): ?int
@@ -273,4 +285,46 @@ class Product
 
 		return $this;
 	}
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderProduct>
+     */
+    public function getOrderProducts(): Collection
+    {
+        return $this->orderProducts;
+    }
+
+    public function addOrderProduct(OrderProduct $orderProduct): static
+    {
+        if (!$this->orderProducts->contains($orderProduct)) {
+            $this->orderProducts->add($orderProduct);
+            $orderProduct->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderProduct(OrderProduct $orderProduct): static
+    {
+        if ($this->orderProducts->removeElement($orderProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($orderProduct->getProduct() === $this) {
+                $orderProduct->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
 }

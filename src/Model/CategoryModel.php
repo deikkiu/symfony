@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class CategoryModel
 {
-
 	public function __construct(
 		protected EntityManagerInterface $entityManager,
 		protected CategoryRepository     $categoryRepository,

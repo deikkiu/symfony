@@ -323,12 +323,6 @@ footer {
     color: white;
 }
 
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
 .quantity {
     margin-top: 20px;
 }
@@ -404,6 +398,21 @@ footer {
 }
 
 /* card */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card.draft {
+    background-color: #dfdfdf;
+}
+
+.card.draft ul.list-group li {
+    background-color: #dfdfdf;
+}
+
 .card-img-p {
     width: 100%;
 
@@ -437,4 +446,10 @@ footer {
 
 .card-btns > a {
     max-height: 40px;
+}
+
+
+/* order */
+.order {
+    margin-top: 40px;
 }

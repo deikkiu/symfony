@@ -78,6 +78,15 @@ cart_remove:
   path: /cart/remove/{id}
   controller: App\Controller\CartController::remove
 
+# order
+order:
+  path: /order
+  controller: App\Controller\OrderController::showAll
+
+order_create:
+  path: /order/create
+  controller: App\Controller\OrderController::create
+
 # api
 api_get_product:
   path: /api/product/{id}

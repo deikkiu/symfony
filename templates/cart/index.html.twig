@@ -22,4 +22,10 @@
         <br/>
         <p>The list of products in cart is empty</p>
     {% endif %}
+
+    {% if app.session.get('cart') != null and app.session.get('cart').quantity > 0 %}
+        <div class="order">
+            <a class="btn btn-primary" href="{{ path('order_create') }}">Make an order</a>
+        </div>
+    {% endif %}
 {% endblock %}

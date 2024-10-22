@@ -45,3 +45,16 @@ services:
             - { name: doctrine.event_listener, event: 'prePersist' }
         calls:
             - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
+
+    gedmo.listener.soft_deleteable:
+        class: Gedmo\SoftDeleteable\SoftDeleteableListener
+        tags:
+            - { name: doctrine.event_listener, event: 'loadClassMetadata' }
+            - { name: doctrine.event_listener, event: 'onFlush' }
+        calls:
+            # Uncomment the below call if using attributes, and comment the call for the annotation reader
+            - [ setAnnotationReader, [ '@gedmo.mapping.driver.attribute' ] ]
+            # The `annotation_reader` service was deprecated in Symfony 6.4 and removed in Symfony 7.0
+            # - [ setAnnotationReader, [ '@annotation_reader' ] ]
+            # The `clock` service was introduced in Symfony 6.2; if using an older Symfony version, you can either comment this call or provide your own PSR-20 Clock implementation
+            - [ setClock, [ '@clock' ] ]
