@@ -86,6 +86,7 @@ class CategoryModel
 	private function getCategoryProducts(Category $category): array
 	{
 		$products = $category->getProducts()->toArray();
+
 		$subCategories = $category->getCategories()->toArray();
 
 		foreach ($subCategories as $subCategory) {
@@ -101,7 +102,10 @@ class CategoryModel
 		$i = 0;
 
 		foreach ($products as $product) {
-			$product->setCategory($category);
+			$product->getDeletedAt()
+				? $product->setCategory(null)
+				: $product->setCategory($category);
+
 			$this->entityManager->persist($product);
 
 			++$i;

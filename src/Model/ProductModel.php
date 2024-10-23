@@ -97,6 +97,7 @@ class ProductModel
 
 		if ($product->getCategory()) {
 			$this->categoryModel->updateCountProducts($product->getCategory());
+			$product->setCategory(null);
 		}
 
 		$this->addFlash('success', 'Product has been deleted!');

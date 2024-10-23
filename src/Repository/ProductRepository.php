@@ -110,6 +110,7 @@ class ProductRepository extends ServiceEntityRepository
 			->select('COUNT(p)')
 			->where('p.category = :category')
 			->setParameter('category', $category)
+			->andWhere('p.deletedAt IS NULL')
 			->getQuery()
 			->getSingleScalarResult();
 	}

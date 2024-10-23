@@ -5,7 +5,6 @@ namespace App\Model;
 use App\Dto\Cart;
 use App\Entity\Order;
 use App\Entity\OrderProduct;
-use App\Entity\User;
 use App\Repository\ProductRepository;
 use App\Services\CartService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,20 +25,13 @@ class OrderModel
 
 	public function createOrder(Cart $cart): void
 	{
-		$validationResult = $this->cartService->validateCart($cart);
-
-		if (!$validationResult['isValid']) {
-			$message = $this->cartService->generateCartUpdateMessage($validationResult['updatedProducts']);
-			throw new \Exception($message);
-		}
+		$this->cartService->validateCartOrFail($cart);
 
 		$order = new Order();
-
-		$order->setOwner($this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId()));
+		$order->setOwner($this->security->getUser());
 		$order->setStatus(1);
 		$order->setDeleted(false);
-
-		$this->setOrderDate($order);
+		$this->setOrderDates($order);
 		$this->setOrderProducts($order, $cart);
 
 		$this->entityManager->persist($order);
@@ -53,11 +45,7 @@ class OrderModel
 	public function deleteOrder(Order $order): void
 	{
 		$order->setDeleted(true);
-
-		$this->entityManager->remove($order);
 		$this->entityManager->flush();
-
-		$this->addFlash('success', 'Order has been deleted');
 	}
 
 	private function setOrderProducts(Order $order, Cart $cart): void
@@ -66,18 +54,17 @@ class OrderModel
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct['id']);
-
 			$orderProduct = new OrderProduct();
-			$orderProduct->setAppOrder($order);
-			$orderProduct->setPriceForOne($product->getPrice());
-			$orderProduct->setQuantity($cartProduct['quantity']);
-			$orderProduct->setProduct($product);
+			$orderProduct->setAppOrder($order)
+				->setPriceForOne($product->getPrice())
+				->setQuantity($cartProduct['quantity'])
+				->setProduct($product);
 
 			$totalPrice += $cartProduct['quantity'] * $product->getPrice();
-			$order->setTotalPrice($totalPrice);
-
 			$this->entityManager->persist($orderProduct);
 		}
+
+		$order->setTotalPrice($totalPrice);
 	}
 
 	private function updateProductStock(Cart $cart): void
@@ -93,7 +80,7 @@ class OrderModel
 		$this->entityManager->flush();
 	}
 
-	private function setOrderDate(Order $order): void
+	private function setOrderDates(Order $order): void
 	{
 		$this->onCreateAt($order);
 		$this->onUpdateAt($order);
@@ -108,9 +95,5 @@ class OrderModel
 	{
 		$order->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
 	}
-
-	private function addFlash(string $type, string $message): void
-	{
-		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
-	}
 }
+
