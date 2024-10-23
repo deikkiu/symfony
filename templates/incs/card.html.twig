@@ -1,22 +1,26 @@
-<div class="card mt-3 mb-3 {% if product.isDraft %}draft{% endif %}">
-    {% if product.imagePath %}
-        <div class="card-img-p">
-            {% if big_image is defined %}
-                <img class="card-img-top card-img-big"
-                     src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
-                     alt="{{ product.name }}">
-            {% else %}
-                <img class="card-img-top card-img"
-                     src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
-                     alt="{{ product.name }}">
-            {% endif %}
-        </div>
-    {% endif %}
+<div class="card mt-3 mb-3 {% if product is defined and product.isDraft %}draft{% endif %}">
+    {% block image %}
+        {% if product.imagePath %}
+            <div class="card-img-p">
+                {% if big_image is defined %}
+                    <img class="card-img-top card-img-big"
+                         src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
+                         alt="{{ product.name }}">
+                {% else %}
+                    <img class="card-img-top card-img"
+                         src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_small') }}"
+                         alt="{{ product.name }}">
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endblock %}
 
-    <div class="card-body">
-        <h4 class="card-title">{{ product.name }}</h4>
-        <p class="card-text">{{ product.descr }}</p>
-    </div>
+    {% block cardTitle %}
+        <div class="card-body">
+            <h4 class="card-title">{{ product.name }}</h4>
+            <p class="card-text">{{ product.descr }}</p>
+        </div>
+    {% endblock %}
 
     <ul class="list-group list-group-flush">
         {% block list %}
@@ -24,7 +28,6 @@
                 <li class="list-group-item">Category: {{ product.category.name }}</li>
             {% endif %}
 
-            <li class="list-group-item">Slug: {{ product.slug }}</li>
             <li class="list-group-item">User: {{ product.user.email }}</li>
 
             <li class="list-group-item">Price: {{ product.price|price }}</li>

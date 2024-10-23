@@ -26,8 +26,8 @@ doctrine:
             auto_mapping: false
         filters:
             'soft-deleteable':
-                class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
-                enabled: true
+              class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+              enabled: true
 
 when@test:
     doctrine:

@@ -7,17 +7,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\Slug;
+use Gedmo\Mapping\Annotation\SoftDeleteable;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
-use Gedmo\Mapping\Annotation\Slug;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[Context([AbstractObjectNormalizer::SKIP_NULL_VALUES => true])]
-#[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: true)]
+#[SoftDeleteable(fieldName: 'deletedAt', timeAware: false)]
 class Product
 {
 	#[ORM\Id]
@@ -93,19 +93,19 @@ class Product
 	#[Groups(['serialize'])]
 	private ?bool $isDraft = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $deletedAt = null;
+	#[ORM\Column(nullable: true)]
+	private ?\DateTimeImmutable $deletedAt = null;
 
-    /**
-     * @var Collection<int, OrderProduct>
-     */
-    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
-    private Collection $orderProducts;
+	/**
+	 * @var Collection<int, OrderProduct>
+	 */
+	#[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
+	private Collection $orderProducts;
 
 	public function __construct()
 	{
 		$this->colors = new ArrayCollection();
-        $this->orderProducts = new ArrayCollection();
+		$this->orderProducts = new ArrayCollection();
 	}
 
 	public function getId(): ?int
@@ -286,45 +286,45 @@ class Product
 		return $this;
 	}
 
-    public function getDeletedAt(): ?\DateTimeImmutable
-    {
-        return $this->deletedAt;
-    }
+	public function getDeletedAt(): ?\DateTimeImmutable
+	{
+		return $this->deletedAt;
+	}
 
-    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
-    {
-        $this->deletedAt = $deletedAt;
+	public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+	{
+		$this->deletedAt = $deletedAt;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return Collection<int, OrderProduct>
-     */
-    public function getOrderProducts(): Collection
-    {
-        return $this->orderProducts;
-    }
+	/**
+	 * @return Collection<int, OrderProduct>
+	 */
+	public function getOrderProducts(): Collection
+	{
+		return $this->orderProducts;
+	}
 
-    public function addOrderProduct(OrderProduct $orderProduct): static
-    {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
-            $orderProduct->setProduct($this);
-        }
+	public function addOrderProduct(OrderProduct $orderProduct): static
+	{
+		if (!$this->orderProducts->contains($orderProduct)) {
+			$this->orderProducts->add($orderProduct);
+			$orderProduct->setProduct($this);
+		}
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function removeOrderProduct(OrderProduct $orderProduct): static
-    {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            // set the owning side to null (unless already changed)
-            if ($orderProduct->getProduct() === $this) {
-                $orderProduct->setProduct(null);
-            }
-        }
+	public function removeOrderProduct(OrderProduct $orderProduct): static
+	{
+		if ($this->orderProducts->removeElement($orderProduct)) {
+			// set the owning side to null (unless already changed)
+			if ($orderProduct->getProduct() === $this) {
+				$orderProduct->setProduct(null);
+			}
+		}
 
-        return $this;
-    }
+		return $this;
+	}
 }

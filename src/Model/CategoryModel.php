@@ -9,16 +9,17 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class CategoryModel
 {
+	private ProductModel $productModel;
+
 	public function __construct(
 		protected EntityManagerInterface $entityManager,
 		protected CategoryRepository     $categoryRepository,
-		protected ProductModel           $productModel,
 		protected RequestStack           $requestStack,
 	)
 	{
 	}
 
-	public function getOrCreateCategory(?string $slug): ?Category
+	public function getOrCreateCategory(?string $slug): Category|null
 	{
 		if (!$slug) {
 			return new Category();
@@ -133,5 +134,10 @@ class CategoryModel
 	public function addFlash(string $type, string $message): void
 	{
 		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
+	}
+
+	public function setProductModel(ProductModel $productModel): void
+	{
+		$this->productModel = $productModel;
 	}
 }

@@ -24,9 +24,7 @@ class CategoryController extends AbstractController
 			throw $this->createNotFoundException('No category found for slug = ' . $slug);
 		}
 
-		$form = $this->createForm(CategoryType::class, $category, [
-			'category' => $category,
-		]);
+		$form = $this->createForm(CategoryType::class, $category, ['category' => $category]);
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {

@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class ProductModel
 {
+	private CategoryModel $categoryModel;
+
 	public function __construct(
 		protected EntityManagerInterface $entityManager,
 		protected ProductRepository      $productRepository,
@@ -26,8 +28,7 @@ class ProductModel
 		protected CacheManager           $cacheManager,
 		protected FileUploader           $fileUploader,
 		protected string                 $uploadsDirectory,
-		protected string                 $uploadsFolder,
-		protected CategoryModel          $categoryModel
+		protected string                 $uploadsFolder
 	)
 	{
 	}
@@ -64,7 +65,6 @@ class ProductModel
 	{
 		$message = 'Product has been updated!';
 
-		// @TODO
 		$user = $this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
 
 		if (!$product->getId()) {
@@ -93,6 +93,10 @@ class ProductModel
 
 		if ($lastProduct === $product->getSlug()) {
 			$this->removeSessionAttribute('lastProduct');
+		}
+
+		if ($product->getCategory()) {
+			$this->categoryModel->updateCountProducts($product->getCategory());
 		}
 
 		$this->addFlash('success', 'Product has been deleted!');
@@ -155,5 +159,10 @@ class ProductModel
 	private function addFlash(string $type, string $message): void
 	{
 		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
+	}
+
+	public function setCategoryModel(CategoryModel $categoryModel): void
+	{
+		$this->categoryModel = $categoryModel;
 	}
 }

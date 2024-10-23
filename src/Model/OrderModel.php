@@ -10,6 +10,7 @@ use App\Repository\ProductRepository;
 use App\Services\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class OrderModel
 {
@@ -17,7 +18,8 @@ class OrderModel
 		protected ProductRepository      $productRepository,
 		protected EntityManagerInterface $entityManager,
 		protected Security               $security,
-		protected CartService            $cartService
+		protected CartService            $cartService,
+		protected RequestStack           $requestStack
 	)
 	{
 	}
@@ -46,6 +48,16 @@ class OrderModel
 		$this->updateProductStock($cart);
 
 		$this->cartService->clearCart();
+	}
+
+	public function deleteOrder(Order $order): void
+	{
+		$order->setDeleted(true);
+
+		$this->entityManager->remove($order);
+		$this->entityManager->flush();
+
+		$this->addFlash('success', 'Order has been deleted');
 	}
 
 	private function setOrderProducts(Order $order, Cart $cart): void
@@ -95,5 +107,10 @@ class OrderModel
 	private function onUpdateAt(Order $order): void
 	{
 		$order->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
+	}
+
+	private function addFlash(string $type, string $message): void
+	{
+		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
 	}
 }

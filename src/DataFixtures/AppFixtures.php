@@ -56,6 +56,7 @@ class AppFixtures extends Fixture
 			$category = new Category();
 			$category->setName('Category-' . $i);
 			$category->setProductCount(0);
+			$category->setProductCountPublished(0);
 
 			$categories[] = $category;
 
@@ -64,6 +65,7 @@ class AppFixtures extends Fixture
 
 		for ($i = 1; $i <= 6; $i++) {
 			$product = new Product();
+
 			$product->setName('Product-' . $i);
 			$product->setPrice(mt_rand(100, 1000000));
 			$product->setAmount(mt_rand(0, 50));

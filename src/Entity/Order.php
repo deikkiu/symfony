@@ -6,8 +6,11 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\SoftDeleteable;
 
+#[ORM\Table(name: '`order`')]
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
+#[SoftDeleteable(fieldName: 'deletedAt', timeAware: false)]
 class Order
 {
     #[ORM\Id]
@@ -39,6 +42,9 @@ class Order
      */
     #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'appOrder')]
     private Collection $orderProducts;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     public function __construct()
     {
@@ -148,6 +154,18 @@ class Order
                 $orderProduct->setAppOrder(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }
