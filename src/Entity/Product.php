@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation\Slug;
 use Gedmo\Mapping\Annotation\SoftDeleteable;
+use Gedmo\Mapping\Annotation\Timestampable;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -66,12 +67,14 @@ class Product
 	#[ORM\Column]
 	#[Groups(['serialize'])]
 	#[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s'])]
-	private ?\DateTime $created_at = null;
+	#[Timestampable]
+	private ?\DateTimeImmutable $created_at = null;
 
 	#[ORM\Column]
 	#[Groups(['serialize'])]
 	#[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s'])]
-	private ?\DateTime $updated_at = null;
+	#[Timestampable]
+	private ?\DateTimeImmutable $updated_at = null;
 
 	/**
 	 * @var Collection<int, Color>
@@ -197,24 +200,24 @@ class Product
 		return $this;
 	}
 
-	public function getCreatedAt(): ?\DateTime
+	public function getCreatedAt(): ?\DateTimeImmutable
 	{
 		return $this->created_at;
 	}
 
-	public function setCreatedAt(\DateTime $created_at): static
+	public function setCreatedAt(\DateTimeImmutable $created_at): static
 	{
 		$this->created_at = $created_at;
 
 		return $this;
 	}
 
-	public function getUpdatedAt(): ?\DateTime
+	public function getUpdatedAt(): ?\DateTimeImmutable
 	{
 		return $this->updated_at;
 	}
 
-	public function setUpdatedAt(\DateTime $updated_at): static
+	public function setUpdatedAt(\DateTimeImmutable $updated_at): static
 	{
 		$this->updated_at = $updated_at;
 

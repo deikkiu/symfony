@@ -17,7 +17,7 @@ class CartController extends AbstractController
 			$cart = $cartService->getCart();
 		} catch (\Exception $e) {
 			$this->addFlash('notice', $e->getMessage());
-			return $this->redirectToRoute('cart');
+			return $this->redirectToRoute('home');
 		}
 
 		$products = $cartService->getDetailedProducts($cart);
@@ -32,29 +32,49 @@ class CartController extends AbstractController
 
 	public function add(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
 	{
-		$id = (int)$request->get('id');
+		$id = $request->get('id');
+		$product = $productRepository->find($id);
+
+		if (!$product || $product->isDraft()) {
+			$this->json(['success' => false, 'message' => "Product with ID $id not found."], 404);
+		}
+
+		$cartService->addProductToCart($id);
+
+		$cart = $cartService->getCart();
+		$totalPrice = $cartService->calculateTotalPrice($cart);
+		$quantity = $cart->getQuantity();
+
+		return $this->json(['success' => true, 'message' => 'Product added to cart successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
+	}
+
+	public function delete(Request $request, CartService $cartService): JsonResponse
+	{
+		$id = $request->get('id');
+		$cart = $cartService->getCart();
+		$cartProduct = $cart->getProducts()[$id] ?? null;
+
+		if (!$cartProduct) {
+			$this->json(['success' => false, 'message' => "Product with ID $id not found."], 404);
+		}
+
+		$cartService->deleteProductFromCart($id);
+
+		$totalPrice = $cartService->calculateTotalPrice($cart);
+		$quantity = $cart->getQuantity();
+
+		return $this->json(['success' => true, 'message' => 'Product deleted successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
+	}
+
+	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): Response
+	{
+		$id = $request->get('id');
 		$product = $productRepository->find($id);
 
 		if (!$product) {
 			$this->createNotFoundException("Product with ID $id not found.");
 		}
 
-		$cartService->addProductToCart($id);
-
-		return $this->json(['success' => true, 'message' => 'Product added to cart successfully!']);
-	}
-
-	public function delete(Request $request, CartService $cartService): JsonResponse
-	{
-		$id = (int)$request->get('id');
-		$cartService->deleteProductFromCart($id);
-
-		return $this->json(['success' => true, 'message' => 'Product deleted successfully!']);
-	}
-
-	public function remove(Request $request, CartService $cartService): Response
-	{
-		$id = (int)$request->get('id');
 		$cartService->removeProductFromCart($id);
 
 		return $this->redirectToRoute('cart');

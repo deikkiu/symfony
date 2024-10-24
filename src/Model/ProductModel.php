@@ -69,13 +69,8 @@ class ProductModel
 
 		if (!$product->getId()) {
 			$product->setUser($user);
-
-			$this->onCreateAt($product);
-
 			$message = 'Product has been created!';
 		}
-
-		$this->onUpdateAt($product);
 
 		return $message;
 	}
@@ -97,7 +92,6 @@ class ProductModel
 
 		if ($product->getCategory()) {
 			$this->categoryModel->updateCountProducts($product->getCategory());
-			$product->setCategory(null);
 		}
 
 		$this->addFlash('success', 'Product has been deleted!');
@@ -122,16 +116,6 @@ class ProductModel
 		}
 
 		$product->setImagePath($this->fileUploader->upload($file, $folder));
-	}
-
-	private function onCreateAt(Product $product): void
-	{
-		$product->setCreatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
-	}
-
-	private function onUpdateAt(Product $product): void
-	{
-		$product->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
 	}
 
 	public function countProductsByCategory(Category $category): ?int

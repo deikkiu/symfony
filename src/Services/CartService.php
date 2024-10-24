@@ -2,48 +2,55 @@
 
 namespace App\Services;
 
-use App\Dto\Cart;
+use App\Dto\CartDto;
+use App\Dto\CartProductDto;
 use App\Dto\ProductDto;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService
 {
-	public function __construct(protected RequestStack $stack, protected ProductRepository $productRepository)
+	public function __construct(
+		protected RequestStack      $stack,
+		protected ProductRepository $productRepository
+	)
 	{
 	}
 
-	public function getCart(): Cart
+	public function getCart(): CartDto
 	{
 		$cart = $this->getCartFromSession();
 		$this->validateCartOrFail($cart);
 		return $cart;
 	}
 
-	private function getCartFromSession(): Cart
+	public function addProductToCart(int $id): void
 	{
-		return $this->stack->getSession()->get('cart', new Cart());
+		$cart = $this->getCartFromSession();
+
+		$this->updateCartWithProduct($cart, $id);
+		$this->saveCartToSession($cart);
 	}
 
-	public function validateCartOrFail(Cart $cart): void
+	public function validateCartOrFail(CartDto $cart): void
 	{
-		$validationResult = $this->validateCart($cart);
+		$result = $this->validateCart($cart);
 
-		if (!$validationResult['isValid']) {
-			$message = $this->generateCartUpdateMessage($validationResult['updatedProducts']);
+		if (!$result['isValid']) {
+			$message = $this->generateCartUpdateMessage($result['updatedProducts']);
 			throw new \Exception($message);
 		}
 	}
 
-	public function validateCart(Cart $cart): array
+	public function validateCart(CartDto $cart): array
 	{
-		$products = $cart->getProducts();
+		$cartProducts = $cart->getProducts();
 		$updatedProducts = [];
 		$isValid = true;
 
-		if (!empty($products)) {
-			foreach ($products as $key => $cartProduct) {
-				$product = $this->productRepository->find($cartProduct['id']);
+		if (!empty($cartProducts)) {
+			foreach ($cartProducts as $cartProduct) {
+				$product = $this->productRepository->find($cartProduct->getId());
 
 				if (!$product) {
 					$this->filterCart($cart, $cartProduct);
@@ -51,10 +58,17 @@ class CartService
 					continue;
 				}
 
-				if ($cartProduct['quantity'] > $product->getAmount()) {
+				// @TODO: product amount = 0
+				if ($product->getAmount() === 0) {
+					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
+					$cartProduct->setQuantity(0);
+					continue;
+				}
+
+				if ($cartProduct->getQuantity() > $product->getAmount()) {
 					$isValid = false;
-					$cartProduct['quantity'] = $product->getAmount();
-					$updatedProducts[] = $this->createUpdatedProductMessage($product, $cartProduct['quantity']);
+					$cartProduct->setQuantity($product->getAmount());
+					$updatedProducts[] = $this->createUpdatedProductMessage($product, $cartProduct->getQuantity());
 				}
 			}
 		}
@@ -62,33 +76,77 @@ class CartService
 		return ['isValid' => $isValid, 'updatedProducts' => $updatedProducts];
 	}
 
-	private function filterCart(Cart $cart, array $cartProduct): void
+	private function filterCart(CartDto $cart, CartProductDto $cartProduct): void
 	{
-		$products = array_filter($cart->getProducts(), fn($p) => $p['id'] !== $cartProduct['id']);
-		$cart->setProducts($products);
-		$cart->setQuantity($cart->getQuantity() - $cartProduct['quantity']);
-		$this->addFlashMessage('notice', "Product with ID: {$cartProduct['id']} is no longer available. We apologize for the inconvenience!");
+		$cartProducts = array_filter($cart->getProducts(), fn($cp) => $cp->getId() !== $cartProduct->getId());
+		$cart->setProducts($cartProducts);
+		$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
+		$this->addFlashMessage('notice', "Product with ID: {$cartProduct->getId()} is no longer available. We apologize for the inconvenience!");
 	}
 
-	private function setQuantity(array $products, int $id): array
+	private function setQuantity(CartProductDto $cartProduct): bool
 	{
-		$productAmount = $this->productRepository->find($id)->getAmount();
 		$flag = true;
 
-		$productQuantity = $products[$id]['quantity'] + 1;
+		$productAmount = $this->productRepository->find($cartProduct->getId())->getAmount();
+		$productQuantity = $cartProduct->getQuantity() + 1;
 
-		if ($productQuantity > $productAmount) {
-			$flag = false;
-		} else {
-			$products[$id]['quantity'] = $productQuantity;
-		}
+		$productQuantity > $productAmount
+			? $flag = false
+			: $cartProduct->setQuantity($productQuantity);;
 
-		return [$products, $flag];
+		return $flag;
 	}
 
-	private function addFlashMessage(string $type, string $message): void
+	private function updateCartWithProduct(CartDto $cart, int $id): void
 	{
-		$this->stack->getSession()->getFlashBag()->add($type, $message);
+		$cartProducts = $cart->getProducts();
+		$cartProduct = $cartProducts[$id] ?? null;
+
+		if ($cartProduct) {
+			$added = $this->setQuantity($cartProduct);
+
+			if ($added) {
+				$cart->setQuantity($cart->getQuantity() + 1);
+			}
+		} else {
+			$cartProducts[$id] = new CartProductDto($id, 1);
+			$cart->setQuantity($cart->getQuantity() + 1);
+		}
+
+		$cart->setProducts($cartProducts);
+	}
+
+	public function deleteProductFromCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$cartProduct = $cart->getProducts()[$id] ?? null;
+
+		if ($cartProduct) {
+			if ($cartProduct->getQuantity() - 1 > 0) {
+				$cartProduct->setQuantity($cartProduct->getQuantity() - 1);
+			} else {
+				$this->removeProductFromCart($id);
+			}
+
+			$cart->setQuantity($cart->getQuantity() - 1);
+		}
+
+		$this->saveCartToSession($cart);
+	}
+
+	public function removeProductFromCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$cartProducts = $cart->getProducts();
+		$cartProduct = $cartProducts[$id] ?? null;
+
+		if ($cartProduct) {
+			$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
+			unset($cartProducts[$id]);
+		}
+
+		$cart->setProducts($cartProducts);
 	}
 
 	private function createUpdatedProductMessage($product, int $requestedQuantity): array
@@ -111,75 +169,56 @@ class CartService
 		return $message;
 	}
 
-	public function addProductToCart(int $id): void
+	public function getDetailedProducts(CartDto $cart): array
 	{
-		$cart = $this->getCartFromSession();
-
-		$this->updateCartWithProduct($cart, $id);
-		$this->saveCartToSession($cart);
-	}
-
-	private function updateCartWithProduct(Cart $cart, int $id): void
-	{
-		$products = $cart->getProducts();
-
-		if (isset($products[$id])) {
-			[$products, $added] = $this->setQuantity($products, $id);
-
-			if ($added) {
-				$cart->setQuantity($cart->getQuantity() + 1);
-			}
-		} else {
-			$products[$id] = ['id' => $id, 'quantity' => 1];
-			$cart->setQuantity($cart->getQuantity() + 1);
-		}
-
-		$cart->setProducts($products);
-	}
-
-	private function saveCartToSession(Cart $cart): void
-	{
-		$this->stack->getSession()->set('cart', $cart);
-	}
-
-	public function deleteProductFromCart(int $id): void
-	{
-		$cart = $this->getCartFromSession();
-		$this->removeProductFromCart($id);
-		$this->saveCartToSession($cart);
-	}
-
-	public function removeProductFromCart(int $id): void
-	{
-		$cart = $this->getCartFromSession();
-		$products = $cart->getProducts();
-
-		if (isset($products[$id])) {
-			$cart->setQuantity( max($cart->getQuantity() - $products[$id]['quantity'], 0));
-			unset($products[$id]);
-			$cart->setProducts($products);
-		}
-	}
-
-	public function getDetailedProducts(Cart $cart): array
-	{
-		return array_map(fn($cartProduct) => new ProductDTO($this->productRepository->find($cartProduct['id']), $cartProduct['quantity']), $cart->getProducts());
-	}
-
-	public function calculateTotalPrice(Cart $cart): float
-	{
-		return array_reduce($cart->getProducts(), fn($total, $cartProduct) => $total + $this->productRepository->find($cartProduct['id'])->getPrice() * $cartProduct['quantity'], 0);
+		return array_map(function ($cartProduct) {
+			$product = $this->productRepository->find($cartProduct->getId());
+			return new ProductDto($product, $cartProduct->getQuantity());
+		}, $cart->getProducts());
 	}
 
 	public function clearCart(): void
 	{
-		$this->stack->getSession()->remove('cart');
+		$cart = $this->getCartFromSession();
+		$cartProducts = $cart->getProducts();
+
+		foreach ($cartProducts as $cartProduct) {
+			if ($cartProduct->getQuantity() !== 0) {
+				$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
+				unset($cartProducts[$cartProduct->getId()]);
+			}
+		}
+
+		$cart->setProducts($cartProducts);
+	}
+
+	public function calculateTotalPrice(CartDto $cart): float
+	{
+		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
+			$productPrice = $this->productRepository->find($cartProduct->getId())->getPrice();
+			return $total + ($productPrice * $cartProduct->getQuantity());
+		}, 0);
 	}
 
 	public function getProductQuantityInCart(int $id): int
 	{
-		$products = $this->getCartFromSession()->getProducts();
+		$cartProduct = $this->getCartFromSession()->getProducts()[$id] ?? null;
 
-		return $products[$id]['quantity'] ?? 0;
+		return $cartProduct ? $cartProduct->getQuantity() : 0;
+	}
+
+	private function getCartFromSession(): CartDto
+	{
+		return $this->stack->getSession()->get('cart', new CartDto());
+	}
+
+	private function saveCartToSession(CartDto $cart): void
+	{
+		$this->stack->getSession()->set('cart', $cart);
+	}
+
+	private function addFlashMessage(string $type, string $message): void
+	{
+		$this->stack->getSession()->getFlashBag()->add($type, $message);
 	}
 }

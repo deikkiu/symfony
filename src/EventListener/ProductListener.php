@@ -14,7 +14,7 @@ use Doctrine\ORM\Events;
 #[AsEntityListener(event: Events::postPersist, method: 'postPersist', entity: Product::class)]
 #[AsEntityListener(event: Events::postUpdate, method: 'postUpdate', entity: Product::class)]
 #[AsEntityListener(event: Events::postRemove, method: 'postRemove', entity: Product::class)]
-class ProductListener
+final class ProductListener
 {
 	public function __construct(
 		protected CategoryModel $categoryModel,

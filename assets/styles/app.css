@@ -405,6 +405,14 @@ footer {
     gap: 20px;
 }
 
+.card.amount-0 {
+    background-color: #ffc3c3;
+}
+
+.card.amount-0 ul.list-group li {
+    background-color: #ffc3c3;
+}
+
 .card.draft {
     background-color: #dfdfdf;
 }
@@ -440,7 +448,7 @@ footer {
     gap: 6px;
 }
 
-.card-btns > a.long {
+.card-btns > .long {
     grid-column: span 2;
 }
 

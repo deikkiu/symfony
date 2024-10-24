@@ -8,8 +8,8 @@
     <br/>
 
     {% if quantity is not empty %}
-        <h4>Total price: {{ totalPrice|price }}</h4>
-        <h5 class="mt-1">Quantity: {{ quantity }}</h5>
+        <h4 data-totalPrice>Total price: <span>{{ totalPrice|price }}</span></h4>
+        <h5 class="mt-1" data-quantity>Quantity: <span>{{ quantity }}</span></h5>
     {% endif %}
 
     {% if products is not empty %}

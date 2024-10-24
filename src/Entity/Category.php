@@ -6,6 +6,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\SoftDeleteable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,6 +17,7 @@ use Gedmo\Mapping\Annotation\Slug;
 	fields: 'slug',
 	message: 'Category already exists!',
 )]
+#[SoftDeleteable(fieldName: 'deletedAt', timeAware: false)]
 class Category
 {
     #[ORM\Id]
@@ -55,6 +57,9 @@ class Category
 
     #[ORM\Column]
     private ?int $productCountPublished = 0;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
 
     public function __construct()
     {
@@ -183,6 +188,18 @@ class Category
     public function setProductCountPublished(int $productCountPublished): static
     {
         $this->productCountPublished = $productCountPublished;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }

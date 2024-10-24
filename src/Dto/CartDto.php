@@ -2,8 +2,11 @@
 
 namespace App\Dto;
 
-class Cart
+class CartDto
 {
+	/**
+	 * @var array<int, CartProductDto>
+	 */
 	private array $products = [];
 	private int $quantity = 0;
 

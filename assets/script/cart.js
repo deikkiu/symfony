@@ -7,27 +7,27 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        let url = `/cart/${action}/${productId}`;
-
-        fetch(url, {
+        const url = `/cart/${action}/${productId}`;
+        const body = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (action === 'add') {
-                        quantityInput.value = currentValue + 1;
-                    } else if (action === 'delete' && currentValue > 1) {
-                        quantityInput.value = currentValue - 1;
-                    }
-                } else {
-                    console.error('Ошибка при обновлении количества:', data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
+        };
+
+        fetchCartRequest(url, body, quantityInput, action, currentValue);
+    }
+
+    async function fetchCartRequest(url, body, quantityInput, action, currentValue) {
+        try {
+            const response = await fetch(url, body);
+            const data = await response.json();
+
+            quantityInput.value = action === 'add' ? currentValue + 1 : currentValue - 1;
+            await updateCartDataInPage(data.totalPrice, data.quantity);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     document.querySelectorAll('.increase-btn').forEach(button => {
@@ -71,4 +71,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         addBtn.disabled = currentQuantity - 1 > maxAmount;
     }
-});
+
+    function updateCartDataInPage(totalPrice, quantity) {
+        const totalPriceSpan = document.querySelector('[data-totalPrice] > span');
+        const quantitySpan = document.querySelector('[data-quantity] > span');
+
+        const formatPrice = new Intl.NumberFormat('en-US', {
+            style: 'decimal',
+        }).format(totalPrice / 100);
+
+        totalPriceSpan.textContent = `${formatPrice}$`;
+        quantitySpan.textContent = quantity;
+    }
+})
+;

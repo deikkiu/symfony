@@ -38,12 +38,12 @@
                         <button class="btn btn-outline-secondary" type="button" id="increaseBtn" data-product="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
                     </div>
                 {% else %}
-                    {% if product.amount > 1 %}
+                    {% if product.amount > 0 %}
                         <button type="button" id="addProductToCart" class="btn btn-secondary" data-product="{{ product.id }}" data-amount="{{ product.amount }}">
                             Add product in cart
                         </button>
                     {% else %}
-                        <h4 style="color: red">Товара нет в наличии!</h4>
+                        <h5 style="color: red">The product is out of stock!</h5>
                     {% endif %}
                 {% endif %}
             {% endif %}

@@ -3,15 +3,41 @@
 {% block title %}Orders{% endblock %}
 
 {% block content %}
-    <h1>Orders list:</h1>
+    <h1>Orders</h1>
 
     {% if orders %}
-        <div class="cards">
-            {% for order in orders %}
-                {% include 'incs/orderCard.html.twig' %}
-            {% endfor %}
+        <div class="mt-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Total price</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">#</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <th scope="row" class="align-middle">{{ order.id }}</th>
+                            <td class="align-middle">{{ order.totalPrice|price }}</td>
+                            <td class="align-middle">{{ status[order.status] }}</td>
+                            <td class="align-middle">{{ order.createdAt|date('d/m/Y | H:i') }}</td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ path('order', {'id': order.id}) }}">
+                                    Open order
+                                </a>
+                                <a class="btn btn-danger" href="{{ path('order_delete', {'id': order.id}) }}">
+                                    Delete order
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
-        <p>The list of orders is empty</p>
+        <p class="mt-2">The list of orders is empty</p>
     {% endif %}
 {% endblock %}

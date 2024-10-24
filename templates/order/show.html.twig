@@ -5,34 +5,36 @@
 {% block content %}
     <h1>Order products</h1>
 
-    {% for orderProduct in orderProducts %}
-        {% set product = orderProduct.product %}
+    <div class="cards">
+        {% for orderProduct in orderProducts %}
+            {% set product = orderProduct.product %}
 
-        {% embed 'incs/card.html.twig' %}
-            {% block class %}{% endblock %}
+            {% embed 'incs/card.html.twig' %}
+                {% block class %}{% endblock %}
 
-            {% block list %}
-                {{ parent('list') }}
+                {% block list %}
+                    {{ parent('list') }}
 
-                {% if product.productAttr %}
-                    <li class="list-group-item">Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</li>
+                    {% if product.productAttr %}
+                        <li class="list-group-item">Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</li>
 
-                    {% if product.amount %}
-                        <li class="list-group-item">Weight: {{ product.productAttr.weight }} g</li>
-                    {% else %}
-                        <li class="list-group-item">Weight: 0 g</li>
+                        {% if product.amount %}
+                            <li class="list-group-item">Weight: {{ product.productAttr.weight }} g</li>
+                        {% else %}
+                            <li class="list-group-item">Weight: 0 g</li>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
 
-                <li class="list-group-item">Quantity: {{ orderProduct.quantity }}</li>
-                <li class="list-group-item">Old price: {{ orderProduct.priceForOne|price }}</li>
-            {% endblock %}
+                    <li class="list-group-item">Quantity: {{ orderProduct.quantity }}</li>
+                    <li class="list-group-item">Old price: {{ orderProduct.priceForOne|price }}</li>
+                {% endblock %}
 
-            {% block buttons %}
-                <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}" target="_blank">
-                    Open product
-                </a>
-            {% endblock %}
-        {% endembed %}
-    {% endfor %}
+                {% block buttons %}
+                    <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}" target="_blank">
+                        Open product
+                    </a>
+                {% endblock %}
+            {% endembed %}
+        {% endfor %}
+    </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-<div class="card mt-3">
+<div class="card mt-3 {% if product.amount < 1 %}amount-0{% endif %}">
     {% if product.imagePath %}
         <div class="card-img-p">
             <img class="card-img-top card-img"
@@ -22,19 +22,25 @@
     </ul>
     <div class="card-body card-btns">
         {% block buttons %}
+            {% if product.amount > 0 %}
+                <div class="d-flex justify-content-center align-items-center mt-2" style="grid-column: span 2">
+                    <button class="btn btn-outline-secondary decrease-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">-</button>
+                    <input type="number" class="form-control text-center mx-2 product-quantity" id="product-quantity-{{ product.id }}" value="{{ product.quantity }}" readonly>
+                    <button class="btn btn-outline-secondary increase-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
+                </div>
+            {% else %}
+                <div class="long">
+                    <p style="color: red">The product is out of stock!</p>
+                </div>
+            {% endif %}
+
             <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
-                Open product
+                Open
             </a>
 
             <a class="btn btn-danger" href="{{ path('cart_remove', {'id': product.id}) }}">
-                Remove from cart
+                Remove
             </a>
-
-            <div class="d-flex justify-content-center align-items-center mt-2" style="grid-column: span 2">
-                <button class="btn btn-outline-secondary decrease-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">-</button>
-                <input type="number" class="form-control text-center mx-2 product-quantity" id="product-quantity-{{ product.id }}" value="{{ product.quantity }}" readonly>
-                <button class="btn btn-outline-secondary increase-btn" type="button" data-product-id="{{ product.id }}" data-amount="{{ product.amount }}">+</button>
-            </div>
         {% endblock %}
     </div>
 </div>

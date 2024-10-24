@@ -25,7 +25,7 @@ doctrine:
         controller_resolver:
             auto_mapping: false
         filters:
-            'soft-deleteable':
+            softdeleteable:
               class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
               enabled: true
 

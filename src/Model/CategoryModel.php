@@ -102,10 +102,7 @@ class CategoryModel
 		$i = 0;
 
 		foreach ($products as $product) {
-			$product->getDeletedAt()
-				? $product->setCategory(null)
-				: $product->setCategory($category);
-
+			$product->setCategory($category);
 			$this->entityManager->persist($product);
 
 			++$i;
@@ -135,7 +132,7 @@ class CategoryModel
 		$this->entityManager->flush();
 	}
 
-	public function addFlash(string $type, string $message): void
+	private function addFlash(string $type, string $message): void
 	{
 		$this->requestStack->getSession()->getFlashBag()->add($type, $message);
 	}

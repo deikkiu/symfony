@@ -52,7 +52,7 @@ class AppFixtures extends Fixture
 
 		$users[] = $user;
 
-		for ($i = 1; $i <= 3; $i++) {
+		for ($i = 1; $i <= 5; $i++) {
 			$category = new Category();
 			$category->setName('Category-' . $i);
 			$category->setProductCount(0);
@@ -63,14 +63,14 @@ class AppFixtures extends Fixture
 			$manager->persist($category);
 		}
 
-		for ($i = 1; $i <= 6; $i++) {
+		for ($i = 1; $i <= 12; $i++) {
 			$product = new Product();
 
 			$product->setName('Product-' . $i);
 			$product->setPrice(mt_rand(100, 1000000));
 			$product->setAmount(mt_rand(0, 50));
-			$product->setCreatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
-			$product->setUpdatedAt(new \DateTime('now', new \DateTimeZone('Asia/Almaty')));
+			$product->setCreatedAt(new \DateTimeImmutable());
+			$product->setUpdatedAt(new \DateTimeImmutable());
 
 			$product->setDescr("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
 

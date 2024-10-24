@@ -113,7 +113,7 @@ class ProductController extends AbstractController
 			$productSearch = $form->getData();
 		}
 
-		// @TODO
+		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch, $isUser);
@@ -137,7 +137,7 @@ class ProductController extends AbstractController
 			$this->denyAccessUnlessGranted(ProductVoter::SHOW, $product, 'You have not access to open this product.');
 		}
 
-		// @TODO
+		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);

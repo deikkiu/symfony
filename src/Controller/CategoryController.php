@@ -68,7 +68,7 @@ class CategoryController extends AbstractController
 	#[IsGranted('ROLE_USER')]
 	public function recentCategories(CategoryRepository $categoryRepository): Response
 	{
-		// @TODO
+		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$categories = $categoryRepository->findAll();

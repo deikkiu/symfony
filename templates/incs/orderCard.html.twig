@@ -6,18 +6,19 @@
     <ul class="list-group list-group-flush">
         {% block list %}
             <li class="list-group-item">Total price: {{ order.totalPrice|price }}</li>
-            <li class="list-group-item">Status: {{ order.status }}</li>
-{#            <li class="list-group-item">Order date: {{ order.createdAt }}</li>#}
+            <li class="list-group-item">Status: {{ status[order.status] }}</li>
+            <li class="list-group-item">Order date: {{ order.createdAt|date('d/m/Y') }}</li>
+            <li class="list-group-item">Order time: {{ order.createdAt|date('H\\h s\\s') }}</li>
         {% endblock %}
     </ul>
 
     <div class="card-body card-btns">
         {% block buttons %}
             <a class="btn btn-primary" href="{{ path('order', {'id': order.id}) }}">
-                Open order
+                Open
             </a>
             <a class="btn btn-danger" href="{{ path('order_delete', {'id': order.id}) }}">
-                Delete order
+                Delete
             </a>
         {% endblock %}
     </div>
