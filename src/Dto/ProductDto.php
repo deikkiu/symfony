@@ -9,6 +9,7 @@ readonly class ProductDto
 	public function __construct(
 		private Product $product,
 		private int     $quantity,
+		private bool    $inStock
 	)
 	{
 	}
@@ -41,6 +42,11 @@ readonly class ProductDto
 	public function getQuantity(): ?int
 	{
 		return $this->quantity;
+	}
+
+	public function isInStock(): bool
+	{
+		return $this->inStock;
 	}
 
 	public function getImagePath(): ?string

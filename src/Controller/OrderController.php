@@ -6,7 +6,7 @@ use App\Entity\Order;
 use App\Model\OrderModel;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
-use App\Services\CartService;
+use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -47,13 +47,8 @@ class OrderController extends AbstractController
 			return $this->redirectToRoute('login');
 		}
 
-		try {
-			$cart = $cartService->getCart();
-			$orderModel->createOrder($cart);
-		} catch (\Exception $e) {
-			$this->addFlash('notice', $e->getMessage());
-			return $this->redirectToRoute('cart');
-		}
+		$cart = $cartService->getCart();
+		$orderModel->createOrder($cart);
 
 		$cartService->clearCart();
 		$this->addFlash('success', 'Your order has been placed!');

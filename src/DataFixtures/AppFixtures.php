@@ -82,7 +82,7 @@ class AppFixtures extends Fixture
 
 			$product->setProductAttr($productAttr);
 
-			$product->setDraft(true);
+			$product->setDraft(false);
 
 			$manager->persist($product);
 		}

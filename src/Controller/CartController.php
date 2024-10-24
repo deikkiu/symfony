@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Services\CartService;
+use App\Service\CartService;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,18 +13,14 @@ class CartController extends AbstractController
 {
 	public function show(CartService $cartService): Response
 	{
-		try {
-			$cart = $cartService->getCart();
-		} catch (\Exception $e) {
-			$this->addFlash('notice', $e->getMessage());
-			return $this->redirectToRoute('home');
-		}
+		$cart = $cartService->getCart();
 
-		$products = $cartService->getDetailedProducts($cart);
+		[$products, $productsIsNotStock] = $cartService->getDetailedProducts($cart);
 		$totalPrice = $cartService->calculateTotalPrice($cart);
 
 		return $this->render('cart/index.html.twig', [
 			'products' => $products,
+			'productsIsNotStock' => $productsIsNotStock,
 			'quantity' => $cart->getQuantity(),
 			'totalPrice' => $totalPrice,
 		]);

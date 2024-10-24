@@ -6,7 +6,7 @@ use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Repository\ProductRepository;
-use App\Services\FileUploader;
+use App\Service\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;

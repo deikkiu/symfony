@@ -4,7 +4,7 @@ namespace App\EventListener;
 
 use App\Entity\Order;
 use App\Repository\ProductRepository;
-use App\Services\CartService;
+use App\Service\CartService;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
@@ -26,11 +26,13 @@ final class OrderListener
 		$cart = $this->cartService->getCart();
 
 		foreach ($cart->getProducts() as $cartProduct) {
-			$product = $this->productRepository->find($cartProduct->getId());
-			$newAmount = $product->getAmount() - $cartProduct->getQuantity();
-			$product->setAmount($newAmount);
+			if ($cartProduct->isInStock()) {
+				$product = $this->productRepository->find($cartProduct->getId());
+				$newAmount = $product->getAmount() - $cartProduct->getQuantity();
+				$product->setAmount($newAmount);
 
-			$this->entityManager->persist($product);
+				$this->entityManager->persist($product);
+			}
 		}
 
 		$this->entityManager->flush();

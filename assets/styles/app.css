@@ -461,3 +461,17 @@ footer {
 .order {
     margin-top: 40px;
 }
+
+/* stock */
+.stock {
+    opacity: 0.6;
+    background-color: #f3f3f3;
+}
+
+.stock img {
+    filter: grayscale(100%);
+}
+
+.stock h5, .stock p, .stock .price {
+    color: #888;
+}

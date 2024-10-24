@@ -4,11 +4,23 @@ namespace App\Dto;
 
 class CartProductDto
 {
+	private bool $inStock = true;
+
 	public function __construct(
 		private int $id,
-		private int $quantity,
+		private int $quantity
 	)
 	{
+	}
+
+	public function isInStock(): bool
+	{
+		return $this->inStock;
+	}
+
+	public function setInStock(bool $inStock): void
+	{
+		$this->inStock = $inStock;
 	}
 
 	public function getId(): int

@@ -3,29 +3,47 @@
 {% block title %}Card{% endblock %}
 
 {% block content %}
-    <h1>Cart</h1>
+    <div class="container mt-5">
+        <div class="row">
 
-    <br/>
+            <h1>Cart</h1>
 
-    {% if quantity is not empty %}
-        <h4 data-totalPrice>Total price: <span>{{ totalPrice|price }}</span></h4>
-        <h5 class="mt-1" data-quantity>Quantity: <span>{{ quantity }}</span></h5>
-    {% endif %}
+            <div class="col-12 col-md-8 mt-3">
+                <div>
+                    {% if products is not empty %}
+                        {% for product in products %}
+                            {% include 'incs/productCart.html.twig' %}
+                        {% endfor %}
+                    {% else %}
+                        <p>The list of products in cart is empty</p>
+                    {% endif %}
+                </div>
 
-    {% if products is not empty %}
-        <div class="cards">
-            {% for product in products %}
-                {% include 'incs/productCart.html.twig' %}
-            {% endfor %}
+                {% if productsIsNotStock is not empty %}
+                    <div class="mt-4">
+                        <h3>Products are out of stock</h3>
+                        <div class="mt-3">
+                            {% for product in productsIsNotStock %}
+                                {% include 'incs/productCart.html.twig' %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if products is not empty %}
+                <div class="col-12 col-md-4">
+                    <div class="card p-3">
+                        <h4 data-quantity>Total products: <span>{{ quantity }}</span></h4>
+                        <h6 class="mt-2" data-totalPrice>The total price: <span>{{ totalPrice|price }}</span></h6>
+                        {% if app.session.get('cart') != null and app.session.get('cart').quantity > 0 %}
+                            <a class="btn btn-success btn-lg w-100 mt-3" href="{{ path('order_create') }}">
+                                Go to purchase
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
-    {% else %}
-        <br/>
-        <p>The list of products in cart is empty</p>
-    {% endif %}
-
-    {% if app.session.get('cart') != null and app.session.get('cart').quantity > 0 %}
-        <div class="order">
-            <a class="btn btn-primary" href="{{ path('order_create') }}">Make an order</a>
-        </div>
-    {% endif %}
+    </div>
 {% endblock %}

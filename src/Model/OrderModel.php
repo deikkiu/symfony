@@ -35,10 +35,16 @@ class OrderModel
 		$this->entityManager->flush();
 	}
 
-	public function deleteOrder(Order $order): void
+	private function calculateTotalPrice(CartDto $cart): int
 	{
-		$this->entityManager->remove($order);
-		$this->entityManager->flush();
+		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
+			if ($cartProduct->isInStock()) {
+				$productPrice = $this->productRepository->find($cartProduct->getId())->getPrice();
+				return $total + ($productPrice * $cartProduct->getQuantity());
+			}
+
+			return $total;
+		}, 0);
 	}
 
 	private function setOrderProducts(Order $order, CartDto $cart): void
@@ -46,26 +52,22 @@ class OrderModel
 		foreach ($cart->getProducts() as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct->getId());
 
-			if ($product->getAmount() < 1) {
-				continue;
+			if ($cartProduct->isInStock()) {
+				$orderProduct = new OrderProduct();
+				$orderProduct->setAppOrder($order)
+					->setPriceForOne($product->getPrice())
+					->setQuantity($cartProduct->getQuantity())
+					->setProduct($product);
+
+				$this->entityManager->persist($orderProduct);
 			}
-
-			$orderProduct = new OrderProduct();
-			$orderProduct->setAppOrder($order)
-				->setPriceForOne($product->getPrice())
-				->setQuantity($cartProduct->getQuantity())
-				->setProduct($product);
-
-			$this->entityManager->persist($orderProduct);
 		}
 	}
 
-	private function calculateTotalPrice(CartDto $cart): int
+	public function deleteOrder(Order $order): void
 	{
-		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
-			$productPrice = $this->productRepository->find($cartProduct->getId())->getPrice();
-			return $total + ($productPrice * $cartProduct->getQuantity());
-		}, 0);
+		$this->entityManager->remove($order);
+		$this->entityManager->flush();
 	}
 }
 
