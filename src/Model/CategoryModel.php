@@ -21,9 +21,7 @@ class CategoryModel
 
 	public function getOrCreateCategory(?string $slug): Category|null
 	{
-		if (!$slug) {
-			return new Category();
-		}
+		if (!$slug) return new Category();
 
 		return $this->categoryRepository->findOneBy(['slug' => $slug]);
 	}
@@ -86,7 +84,6 @@ class CategoryModel
 	private function getCategoryProducts(Category $category): array
 	{
 		$products = $category->getProducts()->toArray();
-
 		$subCategories = $category->getCategories()->toArray();
 
 		foreach ($subCategories as $subCategory) {

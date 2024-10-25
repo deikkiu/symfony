@@ -49,7 +49,6 @@ class ProductController extends AbstractController
 		}
 
 		$form = $this->createForm(ProductType::class, $product);
-
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
@@ -141,7 +140,6 @@ class ProductController extends AbstractController
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);
-
 		$productQuantityInCart = $cartService->getProductQuantityInCart($product->getId());
 
 		return $this->render('product/product.html.twig', [

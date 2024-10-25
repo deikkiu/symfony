@@ -1,0 +1,66 @@
+<div class="card mt-3 mb-3 {% block class %}{% if product.amount == 0 %}amount-0{% endif %} {% if product.isDraft %}draft{% endif %}{% endblock %}">
+    <div class="row g-0">
+        {% block image %}
+            {% if product.imagePath %}
+                <div class="col-md-3 p-3 d-flex align-items-center justify-content-center">
+                    <img class="img-fluid rounded-start card-img-big"
+                         src="{{ asset(uploads_directory ~ product.imagePath) | imagine_filter('my_thumb_big') }}"
+                         alt="{{ product.name }}">
+                </div>
+            {% endif %}
+        {% endblock %}
+        <div class="{% if product.imagePath %}col-md-9{% else %}col-md-12{% endif %}">
+            {% block cardTitle %}
+                <div class="card-body">
+                    <h4 class="card-title">{{ product.name }}</h4>
+                    <p class="card-text">{{ product.descr }}</p>
+                </div>
+            {% endblock %}
+
+            <ul class="list-group list-group-flush">
+                {% block list %}
+                    {% if product.category %}
+                        <li class="list-group-item">Category: {{ product.category.name }}</li>
+                    {% endif %}
+
+                    <li class="list-group-item">User: {{ product.user.email }}</li>
+
+                    <li class="list-group-item">Price: {{ product.price|price }}</li>
+
+                    {% if product.amount %}
+                        <li class="list-group-item amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</li>
+                    {% else %}
+                        <li class="list-group-item">Amount: 0</li>
+                    {% endif %}
+
+                    {% if product.colors|length %}
+                        <li class="list-group-item">
+                            Colors:
+                            {% for color in product.colors %}
+                                {{ color.name }}&nbsp;
+                            {% endfor %}
+                        </li>
+                    {% endif %}
+                {% endblock %}
+            </ul>
+
+            <div class="card-body card-btns">
+                {% block buttons %}
+                    {% if is_granted('EDIT', product) %}
+                        <a class="btn btn-success" href="{{ path('product_update', {'slug': product.slug}) }}">
+                            Update product
+                        </a>
+                    {% endif %}
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="btn btn-danger" href="{{ path('product_delete', {'id': product.id}) }}">
+                            Delete product
+                        </a>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+

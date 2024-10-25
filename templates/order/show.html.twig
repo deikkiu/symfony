@@ -9,7 +9,7 @@
         {% for orderProduct in orderProducts %}
             {% set product = orderProduct.product %}
 
-            {% embed 'incs/card.html.twig' %}
+            {% embed 'cards/card.html.twig' %}
                 {% block class %}{% endblock %}
 
                 {% block list %}

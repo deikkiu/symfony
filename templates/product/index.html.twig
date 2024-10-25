@@ -27,7 +27,7 @@
     {% if products %}
         <div class="cards">
             {% for product in products %}
-                {% embed 'incs/card.html.twig' %}
+                {% embed 'cards/card.html.twig' %}
                     {% block buttons %}
                         {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}">

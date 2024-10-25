@@ -27,6 +27,7 @@ class RegistrationController extends AbstractController
 		}
 
 		$user = new User();
+
 		$form = $this->createForm(RegistrationFormType::class, $user);
 		$form->handleRequest($request);
 
@@ -39,7 +40,6 @@ class RegistrationController extends AbstractController
 			$entityManager->persist($user);
 			$entityManager->flush();
 
-			// login
 			return $security->login($user, 'form_login');
 		}
 

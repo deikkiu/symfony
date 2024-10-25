@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>{{ product.name }}:</h1>
-    {% embed 'incs/card.html.twig' with {'big_image': 'true'} %}
+    {% embed 'cards/productCard.html.twig' %}
 
         {% block list %}
             {{ parent('list') }}
@@ -31,7 +31,7 @@
             {{ parent('buttons') }}
 
             {% if not product.isDraft %}
-                {% if productQuantityInCart > 0 %}
+                {% if productQuantityInCart > 0 and product.amount > 0 %}
                     <div class="d-flex justify-content-center align-items-center">
                         <button class="btn btn-outline-secondary" type="button" id="decreaseBtn" data-product="{{ product.id }}" data-amount="{{ product.amount }}">-</button>
                         <input type="number" class="form-control text-center mx-2" id="counterInput" value="{{ productQuantityInCart }}" readonly>
@@ -43,7 +43,7 @@
                             Add product in cart
                         </button>
                     {% else %}
-                        <h5 style="color: red">The product is out of stock!</h5>
+                        <h6 class="mt-2" style="color: red">The product is out of stock!</h6>
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -52,12 +52,12 @@
     {% endembed %}
 
     {% if categoryProducts %}
-        <h2>Products in category - {{ product.category.name }}</h2>
+        <h3 class="mt-5">Products in category - {{ product.category.name }}</h3>
     {% endif %}
 
     <div class="cards">
         {% for categoryProduct in categoryProducts %}
-            {% embed 'incs/card.html.twig' with {'product': categoryProduct} %}
+            {% embed 'cards/card.html.twig' with {'product': categoryProduct} %}
                 {% block buttons %}
                     <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
                         Open product

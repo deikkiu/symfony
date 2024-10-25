@@ -35,9 +35,7 @@ class ProductModel
 
 	public function getOrCreateProduct(?string $slug): ?Product
 	{
-		if (!$slug) {
-			return new Product();
-		}
+		if (!$slug) return new Product();
 
 		return $this->entityManager->getRepository(Product::class)->findOneBy(['slug' => $slug]);
 	}
@@ -111,10 +109,8 @@ class ProductModel
 	{
 		$existImage = $product->getImagePath();
 
-		if ($existImage) {
-			$this->deleteImage($existImage);
-		}
-
+		if ($existImage) $this->deleteImage($existImage);
+		
 		$product->setImagePath($this->fileUploader->upload($file, $folder));
 	}
 
