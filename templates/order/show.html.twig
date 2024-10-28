@@ -15,16 +15,6 @@
                 {% block list %}
                     {{ parent('list') }}
 
-                    {% if product.productAttr %}
-                        <li class="list-group-item">Volume: {{ volume(product.productAttr.length, product.productAttr.width, product.productAttr.height) }}</li>
-
-                        {% if product.amount %}
-                            <li class="list-group-item">Weight: {{ product.productAttr.weight }} g</li>
-                        {% else %}
-                            <li class="list-group-item">Weight: 0 g</li>
-                        {% endif %}
-                    {% endif %}
-
                     <li class="list-group-item">Quantity: {{ orderProduct.quantity }}</li>
                     <li class="list-group-item">Old price: {{ orderProduct.priceForOne|price }}</li>
                 {% endblock %}

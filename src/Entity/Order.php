@@ -16,8 +16,8 @@ class Order
 {
 	public const STATUS_CREATED = 1;
 	public const STATUS_PROCESSED = 2;
-	public const STATUS_COMPLECTED = 3;
-	public const STATUS_DELIVERED = 4;
+	public const STATUS_DELIVERED = 3;
+	public const STATUS_COMPLECTED = 4;
 	public const STATUS_DENIED = 5;
 
 	#[ORM\Id]

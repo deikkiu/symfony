@@ -68,36 +68,41 @@ class CartService
 	{
 		$cartProducts = $cart->getProducts();
 
-		if (!empty($cartProducts)) {
-			foreach ($cartProducts as $cartProduct) {
-				$product = $this->productRepository->find($cartProduct->getId());
+		if (empty($cartProducts)) return;
 
-				if (!$product || $product->getAmount() < 1) {
-					if ($cartProduct->isInStock()) {
-						$cartProduct->setInStock(false);
-						$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
-					}
+		foreach ($cartProducts as $cartProduct) {
+			$product = $this->productRepository->find($cartProduct->getId());
 
-					continue;
+			if (!$product || $product->getAmount() < 1) {
+				if ($cartProduct->isInStock()) {
+					$cartProduct->setInStock(false);
+					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
 				}
 
-				if (!$cartProduct->isInStock()) {
-					$cartProduct->setInStock(true);
+				continue;
+			}
 
-					if ($cartProduct->getQuantity() > $product->getAmount()) {
-						$cart->setQuantity(max($cart->getQuantity() + $product->getAmount(), 0));
-						$cartProduct->setQuantity($product->getAmount());
-					} else {
-						$cart->setQuantity(max($cart->getQuantity() + $cartProduct->getQuantity(), 0));
-					}
+			if ($product->isDraft()) {
+				$this->removeProductFromCart($cartProduct->getId());
+				continue;
+			}
 
-					continue;
-				}
+			if (!$cartProduct->isInStock()) {
+				$cartProduct->setInStock(true);
 
 				if ($cartProduct->getQuantity() > $product->getAmount()) {
-					$cart->setQuantity(max($cart->getQuantity() - ($cartProduct->getQuantity() - $product->getAmount()), 0));
+					$cart->setQuantity(max($cart->getQuantity() + $product->getAmount(), 0));
 					$cartProduct->setQuantity($product->getAmount());
+				} else {
+					$cart->setQuantity(max($cart->getQuantity() + $cartProduct->getQuantity(), 0));
 				}
+
+				continue;
+			}
+
+			if ($cartProduct->getQuantity() > $product->getAmount()) {
+				$cart->setQuantity(max($cart->getQuantity() - ($cartProduct->getQuantity() - $product->getAmount()), 0));
+				$cartProduct->setQuantity($product->getAmount());
 			}
 		}
 	}

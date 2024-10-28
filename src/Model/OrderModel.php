@@ -35,6 +35,12 @@ class OrderModel
 		$this->entityManager->flush();
 	}
 
+	public function deleteOrder(Order $order): void
+	{
+		$this->entityManager->remove($order);
+		$this->entityManager->flush();
+	}
+
 	private function calculateTotalPrice(CartDto $cart): int
 	{
 		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
@@ -62,12 +68,6 @@ class OrderModel
 				$this->entityManager->persist($orderProduct);
 			}
 		}
-	}
-
-	public function deleteOrder(Order $order): void
-	{
-		$this->entityManager->remove($order);
-		$this->entityManager->flush();
 	}
 }
 
