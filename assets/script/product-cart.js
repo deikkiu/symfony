@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const response = await fetch(url, body);
                 const data = await response.json();
 
-                await renderCounter(addToCartBtn, 1, addToCartBtn.getAttribute('data-amount'));
-                await addFlash('success', data.message);
+                renderCounter(addToCartBtn, 1, addToCartBtn.getAttribute('data-amount'));
+                addFlash('success', data.message);
             } catch (e) {
                 console.error('Error:', e)
                 addFlash('error', e.message);

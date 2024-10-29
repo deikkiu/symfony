@@ -32,7 +32,7 @@ class CartController extends AbstractController
 		$product = $productRepository->find($id);
 
 		if (!$product || $product->isDraft()) {
-			$this->json(['success' => false, 'message' => "Product with ID $id not found."], 404);
+			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
 		$cartService->addProductToCart($id);
@@ -41,7 +41,7 @@ class CartController extends AbstractController
 		$totalPrice = $cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
-		return $this->json(['success' => true, 'message' => 'Product added to cart successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
+		return $this->json(['message' => 'Product added to cart successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
 	}
 
 	public function delete(Request $request, CartService $cartService): JsonResponse
@@ -51,7 +51,7 @@ class CartController extends AbstractController
 		$cartProduct = $cart->getProducts()[$id] ?? null;
 
 		if (!$cartProduct) {
-			$this->json(['success' => false, 'message' => "Product with ID $id not found."], 404);
+			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
 		$cartService->deleteProductFromCart($id);
@@ -59,7 +59,7 @@ class CartController extends AbstractController
 		$totalPrice = $cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
-		return $this->json(['success' => true, 'message' => 'Product deleted successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
+		return $this->json(['message' => 'Product deleted successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
 	}
 
 	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): Response

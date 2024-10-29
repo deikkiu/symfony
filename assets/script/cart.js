@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             quantityInput.value = action === 'add' ? currentValue + 1 : currentValue - 1;
-            await updateCartDataInPage(data.totalPrice, data.quantity);
+            updateCartDataInPage(data.totalPrice, data.quantity);
         } catch (error) {
             console.error('Error:', error);
         }

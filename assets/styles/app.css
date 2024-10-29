@@ -405,14 +405,6 @@ footer {
     gap: 20px;
 }
 
-.card.amount-0 {
-    background-color: #ffc3c3;
-}
-
-.card.amount-0 ul.list-group li {
-    background-color: #ffc3c3;
-}
-
 .card.draft {
     background-color: #dfdfdf;
 }
@@ -464,6 +456,11 @@ footer {
 
 /* stock */
 .stock {
+    opacity: 0.6;
+    background-color: #f3f3f3;
+}
+
+.stock ul.list-group li {
     opacity: 0.6;
     background-color: #f3f3f3;
 }

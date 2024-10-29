@@ -15,6 +15,16 @@ user_register:
   path: /register
   controller: App\Controller\RegistrationController::register
 
+# api
+api_get_product:
+  path: /api/product/{id}
+  controller: App\Controller\Api\ProductController::getProduct
+
+api_login:
+  path: /api/login
+  controller: App\Controller\Api\LoginController::index
+  methods: POST
+
 # category
 category_list:
   path: /category/list
@@ -95,12 +105,11 @@ order:
   path: /order/{id}
   controller: App\Controller\OrderController::show
 
-# api
-api_get_product:
-  path: /api/product/{id}
-  controller: App\Controller\Api\ProductController::getProduct
+# payment
+payment:
+  path: /payment/{id}
+  controller: App\Controller\PaymentController::payment
 
-api_login:
-  path: /api/login
-  controller: App\Controller\Api\LoginController::index
-  methods: POST
+payment_return:
+  path: /payment/return/{checkout_id}
+  controller: App\Controller\PaymentController::paymentReturn

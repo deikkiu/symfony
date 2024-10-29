@@ -1,0 +1,2 @@
+1. Block request in api points
+2. OrderController::create validate cart

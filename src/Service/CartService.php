@@ -64,7 +64,7 @@ class CartService
 		$cart->setProducts($cartProducts);
 	}
 
-	public function validateCart(CartDto $cart): void
+	private function validateCart(CartDto $cart): void
 	{
 		$cartProducts = $cart->getProducts();
 
@@ -73,17 +73,17 @@ class CartService
 		foreach ($cartProducts as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct->getId());
 
-			if (!$product || $product->getAmount() < 1) {
+			if (!$product || $product->isDraft()) {
+				$this->removeProductFromCart($cartProduct->getId());
+				continue;
+			}
+
+			if ($product->getAmount() < 1) {
 				if ($cartProduct->isInStock()) {
 					$cartProduct->setInStock(false);
 					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
 				}
 
-				continue;
-			}
-
-			if ($product->isDraft()) {
-				$this->removeProductFromCart($cartProduct->getId());
 				continue;
 			}
 

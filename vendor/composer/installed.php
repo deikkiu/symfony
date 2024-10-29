@@ -3,7 +3,7 @@
         'name' => 'symfony/skeleton',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e853e0f0dabbcee0a594084a23615baaf1ceeb91',
+        'reference' => 'c9c1091c92b9b9c48f96f97e2bfcb3200a42bd07',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -466,8 +466,8 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0|2.0|3.0',
-                1 => '3.0.0',
+                0 => '3.0.0',
+                1 => '1.0|2.0|3.0',
             ),
         ),
         'psr/simple-cache-implementation' => array(
@@ -619,6 +619,15 @@
             'install_path' => __DIR__ . '/../sebastian/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'stripe/stripe-php' => array(
+            'pretty_version' => 'v16.1.1',
+            'version' => '16.1.1.0',
+            'reference' => '524ae42483d7434dfaecb0076e32e5cb521f6bb7',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../stripe/stripe-php',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'symfony/asset' => array(
             'pretty_version' => 'v7.1.1',
@@ -1208,7 +1217,7 @@
         'symfony/skeleton' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e853e0f0dabbcee0a594084a23615baaf1ceeb91',
+            'reference' => 'c9c1091c92b9b9c48f96f97e2bfcb3200a42bd07',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

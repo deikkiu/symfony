@@ -1,4 +1,4 @@
-<div class="card mt-3 mb-3 {% block class %}{% if product.amount == 0 %}amount-0{% endif %} {% if product.isDraft %}draft{% endif %}{% endblock %}">
+<div class="card mt-3 mb-3 {% block class %}{% if product.amount == 0 %}stock{% endif %} {% if product.isDraft %}draft{% endif %}{% endblock %} ">
     {% block image %}
         {% if product.imagePath %}
             <div class="card-img-p">
