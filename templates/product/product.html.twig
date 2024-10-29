@@ -75,3 +75,8 @@
         {% endfor %}
     </div>
 {% endblock %}
+
+{% block scripts %}
+    {{ parent('scripts') }}
+    <script src="{{ asset('script/product-cart.js') }}"></script>
+{% endblock %}

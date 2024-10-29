@@ -107,9 +107,13 @@ order:
 
 # payment
 payment:
-  path: /payment/{id}
+  path: /payment
   controller: App\Controller\PaymentController::payment
 
+payment_checkout:
+  path: /payment/checkout
+  controller: App\Controller\PaymentController::paymentCheckout
+
 payment_return:
-  path: /payment/return/{checkout_id}
+  path: /payment/return
   controller: App\Controller\PaymentController::paymentReturn

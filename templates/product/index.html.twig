@@ -31,11 +31,11 @@
                     {% block buttons %}
                         {% if is_granted('ROLE_ADMIN') %}
                             <a class="btn btn-primary long" href="{{ path('product', {'slug': product.slug}) }}">
-                                Open product
+                                Open
                             </a>
                         {% else %}
                             <a class="btn btn-primary" href="{{ path('product', {'slug': product.slug}) }}">
-                                Open product
+                                Open
                             </a>
                         {% endif %}
 

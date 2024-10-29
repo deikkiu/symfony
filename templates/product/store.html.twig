@@ -37,3 +37,8 @@
     {{ form_end(form) }}
 {% endblock %}
 
+{% block scripts %}
+    {{ parent('scripts') }}
+    <script src="{{ asset('script/color.js') }}"></script>
+{% endblock %}
+
