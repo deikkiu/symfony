@@ -17,11 +17,11 @@ class CartService
 	{
 	}
 
-	public function getCart(): CartDto
+	public function getCart(): array
 	{
 		$cart = $this->getCartFromSession();
-		$this->validateCart($cart);
-		return $cart;
+		[$isValid, $messages] = $this->validateCart($cart);
+		return [$cart, $isValid, $messages];
 	}
 
 	public function addProductToCart(int $id): void
@@ -64,17 +64,24 @@ class CartService
 		$cart->setProducts($cartProducts);
 	}
 
-	private function validateCart(CartDto $cart): void
+	private function validateCart(CartDto $cart): array
 	{
+		$isValid = true;
+		$messages = [];
+
 		$cartProducts = $cart->getProducts();
 
-		if (empty($cartProducts)) return;
+		if (empty($cartProducts)) return [$isValid, $messages];
 
 		foreach ($cartProducts as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct->getId());
 
 			if (!$product || $product->isDraft()) {
 				$this->removeProductFromCart($cartProduct->getId());
+
+				$isValid = false;
+				$messages['notice'] = "Product with id:{$cartProduct->getId()} was delete!";
+
 				continue;
 			}
 
@@ -82,6 +89,9 @@ class CartService
 				if ($cartProduct->isInStock()) {
 					$cartProduct->setInStock(false);
 					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
+
+					$isValid = false;
+					$messages['notice'] = "Product with id:{$cartProduct->getId()} is out of stock!";
 				}
 
 				continue;
@@ -103,8 +113,13 @@ class CartService
 			if ($cartProduct->getQuantity() > $product->getAmount()) {
 				$cart->setQuantity(max($cart->getQuantity() - ($cartProduct->getQuantity() - $product->getAmount()), 0));
 				$cartProduct->setQuantity($product->getAmount());
+
+				$isValid = false;
+				$messages['notice'] = "Product with id:{$cartProduct->getId()} quantity is less than in stock. And we changed the quantity.";
 			}
 		}
+
+		return [$isValid, $messages];
 	}
 
 	private function updateCartWithProduct(CartDto $cart, int $id): void

@@ -79,14 +79,17 @@ cart:
 cart_add:
   path: /cart/add/{id}
   controller: App\Controller\CartController::add
+  methods: POST
 
 cart_delete:
   path: /cart/delete/{id}
   controller: App\Controller\CartController::delete
+  methods: POST
 
 cart_remove:
   path: /cart/remove/{id}
   controller: App\Controller\CartController::remove
+  methods: GET|POST
 
 # order
 orders:
@@ -106,13 +109,10 @@ order:
   controller: App\Controller\OrderController::show
 
 # payment
-payment:
-  path: /payment
-  controller: App\Controller\PaymentController::payment
-
 payment_checkout:
   path: /payment/checkout
   controller: App\Controller\PaymentController::paymentCheckout
+  methods: POST
 
 payment_return:
   path: /payment/return

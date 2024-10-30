@@ -10,8 +10,6 @@ export default class extends Controller {
 
     addCollectionElement(event)
     {
-        console.log(132);
-
         const item = document.createElement('li');
         item.innerHTML = this.prototypeValue.replace(/__name__/g, this.indexValue);
         this.collectionContainerTarget.appendChild(item);

@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Category list page{% endblock %}
+{% block title %}Category list{% endblock %}
 
 {% block content %}
     <h1>Category list:</h1>
@@ -14,7 +14,7 @@
                         <h6 class="card-subtitle mb-2">Slug: {{ category.slug }}</h6>
 
                         {% if category.parent %}
-                            <h6>Parent category: {{ category.parent.name }}</h6>
+                            <h6 class="card-subtitle mb-2">Parent category: {{ category.parent.name }}</h6>
                         {% endif %}
 
                         <a class="card-link" href="{{ path('category_update', {'slug': category.slug}) }}">Update category</a>

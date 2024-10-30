@@ -2,18 +2,24 @@
 
 namespace App\Controller;
 
-use App\Service\CartService;
 use App\Repository\ProductRepository;
+use App\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class CartController extends AbstractController
 {
 	public function show(CartService $cartService): Response
 	{
-		$cart = $cartService->getCart();
+		[$cart, $isValid, $messages] = $cartService->getCart();
+
+		if (!$isValid) {
+			foreach ($messages as $type => $message) {
+				$this->addFlash($type, $message);
+			}
+		}
 
 		[$products, $productsIsNotStock] = $cartService->getDetailedProducts($cart);
 		$totalPrice = $cartService->calculateTotalPrice($cart);
@@ -37,7 +43,7 @@ class CartController extends AbstractController
 
 		$cartService->addProductToCart($id);
 
-		$cart = $cartService->getCart();
+		[$cart] = $cartService->getCart();
 		$totalPrice = $cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
@@ -47,7 +53,7 @@ class CartController extends AbstractController
 	public function delete(Request $request, CartService $cartService): JsonResponse
 	{
 		$id = $request->get('id');
-		$cart = $cartService->getCart();
+		[$cart] = $cartService->getCart();
 		$cartProduct = $cart->getProducts()[$id] ?? null;
 
 		if (!$cartProduct) {

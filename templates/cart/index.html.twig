@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Card{% endblock %}
+{% block title %}Cart{% endblock %}
 
 {% block content %}
     <div class="container mt-5">
@@ -37,18 +37,40 @@
                         <h4 data-quantity>Total products: <span>{{ quantity }}</span></h4>
                         <h6 class="mt-2" data-totalPrice>The total price: <span>{{ totalPrice|price }}</span></h6>
                         {% if app.session.get('cart') != null and app.session.get('cart').quantity > 0 %}
-                            <a class="btn btn-success btn-lg w-100 mt-3" href="{{ path('payment') }}">
+                            <button class="btn btn-success btn-lg w-100 mt-3" data-bs-toggle="modal"
+                                    data-bs-target="#checkoutModal">
                                 Go to purchase
-                            </a>
+                            </button>
                         {% endif %}
                     </div>
                 </div>
             {% endif %}
         </div>
     </div>
+
+    {# payment form #}
+    {% if products is not empty %}
+        <div id="checkoutModal" class="modal fade" tabindex="-1" aria-labelledby="checkoutModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Order payment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="checkout"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
     {{ parent('scripts') }}
+
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="{{ asset('script/cart.js') }}"></script>
+    <script src="{{ asset('script/payment.js') }}" defer></script>
 {% endblock %}

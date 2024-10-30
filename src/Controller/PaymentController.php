@@ -7,22 +7,27 @@ use App\Service\CartService;
 use Stripe\StripeClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends AbstractController
 {
-
-	public function payment(): Response
+	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse|Response
 	{
-		return $this->render('payment/index.html.twig');
-	}
+		[$cart, $isValid, $messages] = $cartService->getCart();
 
-	public function paymentCheckout(CartService $cartService, ProductRepository $productRepository): JsonResponse|RedirectResponse
-	{
-		$cartProducts = $cartService->getCart()->getProducts();
+		if (!$isValid) {
+			foreach ($messages as $type => $message) {
+				$this->addFlash($type, $message);
+			}
 
+			// @TODO: only json response
+			return $this->redirectToRoute('cart');
+		}
+
+		$cartProducts = $cart->getProducts();
+
+		// @TODO: only json response
 		if (empty($cartProducts)) {
 			$this->addFlash('notice', 'For order you need add products in you cart!');
 			return $this->redirectToRoute('product_list');
@@ -47,15 +52,14 @@ class PaymentController extends AbstractController
 			}
 		}
 
-		$stripe = new StripeClient('sk_test_51QF8smF1xKsVMqq0LU9ejDvz12HPSyRmQbj6QavWN1aYoi1cqUMnepsx00AQC913mdg9uotTzskJLOqStZySoAd400Vwx6Mdnd');
-
-		$YOUR_DOMAIN = 'http://project';
+		$stripe = new StripeClient($this->getParameter('stripe_secret_key'));
+		$DOMAIN = $request->getSchemeAndHttpHost();
 
 		$checkout_session = $stripe->checkout->sessions->create([
 			'ui_mode' => 'embedded',
 			'line_items' => $stripeProducts,
 			'mode' => 'payment',
-			'return_url' => $YOUR_DOMAIN . '/payment/return?session_id={CHECKOUT_SESSION_ID}',
+			'return_url' => $DOMAIN . '/payment/return?session_id={CHECKOUT_SESSION_ID}',
 		]);
 
 		return $this->json(['clientSecret' => $checkout_session->client_secret], headers: [
@@ -67,9 +71,8 @@ class PaymentController extends AbstractController
 	{
 		$checkoutSessionId = $request->query->get('session_id');
 
-		// @TODO
 		if (!$checkoutSessionId) {
-			$this->redirectToRoute('payment');
+			$this->redirectToRoute('cart');
 		}
 
 		$stripe = new StripeClient('sk_test_51QF8smF1xKsVMqq0LU9ejDvz12HPSyRmQbj6QavWN1aYoi1cqUMnepsx00AQC913mdg9uotTzskJLOqStZySoAd400Vwx6Mdnd');

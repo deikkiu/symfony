@@ -23,7 +23,7 @@ final class OrderListener
 
 	public function postPersist(): void
 	{
-		$cart = $this->cartService->getCart();
+		[$cart] = $this->cartService->getCart();
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			if ($cartProduct->isInStock()) {

@@ -1,4 +1,3 @@
-1. Block request in api points
-2. OrderController::create validate cart
-3. JS scripts [done]
-4. Payment in modal
+1. Validate cart
+2. Refactor validation func cart
+3. Payment controller response

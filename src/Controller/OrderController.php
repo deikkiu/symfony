@@ -47,8 +47,7 @@ class OrderController extends AbstractController
 			return $this->redirectToRoute('login');
 		}
 
-		// @TODO
-		$cart = $cartService->getCart();
+		[$cart] = $cartService->getCart();
 		$orderModel->createOrder($cart);
 
 		$cartService->clearCart();
