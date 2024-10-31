@@ -14,24 +14,8 @@ class PaymentController extends AbstractController
 {
 	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse|Response
 	{
-		[$cart, $isValid, $messages] = $cartService->getCart();
-
-		if (!$isValid) {
-			foreach ($messages as $type => $message) {
-				$this->addFlash($type, $message);
-			}
-
-			// @TODO: only json response
-			return $this->redirectToRoute('cart');
-		}
-
+		[$cart] = $cartService->getCart();
 		$cartProducts = $cart->getProducts();
-
-		// @TODO: only json response
-		if (empty($cartProducts)) {
-			$this->addFlash('notice', 'For order you need add products in you cart!');
-			return $this->redirectToRoute('product_list');
-		}
 
 		$stripeProducts = [];
 
@@ -72,15 +56,19 @@ class PaymentController extends AbstractController
 		$checkoutSessionId = $request->query->get('session_id');
 
 		if (!$checkoutSessionId) {
-			$this->redirectToRoute('cart');
+			return $this->redirectToRoute('cart');
 		}
 
-		$stripe = new StripeClient('sk_test_51QF8smF1xKsVMqq0LU9ejDvz12HPSyRmQbj6QavWN1aYoi1cqUMnepsx00AQC913mdg9uotTzskJLOqStZySoAd400Vwx6Mdnd');
+		$stripe = new StripeClient($this->getParameter('stripe_secret_key'));
 
 		try {
 			$session = $stripe->checkout->sessions->retrieve($checkoutSessionId);
+			$status = $session->status;
 
-			return $this->redirectToRoute('order_create');
+			return match ($status) {
+				'complete' => $this->redirectToRoute('order_create'),
+				'expired', 'open' => $this->redirectToRoute('cart')
+			};
 		} catch (\Error $e) {
 			throw new \Error($e->getMessage());
 		}
