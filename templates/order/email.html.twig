@@ -1,0 +1,52 @@
+{% apply inline_css(source('@styles/order.css')) %}
+
+    <h1>Order data:</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Owner</th>
+            <th>Total price</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ id }}</td>
+            <td>{{ owner }}</td>
+            <td>{{ price|price }}</td>
+            <td>{{ status }}</td>
+            <td>{{ date }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+
+    <h1>Order products data:</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Quantity</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for orderProduct in orderProducts %}
+            <tr>
+                <td>{{ orderProduct.id }}</td>
+                <td>{{ orderProduct.product.name }}</td>
+                <td>{{ orderProduct.product.category.slug }}</td>
+                <td>{{ orderProduct.priceForOne|price }}</td>
+                <td>{{ orderProduct.quantity }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endapply %}
+
+

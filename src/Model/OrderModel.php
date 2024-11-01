@@ -21,7 +21,7 @@ class OrderModel
 	{
 	}
 
-	public function createOrder(CartDto $cart): void
+	public function createOrder(CartDto $cart): int
 	{
 		$order = new Order();
 
@@ -33,6 +33,8 @@ class OrderModel
 
 		$this->entityManager->persist($order);
 		$this->entityManager->flush();
+
+		return $order->getId();
 	}
 
 	public function deleteOrder(Order $order): void

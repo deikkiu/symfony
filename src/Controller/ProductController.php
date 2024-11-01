@@ -7,11 +7,12 @@ use App\Entity\Product;
 use App\Form\Object\ProductSearch;
 use App\Form\ProductSearchType;
 use App\Form\ProductType;
+use App\Messenger\Message\ImportProductsMessage;
 use App\Model\ProductModel;
 use App\Repository\ProductRepository;
 use App\Security\Voter\ProductVoter;
 use App\Service\CartService;
-use App\Service\ProductImporter;
+use App\Service\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotNull;
@@ -150,7 +152,7 @@ class ProductController extends AbstractController
 	}
 
 	#[IsGranted('ROLE_ADMIN')]
-	public function import(Request $request, ProductImporter $importer): Response
+	public function import(Request $request, MessageBusInterface $bus, FileUploader $fileUploader): Response
 	{
 		$form = $this->createFormBuilder()
 			->add('file', FileType::class, [
@@ -177,14 +179,12 @@ class ProductController extends AbstractController
 
 		if ($form->isSubmitted() && $form->isValid()) {
 			$file = $form->get('file')->getData();
+			$filePath = $this->getParameter('uploads_directory') . $fileUploader->upload($file, 'products-import');
+			$bus->dispatch(new ImportProductsMessage($filePath));
 
-			$isImported = $importer->import($file);
+			$this->addFlash('notice', 'The products are being loaded. After the full download, you will receive a notification.');
 
-			if (!$isImported) {
-				return $this->redirectToRoute('product_import');
-			}
-
-			return $this->redirectToRoute('product_list');
+			return $this->redirectToRoute('product_import');
 		}
 
 		return $this->render('product/import.html.twig', [

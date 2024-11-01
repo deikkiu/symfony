@@ -10,7 +10,6 @@ use App\Model\ProductModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -37,11 +36,11 @@ class ProductImporter
 	{
 	}
 
-	public function import(UploadedFile $file): bool
+	public function import(string $filePath): void
 	{
-		if (($fp = fopen($file->getPathname(), "r")) === false) {
+		if (($fp = fopen($filePath, "r")) === false) {
 			$this->addFlashWarning('Cannot read the file, please upload in the format - csv');
-			return false;
+			return;
 		}
 
 		$flag = true;
@@ -91,19 +90,16 @@ class ProductImporter
 
 			if (!$flag) {
 				$this->entityManager->rollback();
-				return false;
+				return;
 			}
 
 			$this->entityManager->flush();
 			$this->entityManager->commit();
 
 			$this->addFlashSuccess($i);
-
-			return true;
 		} catch (\Exception $e) {
 			$this->entityManager->rollback();
-			$this->addFlashWarning('Error while saving products: ' . $e->getMessage());
-			return false;
+			$this->addFlashWarning('Error while saving products: ' . $e->getMessage());;
 		}
 	}
 

@@ -1,8 +1,12 @@
 twig:
     file_name_pattern: '*.twig'
+
     globals:
-      uploads_directory: '%env(resolve:UPLOADS_DIRECTORY)%/'
+        uploads_directory: '%env(resolve:UPLOADS_DIRECTORY)%/'
+
+    paths:
+        '%kernel.project_dir%/assets/styles': styles
 
 when@test:
     twig:
-      strict_variables: true
+        strict_variables: true

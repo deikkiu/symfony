@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Messenger\Message\SendOrderByEmailMessage;
 use App\Model\OrderModel;
 use App\Repository\OrderRepository;
 use App\Repository\UserRepository;
@@ -12,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class OrderController extends AbstractController
 {
@@ -40,7 +42,7 @@ class OrderController extends AbstractController
 		]);
 	}
 
-	public function create(OrderModel $orderModel, CartService $cartService, Security $security): Response
+	public function create(OrderModel $orderModel, CartService $cartService, Security $security, MessageBusInterface $bus): Response
 	{
 		if (!$security->getUser()) {
 			$this->addFlash('notice', 'For order you need to be logged in.');
@@ -48,9 +50,12 @@ class OrderController extends AbstractController
 		}
 
 		[$cart] = $cartService->getCart();
-		$orderModel->createOrder($cart);
+		$orderId = $orderModel->createOrder($cart);
 
 		$cartService->clearCart();
+
+		$bus->dispatch(new SendOrderByEmailMessage($orderId));
+
 		$this->addFlash('success', 'Your order has been placed!');
 
 		return $this->redirectToRoute('orders');
