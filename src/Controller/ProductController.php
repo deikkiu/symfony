@@ -16,10 +16,12 @@ use App\Service\FileUploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Constraints\File;
@@ -151,9 +153,14 @@ class ProductController extends AbstractController
 		]);
 	}
 
+	/**
+	 * @throws ExceptionInterface
+	 */
 	#[IsGranted('ROLE_ADMIN')]
-	public function import(Request $request, MessageBusInterface $bus, FileUploader $fileUploader): Response
+	public function import(Request $request, MessageBusInterface $bus, FileUploader $fileUploader, Security $security): Response
 	{
+		$userId = $security->getUser()->getId();
+
 		$form = $this->createFormBuilder()
 			->add('file', FileType::class, [
 				'required' => true,
@@ -180,7 +187,7 @@ class ProductController extends AbstractController
 		if ($form->isSubmitted() && $form->isValid()) {
 			$file = $form->get('file')->getData();
 			$filePath = $this->getParameter('uploads_directory') . $fileUploader->upload($file, 'products-import');
-			$bus->dispatch(new ImportProductsMessage($filePath));
+			$bus->dispatch(new ImportProductsMessage($filePath, $userId));
 
 			$this->addFlash('notice', 'The products are being loaded. After the full download, you will receive a notification.');
 

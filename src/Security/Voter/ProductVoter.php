@@ -16,7 +16,7 @@ final class ProductVoter extends Voter
 	public const SHOW = 'SHOW';
 
 	public function __construct(
-		protected Security $security,
+		private readonly Security $security,
 	)
 	{
 	}

@@ -31,8 +31,9 @@
             <th>ID</th>
             <th>Name</th>
             <th>Category</th>
-            <th>Price</th>
+            <th>Price for one</th>
             <th>Quantity</th>
+            <th>Price for all</th>
         </tr>
         </thead>
         <tbody>
@@ -43,6 +44,7 @@
                 <td>{{ orderProduct.product.category.slug }}</td>
                 <td>{{ orderProduct.priceForOne|price }}</td>
                 <td>{{ orderProduct.quantity }}</td>
+                <td>{{ (orderProduct.priceForOne * orderProduct.quantity)|price }}</td>
             </tr>
         {% endfor %}
         </tbody>

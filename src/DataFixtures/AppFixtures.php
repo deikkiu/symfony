@@ -72,7 +72,7 @@ class AppFixtures extends Fixture
 			$product->setCreatedAt(new \DateTimeImmutable());
 			$product->setUpdatedAt(new \DateTimeImmutable());
 
-			$product->setDescr("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
+			$product->setDescr("Lorem Ipsum is simply dummy text of the printing and typesetting industry.");
 
 			$product->setCategory($categories[mt_rand(0, count($categories) - 1)]);
 			$product->setUser($users[mt_rand(0, count($users) - 1)]);

@@ -14,7 +14,7 @@ class PaymentController extends AbstractController
 {
 	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse|Response
 	{
-		[$cart] = $cartService->getCart();
+		$cart = $cartService->getCart();
 		$cartProducts = $cart->getProducts();
 
 		$stripeProducts = [];

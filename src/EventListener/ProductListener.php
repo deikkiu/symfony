@@ -2,22 +2,22 @@
 
 namespace App\EventListener;
 
+use App\Entity\Product;
 use App\Model\CategoryModel;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PostUpdateEventArgs;
-use App\Entity\Product;
-use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
 
 
 #[AsEntityListener(event: Events::postPersist, method: 'postPersist', entity: Product::class)]
 #[AsEntityListener(event: Events::postUpdate, method: 'postUpdate', entity: Product::class)]
 #[AsEntityListener(event: Events::postRemove, method: 'postRemove', entity: Product::class)]
-final class ProductListener
+final readonly class ProductListener
 {
 	public function __construct(
-		protected CategoryModel $categoryModel,
+		private CategoryModel $categoryModel,
 	)
 	{
 	}

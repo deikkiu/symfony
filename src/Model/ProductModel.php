@@ -20,15 +20,15 @@ class ProductModel
 	private CategoryModel $categoryModel;
 
 	public function __construct(
-		protected EntityManagerInterface $entityManager,
-		protected ProductRepository      $productRepository,
-		protected RequestStack           $requestStack,
-		protected Security               $security,
-		protected Filesystem             $filesystem,
-		protected CacheManager           $cacheManager,
-		protected FileUploader           $fileUploader,
-		protected string                 $uploadsDirectory,
-		protected string                 $uploadsFolder
+		private readonly EntityManagerInterface $entityManager,
+		private readonly ProductRepository      $productRepository,
+		private readonly RequestStack           $requestStack,
+		private readonly Security               $security,
+		private readonly Filesystem             $filesystem,
+		private readonly CacheManager           $cacheManager,
+		private readonly FileUploader           $fileUploader,
+		private readonly string                 $uploadsDirectory,
+		private readonly string                 $uploadsFolder
 	)
 	{
 	}
@@ -59,11 +59,15 @@ class ProductModel
 		$this->addFlash('success', $message);
 	}
 
-	public function preSaveOrUpdateProduct(Product $product): string
+	public function preSaveOrUpdateProduct(Product $product, int $userId = null): string
 	{
 		$message = 'Product has been updated!';
 
-		$user = $this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
+		if (!$userId) {
+			$user = $this->entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
+		} else {
+			$user = $this->entityManager->getRepository(User::class)->find($userId);
+		}
 
 		if (!$product->getId()) {
 			$product->setUser($user);
@@ -110,7 +114,7 @@ class ProductModel
 		$existImage = $product->getImagePath();
 
 		if ($existImage) $this->deleteImage($existImage);
-		
+
 		$product->setImagePath($this->fileUploader->upload($file, $folder));
 	}
 

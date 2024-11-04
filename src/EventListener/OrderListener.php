@@ -11,19 +11,19 @@ use Doctrine\ORM\Events;
 
 
 #[AsEntityListener(event: Events::postPersist, method: 'postPersist', entity: Order::class)]
-final class OrderListener
+final readonly class OrderListener
 {
 	public function __construct(
-		protected EntityManagerInterface $entityManager,
-		protected CartService            $cartService,
-		protected ProductRepository      $productRepository,
+		private EntityManagerInterface $entityManager,
+		private CartService            $cartService,
+		private ProductRepository      $productRepository,
 	)
 	{
 	}
 
 	public function postPersist(): void
 	{
-		[$cart] = $this->cartService->getCart();
+		$cart = $this->cartService->getCart();
 
 		foreach ($cart->getProducts() as $cartProduct) {
 			if ($cartProduct->isInStock()) {

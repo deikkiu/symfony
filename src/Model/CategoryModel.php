@@ -12,9 +12,9 @@ class CategoryModel
 	private ProductModel $productModel;
 
 	public function __construct(
-		protected EntityManagerInterface $entityManager,
-		protected CategoryRepository     $categoryRepository,
-		protected RequestStack           $requestStack,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly CategoryRepository     $categoryRepository,
+		private readonly RequestStack           $requestStack,
 	)
 	{
 	}

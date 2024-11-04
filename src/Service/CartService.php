@@ -10,18 +10,21 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService
 {
+	private bool $isValid = true;
+	private array $messages = [];
+
 	public function __construct(
-		protected RequestStack      $stack,
-		protected ProductRepository $productRepository
+		private readonly RequestStack      $stack,
+		private readonly ProductRepository $productRepository
 	)
 	{
 	}
 
-	public function getCart(): array
+	public function getCart(): CartDto
 	{
 		$cart = $this->getCartFromSession();
-		[$isValid, $messages] = $this->validateCart($cart);
-		return [$cart, $isValid, $messages];
+		$this->validateCart($cart);
+		return $cart;
 	}
 
 	public function addProductToCart(int $id): void
@@ -64,14 +67,11 @@ class CartService
 		$cart->setProducts($cartProducts);
 	}
 
-	private function validateCart(CartDto $cart): array
+	private function validateCart(CartDto $cart): void
 	{
-		$isValid = true;
-		$messages = [];
-
 		$cartProducts = $cart->getProducts();
 
-		if (empty($cartProducts)) return [$isValid, $messages];
+		if (empty($cartProducts)) return;
 
 		foreach ($cartProducts as $cartProduct) {
 			$product = $this->productRepository->find($cartProduct->getId());
@@ -79,8 +79,8 @@ class CartService
 			if (!$product || $product->isDraft()) {
 				$this->removeProductFromCart($cartProduct->getId());
 
-				$isValid = false;
-				$messages['notice'] = "Product with id:{$cartProduct->getId()} was delete!";
+				$this->isValid = false;
+				$this->messages['notice'] = "Product with id:{$cartProduct->getId()} was delete!";
 
 				continue;
 			}
@@ -90,8 +90,8 @@ class CartService
 					$cartProduct->setInStock(false);
 					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
 
-					$isValid = false;
-					$messages['notice'] = "Product with id:{$cartProduct->getId()} is out of stock!";
+					$this->isValid = false;
+					$this->messages['notice'] = "Product with id:{$cartProduct->getId()} is out of stock!";
 				}
 
 				continue;
@@ -114,12 +114,10 @@ class CartService
 				$cart->setQuantity(max($cart->getQuantity() - ($cartProduct->getQuantity() - $product->getAmount()), 0));
 				$cartProduct->setQuantity($product->getAmount());
 
-				$isValid = false;
-				$messages['notice'] = "Product with id:{$cartProduct->getId()} quantity is less than in stock. And we changed the quantity.";
+				$this->isValid = false;
+				$this->messages['notice'] = "Product with id:{$cartProduct->getId()} quantity is less than in stock. And we changed the quantity.";
 			}
 		}
-
-		return [$isValid, $messages];
 	}
 
 	private function updateCartWithProduct(CartDto $cart, int $id): void
@@ -215,6 +213,16 @@ class CartService
 	private function saveCartToSession(CartDto $cart): void
 	{
 		$this->stack->getSession()->set('cart', $cart);
+	}
+
+	public function cartIsValid(): bool
+	{
+		return $this->isValid;
+	}
+
+	public function getMessages(): array
+	{
+		return $this->messages;
 	}
 }
 

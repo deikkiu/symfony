@@ -7,11 +7,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class LoginController extends AbstractController
 {
-    public function index(): JsonResponse
-    {
-        return $this->json([
+	public function index(): JsonResponse
+	{
+		return $this->json([
 			'status' => 200,
-            'message' => 'Authentication successful',
-        ]);
-    }
+			'message' => 'Authentication successful',
+		]);
+	}
 }

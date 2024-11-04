@@ -22,10 +22,6 @@ readonly class SendOrderByEmailMessageHandler
 		$orderId = $message->getId();
 		$order = $this->orderRepository->find($orderId);
 
-		if (!$order) {
-			return;
-		}
-
 		$this->mailerSender->sendOrderEmail($order);
 	}
 }

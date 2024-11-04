@@ -13,10 +13,10 @@ class CartController extends AbstractController
 {
 	public function show(CartService $cartService): Response
 	{
-		[$cart, $isValid, $messages] = $cartService->getCart();
+		$cart = $cartService->getCart();
 
-		if (!$isValid) {
-			foreach ($messages as $type => $message) {
+		if ($cartService->cartIsValid()) {
+			foreach ($cartService->getMessages() as $type => $message) {
 				$this->addFlash($type, $message);
 			}
 		}
@@ -43,7 +43,7 @@ class CartController extends AbstractController
 
 		$cartService->addProductToCart($id);
 
-		[$cart] = $cartService->getCart();
+		$cart = $cartService->getCart();
 		$totalPrice = $cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
@@ -53,7 +53,7 @@ class CartController extends AbstractController
 	public function delete(Request $request, CartService $cartService): JsonResponse
 	{
 		$id = $request->get('id');
-		[$cart] = $cartService->getCart();
+		$cart = $cartService->getCart();
 		$cartProduct = $cart->getProducts()[$id] ?? null;
 
 		if (!$cartProduct) {

@@ -7,25 +7,17 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 
-class MailerSender
+readonly class MailerSender
 {
-	private const ADMIN_EMAIL = 'dnxpdrs@gmail.com';
-
 	public function __construct(
-		private readonly MailerInterface $mailer,
+		private MailerInterface $mailer,
+		private string          $adminEmail,
 	)
 	{
 	}
 
-	public function sendOrderEmail(Order $order): void
+	public function send($email): void
 	{
-		$email = (new TemplatedEmail())
-			->from(self::ADMIN_EMAIL)
-			->to(self::ADMIN_EMAIL)
-			->subject('Market | Order id: ' . $order->getId())
-			->htmlTemplate('order/email.html.twig')
-			->context($this->orderContext($order));
-
 		try {
 			$this->mailer->send($email);
 		} catch (TransportExceptionInterface $e) {
@@ -33,16 +25,23 @@ class MailerSender
 		}
 	}
 
-	private function orderContext(Order $order): array
+	// @TODO: common method only for send email
+	public function templatedEmail(Order $order): void
 	{
-		return [
-			'id' => $order->getId(),
-			'owner' => $order->getOwner()->getEmail(),
-			'price' => $order->getTotalPrice(),
-			'status' => $order::getOrderStatus()[$order->getStatus()],
-			'date' => $order->getCreatedAt()->format('d/m/Y | H:i'),
-			'orderProducts' => $order->getOrderProducts()
-		];
-	}
+		$email = (new TemplatedEmail())
+			->from($this->adminEmail)
+			->to($this->adminEmail)
+			->subject('Market | Order id: ' . $order->getId())
+			->htmlTemplate('order/email.html.twig')
+			->context([
+				'id' => $order->getId(),
+				'owner' => $order->getOwner()->getEmail(),
+				'price' => $order->getTotalPrice(),
+				'status' => $order::getOrderStatus()[$order->getStatus()],
+				'date' => $order->getCreatedAt()->format('d/m/Y | H:i'),
+				'orderProducts' => $order->getOrderProducts()
+			]);
 
+		$this->send($email);
+	}
 }

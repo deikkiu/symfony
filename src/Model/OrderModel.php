@@ -14,9 +14,9 @@ class OrderModel
 	private int $STATUS_CREATED = Order::STATUS_CREATED;
 
 	public function __construct(
-		protected ProductRepository      $productRepository,
-		protected EntityManagerInterface $entityManager,
-		protected Security               $security
+		private readonly ProductRepository      $productRepository,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly Security               $security
 	)
 	{
 	}

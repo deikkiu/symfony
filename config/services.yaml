@@ -8,6 +8,7 @@ parameters:
     uploads_directory: '%kernel.project_dir%/public/%uploads_folder%'
     stripe_secret_key: '%env(resolve:STRIPE_SECRET_KEY)%'
     stripe_public_key: '%env(resolve:STRIPE_PUBLIC_KEY)%'
+    admin_email: '%env(resolve:ADMIN_EMAIL)%'
 
 services:
     # default configuration for services in *this* file
@@ -30,6 +31,10 @@ services:
     App\Service\FileUploader:
         arguments:
             $uploadsDirectory: '%uploads_directory%'
+
+    App\Service\MailerSender:
+        arguments:
+            $adminEmail: '%admin_email%'
 
     App\Model\ProductModel:
         calls:

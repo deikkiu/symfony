@@ -5,14 +5,12 @@ namespace App\Service;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
-class FileUploader
+readonly class FileUploader
 {
 	public function __construct(
-		protected SluggerInterface $slugger,
-		protected Filesystem       $filesystem,
-		protected string           $uploadsDirectory
+		private Filesystem $filesystem,
+		private string     $uploadsDirectory
 	)
 	{
 	}

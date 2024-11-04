@@ -49,7 +49,7 @@ class OrderController extends AbstractController
 			return $this->redirectToRoute('login');
 		}
 
-		[$cart] = $cartService->getCart();
+		$cart = $cartService->getCart();
 		$orderId = $orderModel->createOrder($cart);
 
 		$cartService->clearCart();

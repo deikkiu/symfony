@@ -9,8 +9,6 @@ use App\Entity\ProductAttr;
 use App\Model\ProductModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -22,24 +20,23 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class ProductImporter
 {
 	private int $BATCH_SIZE = 20;
+	private array $messages = [];
 
 	public function __construct(
-		protected HttpClientInterface    $httpClient,
-		protected EntityManagerInterface $entityManager,
-		protected ValidatorInterface     $validator,
-		protected Filesystem             $filesystem,
-		protected RequestStack           $requestStack,
-		protected ProductModel           $productModel,
-		protected FileUploader           $fileUploader,
-		protected SerializerInterface    $serializer
+		private readonly HttpClientInterface    $httpClient,
+		private readonly EntityManagerInterface $entityManager,
+		private readonly ValidatorInterface     $validator,
+		private readonly ProductModel           $productModel,
+		private readonly FileUploader           $fileUploader,
+		private readonly SerializerInterface    $serializer
 	)
 	{
 	}
 
-	public function import(string $filePath): void
+	public function import(string $filePath, int $userId): void
 	{
 		if (($fp = fopen($filePath, "r")) === false) {
-			$this->addFlashWarning('Cannot read the file, please upload in the format - csv');
+			$this->addWarningMessage('Cannot read the file, please upload in the format - csv');
 			return;
 		}
 
@@ -69,12 +66,12 @@ class ProductImporter
 					$product = $this->serializer->deserialize(json_encode($data), Product::class, 'json');
 					$this->processRow($product, $data, $flag, $rowNumber);
 				} catch (\Exception $e) {
-					$this->addFlashWarning("Error deserializing row {$rowNumber}: " . $e->getMessage());
+					$this->addWarningMessage("Error deserializing row {$rowNumber}: " . $e->getMessage());
 					$flag = false;
 					continue;
 				}
 
-				$this->productModel->preSaveOrUpdateProduct($product);
+				$this->productModel->preSaveOrUpdateProduct($product, $userId);
 				$this->entityManager->persist($product);
 
 				++$rowNumber;
@@ -96,10 +93,12 @@ class ProductImporter
 			$this->entityManager->flush();
 			$this->entityManager->commit();
 
-			$this->addFlashSuccess($i);
+			$this->entityManager->clear();
+
+			$this->addSuccessMessage($i);
 		} catch (\Exception $e) {
 			$this->entityManager->rollback();
-			$this->addFlashWarning('Error while saving products: ' . $e->getMessage());;
+			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());;
 		}
 	}
 
@@ -110,14 +109,14 @@ class ProductImporter
 		try {
 			$this->setProductColumns($product, $data);
 		} catch (Exception $exception) {
-			$this->addFlashWarning($preMessage . $exception->getMessage());
+			$this->addWarningMessage($preMessage . $exception->getMessage());
 			$flag = false;
 		}
 
 		$errors = $this->validator->validate($product);
 		foreach ($errors as $error) {
 			$message = $preMessage . ucfirst($error->getPropertyPath()) . ': ' . $error->getMessage();
-			$this->addFlashWarning($message);
+			$this->addWarningMessage($message);
 			$flag = false;
 		}
 	}
@@ -140,6 +139,7 @@ class ProductImporter
 
 		if (!empty($data['imagePath'])) {
 			$imagePath = $this->fetchProductImage($data['imagePath']);
+
 			if (!empty($imagePath)) {
 				$product->setImagePath($imagePath);
 			}
@@ -147,6 +147,7 @@ class ProductImporter
 
 		$this->setProductAttributes($product, $data);
 		$this->setProductColors($product, $data['colors']);
+
 		$product->setDraft(true);
 	}
 
@@ -190,13 +191,18 @@ class ProductImporter
 		}
 	}
 
-	private function addFlashSuccess(int $countImportedProducts): void
+	public function getImportMessages(): array
 	{
-		$this->requestStack->getSession()->getFlashBag()->add('success', "{$countImportedProducts} products imported successfully.");
+		return $this->messages;
 	}
 
-	private function addFlashWarning(string $message): void
+	private function addSuccessMessage(int $countImportedProducts): void
 	{
-		$this->requestStack->getSession()->getFlashBag()->add('warning', $message);
+		$this->messages[] = ['type' => 'success', 'message' => "{$countImportedProducts} products imported successfully."];
+	}
+
+	private function addWarningMessage(string $message): void
+	{
+		$this->messages[] = ['type' => 'warning', 'message' => $message];
 	}
 }
