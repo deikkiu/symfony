@@ -8,14 +8,13 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(fromTransport: 'async')]
 final readonly class ImportProductsMessageHandler
 {
 	public function __construct(
 		private ProductImporter $importer,
 		private Filesystem      $filesystem,
 		private LoggerInterface $logger,
-
 	)
 	{
 	}

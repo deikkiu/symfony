@@ -20,6 +20,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class ProductImporter
 {
 	private int $BATCH_SIZE = 20;
+	private int $status = 1;
 	private array $messages = [];
 
 	public function __construct(

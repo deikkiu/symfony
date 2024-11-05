@@ -7,7 +7,7 @@ use App\Repository\OrderRepository;
 use App\Service\MailerSender;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(fromTransport: 'async')]
 readonly class SendOrderByEmailMessageHandler
 {
 	public function __construct(
@@ -22,6 +22,9 @@ readonly class SendOrderByEmailMessageHandler
 		$orderId = $message->getId();
 		$order = $this->orderRepository->find($orderId);
 
-		$this->mailerSender->sendOrderEmail($order);
+		if (!$order) return;
+
+		$this->mailerSender->createAdminOrderEmail($order);
+		$this->mailerSender->createClientOrderEmail($order);
 	}
 }
