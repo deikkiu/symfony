@@ -6,7 +6,8 @@ final readonly class ImportProductsMessage
 {
 	public function __construct(
 		private string $filePath,
-		private int $userId
+		private int    $userId,
+		private string $importSlug,
 	)
 	{
 	}
@@ -19,5 +20,10 @@ final readonly class ImportProductsMessage
 	public function getUserId(): int
 	{
 		return $this->userId;
+	}
+
+	public function getImportSlug(): string
+	{
+		return $this->importSlug;
 	}
 }

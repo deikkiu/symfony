@@ -224,7 +224,7 @@ form[name="registration_form"] input {
     -moz-appearance: none;
     appearance: none;
     border-radius: .375rem;
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
 form input {
@@ -497,4 +497,10 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: end;
+}
+
+.acc-div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
 }

@@ -6,6 +6,8 @@ use App\Repository\ImportProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\Slug;
+use Gedmo\Mapping\Annotation\Timestampable;
 
 #[ORM\Entity(repositoryClass: ImportProductRepository::class)]
 class ImportProduct
@@ -20,28 +22,31 @@ class ImportProduct
 	private ?int $id = null;
 
 	#[ORM\Column(length: 255)]
-	private ?string $name = null;
-
-	#[ORM\Column(length: 255)]
 	private ?string $path = null;
 
 	#[ORM\Column]
 	private ?int $status = null;
 
 	#[ORM\Column]
+	#[Timestampable]
 	private ?\DateTimeImmutable $createdAt = null;
 
 	#[ORM\Column]
+	#[Timestampable]
 	private ?\DateTimeImmutable $updatedAt = null;
 
 	/**
 	 * @var Collection<int, ImportProductMessage>
 	 */
-	#[ORM\OneToMany(targetEntity: ImportProductMessage::class, mappedBy: 'importProduct', orphanRemoval: true)]
+	#[ORM\OneToMany(targetEntity: ImportProductMessage::class, mappedBy: 'importProduct', cascade: ['persist', 'remove'], orphanRemoval: true)]
 	private Collection $messages;
 
 	#[ORM\Column(nullable: true)]
 	private ?int $countImportedProducts = null;
+
+	#[ORM\Column(length: 255)]
+	#[Slug(fields: ['path'], unique: true)]
+	private ?string $slug = null;
 
 	public function __construct()
 	{
@@ -51,18 +56,6 @@ class ImportProduct
 	public function getId(): ?int
 	{
 		return $this->id;
-	}
-
-	public function getName(): ?string
-	{
-		return $this->name;
-	}
-
-	public function setName(string $name): static
-	{
-		$this->name = $name;
-
-		return $this;
 	}
 
 	public function getPath(): ?string
@@ -155,7 +148,7 @@ class ImportProduct
 		return $this;
 	}
 
-	public function getImportStatus(): array
+	public static function getImportStatus(): array
 	{
 		return [
 			self::STATUS_PENDING => 'Pending',
@@ -164,12 +157,24 @@ class ImportProduct
 		];
 	}
 
-	public function getImportStatusMessage(): array
+	public static function getImportStatusMessage(): array
 	{
 		return [
 			self::STATUS_PENDING => 'The import of products is pending.',
-			self::STATUS_SUCCESS => 'The import of the products was completed successfully. ' . $this->getCountImportedProducts() . ' products were imported',
+			self::STATUS_SUCCESS => 'The import of the products was completed successfully.',
 			self::STATUS_ERROR => 'The import of the products was completed with errors. Please try again.'
 		];
+	}
+
+	public function getSlug(): ?string
+	{
+		return $this->slug;
+	}
+
+	public function setSlug(string $slug): static
+	{
+		$this->slug = $slug;
+
+		return $this;
 	}
 }

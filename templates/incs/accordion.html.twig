@@ -1,0 +1,40 @@
+<div class="accordion-item">
+    <h2 class="accordion-header" style="margin-top: 0 !important;">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse{{ import.id }}" aria-expanded="true"
+                aria-controls="collapseOne">
+            <div class="acc-div">
+                <span>ID: {{ import.id }}</span>
+                <span>Path: {{ import.path }}</span>
+                <span>Status: {{ import.status|status }}</span>
+            </div>
+        </button>
+    </h2>
+    <div id="collapse{{ import.id }}" class="accordion-collapse collapse"
+         data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            {% if import.status|status == 'Error' %}
+                <p style="color: red;">{{ import.status|statusMessage }}</p>
+
+                {% set row = 1 %}
+                {% set messages = import.messages %}
+                {% if messages %}
+                    {% for column in messages %}
+                        <p class="{% if row == 1 %}mt-2{% endif %}" style="color: red;">{{ row }}
+                            . {{ column.message }}</p>
+
+                        {% set row = row + 1 %}
+                    {% endfor %}
+                {% endif %}
+
+                <a class="btn btn-primary mt-4" href="{{ path('product_reimport', {'slug': import.slug}) }}">Reimport file</a>
+                <a class="btn btn-primary mt-4" href="{{ path('product_import_edit', {'slug': import.slug}) }}">Edit file</a>
+            {% elseif import.status|status == 'Success' %}
+                <p style="color: green;">{{ import.status|statusMessage }}</p>
+                <p style="color: green; margin-top: 8px">Imported products: {{ import.countImportedProducts }}</p>
+            {% else %}
+                <p style="color: #eeee83;">{{ import.status|statusMessage }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

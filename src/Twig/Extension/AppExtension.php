@@ -2,6 +2,7 @@
 
 namespace App\Twig\Extension;
 
+use App\Entity\ImportProduct;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -12,6 +13,8 @@ class AppExtension extends AbstractExtension
 	{
 		return [
 			new TwigFilter('price', [$this, 'formatPrice']),
+			new TwigFilter('status', [$this, 'formatStatus']),
+			new TwigFilter('statusMessage', [$this, 'formatStatusMessage']),
 		];
 	}
 
@@ -35,5 +38,15 @@ class AppExtension extends AbstractExtension
 		$height = $height ?? 0;
 
 		return "{$length} x {$width} x {$height} sm";
+	}
+
+	public function formatStatus(int $status): string
+	{
+		return ImportProduct::getImportStatus()[$status] ?? '';
+	}
+
+	public function formatStatusMessage(int $status): string
+	{
+		return ImportProduct::getImportStatusMessage()[$status] ?? '';
 	}
 }

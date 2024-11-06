@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <h1>Edit CSV</h1>
+
+    <form method="post">
+        <table>
+            {% for rowIndex, row in rows %}
+                <tr>
+                    {% for cellIndex, cell in row %}
+                        <td>
+                            <input type="text" name="csv[{{ rowIndex }}][{{ cellIndex }}]" value="{{ cell }}">
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+
+        <button type="submit">Save CSV</button>
+    </form>
+
+{% endblock %}

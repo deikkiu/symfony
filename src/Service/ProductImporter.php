@@ -4,8 +4,11 @@ namespace App\Service;
 
 use App\Entity\Category;
 use App\Entity\Color;
+use App\Entity\ImportProduct;
+use App\Entity\ImportProductMessage;
 use App\Entity\Product;
 use App\Entity\ProductAttr;
+use App\Model\ImportProductModel;
 use App\Model\ProductModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -20,7 +23,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class ProductImporter
 {
 	private int $BATCH_SIZE = 20;
-	private int $status = 1;
+	private bool $status = true;
 	private array $messages = [];
 
 	public function __construct(
@@ -29,19 +32,22 @@ class ProductImporter
 		private readonly ValidatorInterface     $validator,
 		private readonly ProductModel           $productModel,
 		private readonly FileUploader           $fileUploader,
-		private readonly SerializerInterface    $serializer
+		private readonly SerializerInterface    $serializer,
+		private readonly ImportProductModel     $importProductModel
 	)
 	{
 	}
 
-	public function import(string $filePath, int $userId): void
+	public function import(string $filePath, int $userId, string $importSlug): void
 	{
 		if (($fp = fopen($filePath, "r")) === false) {
+			$this->status = false;
 			$this->addWarningMessage('Cannot read the file, please upload in the format - csv');
+
+			$this->updateImportProductEntity($importSlug);
 			return;
 		}
 
-		$flag = true;
 		$rowNumber = 1;
 		$i = 0;
 
@@ -65,10 +71,10 @@ class ProductImporter
 
 				try {
 					$product = $this->serializer->deserialize(json_encode($data), Product::class, 'json');
-					$this->processRow($product, $data, $flag, $rowNumber);
+					$this->processRow($product, $data, $rowNumber);
 				} catch (\Exception $e) {
 					$this->addWarningMessage("Error deserializing row {$rowNumber}: " . $e->getMessage());
-					$flag = false;
+					$this->status = false;
 					continue;
 				}
 
@@ -86,8 +92,10 @@ class ProductImporter
 
 			fclose($fp);
 
-			if (!$flag) {
+			if (!$this->status) {
 				$this->entityManager->rollback();
+				$this->entityManager->clear();
+				$this->updateImportProductEntity($importSlug);
 				return;
 			}
 
@@ -96,14 +104,18 @@ class ProductImporter
 
 			$this->entityManager->clear();
 
-			$this->addSuccessMessage($i);
+			$this->updateImportProductEntity($importSlug, $i);
 		} catch (\Exception $e) {
 			$this->entityManager->rollback();
-			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());;
+			$this->entityManager->clear();
+
+			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());
+
+			$this->updateImportProductEntity($importSlug);
 		}
 	}
 
-	private function processRow(Product $product, array $data, bool &$flag, int $rowNumber): void
+	private function processRow(Product $product, array $data, int $rowNumber): void
 	{
 		$preMessage = "Error [Row №{$rowNumber}] | ";
 
@@ -111,14 +123,14 @@ class ProductImporter
 			$this->setProductColumns($product, $data);
 		} catch (Exception $exception) {
 			$this->addWarningMessage($preMessage . $exception->getMessage());
-			$flag = false;
+			$this->status = false;
 		}
 
 		$errors = $this->validator->validate($product);
 		foreach ($errors as $error) {
 			$message = $preMessage . ucfirst($error->getPropertyPath()) . ': ' . $error->getMessage();
 			$this->addWarningMessage($message);
-			$flag = false;
+			$this->status = false;
 		}
 	}
 
@@ -192,18 +204,43 @@ class ProductImporter
 		}
 	}
 
-	public function getImportMessages(): array
+	private function updateImportProductEntity(string $slug, int $countImportedProducts = 0): void
 	{
-		return $this->messages;
+		$importProduct = $this->entityManager->getRepository(ImportProduct::class)->findOneBy(['slug' => $slug]);
+
+		if (ImportProduct::getImportStatus()[$importProduct->getStatus()] === 'Error') {
+			$this->deleteAllMessages($importProduct);
+		}
+
+		if ($this->status) {
+			$importProduct->setStatus(ImportProduct::STATUS_SUCCESS);
+			$importProduct->setCountImportedProducts($countImportedProducts);
+		} else {
+			$importProduct->setStatus(ImportProduct::STATUS_ERROR);
+
+			if (!empty($this->messages)) {
+				foreach ($this->messages as $message) {
+					$importProductMessage = new ImportProductMessage();
+					$importProductMessage->setMessage($message);
+
+					$importProduct->addMessage($importProductMessage);
+
+					$this->entityManager->persist($importProductMessage);
+				}
+			}
+		}
+
+		$this->entityManager->persist($importProduct);
+		$this->entityManager->flush();
 	}
 
-	private function addSuccessMessage(int $countImportedProducts): void
+	private function deleteAllMessages(ImportProduct $importProduct): void
 	{
-		$this->messages[] = ['type' => 'success', 'message' => "{$countImportedProducts} products imported successfully."];
+		$this->importProductModel->clearAllMessages($importProduct);
 	}
 
 	private function addWarningMessage(string $message): void
 	{
-		$this->messages[] = ['type' => 'warning', 'message' => $message];
+		$this->messages[] = $message;
 	}
 }

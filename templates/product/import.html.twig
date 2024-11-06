@@ -7,5 +7,15 @@
     <h1>Product import form</h1>
     {{ form_start(form) }}
     {{ form_end(form) }}
+
+    {% if imports %}
+        <h2>Products import list:</h2>
+
+        <div class="accordion mt-3" id="accordionExample">
+            {% for import in imports %}
+                {% include 'incs/accordion.html.twig' %}
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}
 
