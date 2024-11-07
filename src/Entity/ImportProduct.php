@@ -38,7 +38,7 @@ class ImportProduct
 	/**
 	 * @var Collection<int, ImportProductMessage>
 	 */
-	#[ORM\OneToMany(targetEntity: ImportProductMessage::class, mappedBy: 'importProduct', cascade: ['persist', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToMany(targetEntity: ImportProductMessage::class, mappedBy: 'importProduct', cascade: ['persist'], orphanRemoval: true)]
 	private Collection $messages;
 
 	#[ORM\Column(nullable: true)]
@@ -126,11 +126,9 @@ class ImportProduct
 
 	public function removeMessage(ImportProductMessage $message): static
 	{
-		if ($this->messages->removeElement($message)) {
-			// set the owning side to null (unless already changed)
-			if ($message->getImportProduct() === $this) {
-				$message->setImportProduct(null);
-			}
+		if ($this->messages->contains($message)) {
+			$this->messages->removeElement($message);
+			$message->setImportProduct(null);
 		}
 
 		return $this;
@@ -144,6 +142,18 @@ class ImportProduct
 	public function setCountImportedProducts(?int $countImportedProducts): static
 	{
 		$this->countImportedProducts = $countImportedProducts;
+
+		return $this;
+	}
+
+	public function getSlug(): ?string
+	{
+		return $this->slug;
+	}
+
+	public function setSlug(string $slug): static
+	{
+		$this->slug = $slug;
 
 		return $this;
 	}
@@ -164,17 +174,5 @@ class ImportProduct
 			self::STATUS_SUCCESS => 'The import of the products was completed successfully.',
 			self::STATUS_ERROR => 'The import of the products was completed with errors. Please try again.'
 		];
-	}
-
-	public function getSlug(): ?string
-	{
-		return $this->slug;
-	}
-
-	public function setSlug(string $slug): static
-	{
-		$this->slug = $slug;
-
-		return $this;
 	}
 }

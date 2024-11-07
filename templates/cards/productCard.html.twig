@@ -28,17 +28,15 @@
                     <li class="list-group-item">Price: {{ product.price|price }}</li>
 
                     {% if product.amount %}
-                        <li class="list-group-item amount" data-amount="{{ product.amount }}">Amount: {{ product.amount }}</li>
+                        <li class="list-group-item amount" data-amount="{{ product.amount }}">
+                            Amount: {{ product.amount }}</li>
                     {% else %}
                         <li class="list-group-item">Amount: 0</li>
                     {% endif %}
 
                     {% if product.colors|length %}
                         <li class="list-group-item">
-                            Colors:
-                            {% for color in product.colors %}
-                                {{ color.name }}&nbsp;
-                            {% endfor %}
+                            Colors: {% for color in product.colors %}{{ color.name|capitalize }}&nbsp;{% endfor %}
                         </li>
                     {% endif %}
                 {% endblock %}

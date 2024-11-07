@@ -40,10 +40,7 @@
 
             {% if product.colors|length %}
                 <li class="list-group-item">
-                    Colors:
-                    {% for color in product.colors %}
-                        {{ color.name }}&nbsp;
-                    {% endfor %}
+                    Colors: {% for color in product.colors %}{{ color.name|capitalize }}&nbsp;{% endfor %}
                 </li>
             {% endif %}
         {% endblock %}

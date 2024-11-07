@@ -11,18 +11,24 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends AbstractController
 {
-	public function show(CartService $cartService): Response
+	public function __construct(
+		private readonly CartService $cartService
+	)
 	{
-		$cart = $cartService->getCart();
+	}
 
-		if ($cartService->cartIsValid()) {
-			foreach ($cartService->getMessages() as $type => $message) {
+	public function show(): Response
+	{
+		$cart = $this->cartService->getCart();
+
+		if ($this->cartService->cartIsValid()) {
+			foreach ($this->cartService->getMessages() as $type => $message) {
 				$this->addFlash($type, $message);
 			}
 		}
 
-		[$products, $productsIsNotStock] = $cartService->getDetailedProducts($cart);
-		$totalPrice = $cartService->calculateTotalPrice($cart);
+		[$products, $productsIsNotStock] = $this->cartService->getDetailedProducts($cart);
+		$totalPrice = $this->cartService->calculateTotalPrice($cart);
 
 		return $this->render('cart/index.html.twig', [
 			'products' => $products,
@@ -32,7 +38,7 @@ class CartController extends AbstractController
 		]);
 	}
 
-	public function add(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
+	public function add(Request $request, ProductRepository $productRepository): JsonResponse
 	{
 		$id = $request->get('id');
 		$product = $productRepository->find($id);
@@ -41,34 +47,34 @@ class CartController extends AbstractController
 			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
-		$cartService->addProductToCart($id);
+		$this->cartService->addProductToCart($id);
 
-		$cart = $cartService->getCart();
-		$totalPrice = $cartService->calculateTotalPrice($cart);
+		$cart = $this->cartService->getCart();
+		$totalPrice = $this->cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
 		return $this->json(['message' => 'Product added to cart successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
 	}
 
-	public function delete(Request $request, CartService $cartService): JsonResponse
+	public function delete(Request $request): JsonResponse
 	{
 		$id = $request->get('id');
-		$cart = $cartService->getCart();
+		$cart = $this->cartService->getCart();
 		$cartProduct = $cart->getProducts()[$id] ?? null;
 
 		if (!$cartProduct) {
 			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
-		$cartService->deleteProductFromCart($id);
+		$this->cartService->deleteProductFromCart($id);
 
-		$totalPrice = $cartService->calculateTotalPrice($cart);
+		$totalPrice = $this->cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
 
 		return $this->json(['message' => 'Product deleted successfully!', 'totalPrice' => $totalPrice, 'quantity' => $quantity]);
 	}
 
-	public function remove(Request $request, CartService $cartService, ProductRepository $productRepository): Response
+	public function remove(Request $request, ProductRepository $productRepository): Response
 	{
 		$id = $request->get('id');
 		$product = $productRepository->find($id);
@@ -77,7 +83,7 @@ class CartController extends AbstractController
 			$this->createNotFoundException("Product with ID $id not found.");
 		}
 
-		$cartService->removeProductFromCart($id);
+		$this->cartService->removeProductFromCart($id);
 
 		return $this->redirectToRoute('cart');
 	}

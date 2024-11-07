@@ -59,18 +59,6 @@ product_update:
   path: /product/store/{slug}
   controller: App\Controller\ProductController::store
 
-product_import:
-  path: /product/import
-  controller: App\Controller\ProductController::import
-
-product_import_edit:
-  path: /product/import/edit
-  controller: App\Controller\ProductController::importEdit
-
-product_reimport:
-  path: /product/reimport{slug}
-  controller: App\Controller\ProductController::reimport
-
 product_delete:
   path: /product/delete/{id}
   controller: App\Controller\ProductController::delete
@@ -78,6 +66,23 @@ product_delete:
 product:
   path: /product/{slug}
   controller: App\Controller\ProductController::show
+
+# import
+import:
+  path: /import
+  controller: App\Controller\ImportController::import
+
+reimport:
+  path: /reimport/{slug}
+  controller: App\Controller\ImportController::reimport
+
+import_edit:
+  path: /import/edit/{slug}
+  controller: App\Controller\ImportController::edit
+
+import_delete:
+  path: /import/delete/{slug}
+  controller: App\Controller\ImportController::delete
 
 # cart
 cart:

@@ -79,7 +79,7 @@ class Product
 	/**
 	 * @var Collection<int, Color>
 	 */
-	#[ORM\OneToMany(targetEntity: Color::class, mappedBy: 'product', cascade: ['persist', 'remove'])]
+	#[ORM\OneToMany(targetEntity: Color::class, mappedBy: 'product', cascade: ['persist'], orphanRemoval: true)]
 	#[Assert\Valid]
 	#[Groups(['serialize'])]
 	private Collection $colors;

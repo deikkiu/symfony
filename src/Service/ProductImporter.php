@@ -4,15 +4,13 @@ namespace App\Service;
 
 use App\Entity\Category;
 use App\Entity\Color;
-use App\Entity\ImportProduct;
-use App\Entity\ImportProductMessage;
 use App\Entity\Product;
 use App\Entity\ProductAttr;
 use App\Model\ImportProductModel;
 use App\Model\ProductModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -25,6 +23,7 @@ class ProductImporter
 	private int $BATCH_SIZE = 20;
 	private bool $status = true;
 	private array $messages = [];
+	private array $images = [];
 
 	public function __construct(
 		private readonly HttpClientInterface    $httpClient,
@@ -32,8 +31,9 @@ class ProductImporter
 		private readonly ValidatorInterface     $validator,
 		private readonly ProductModel           $productModel,
 		private readonly FileUploader           $fileUploader,
-		private readonly SerializerInterface    $serializer,
-		private readonly ImportProductModel     $importProductModel
+		private readonly ImportProductModel     $importProductModel,
+		private readonly Filesystem             $fileSystem,
+		private readonly string                 $uploadsDirectory,
 	)
 	{
 	}
@@ -43,8 +43,7 @@ class ProductImporter
 		if (($fp = fopen($filePath, "r")) === false) {
 			$this->status = false;
 			$this->addWarningMessage('Cannot read the file, please upload in the format - csv');
-
-			$this->updateImportProductEntity($importSlug);
+			$this->updateImport($importSlug);
 			return;
 		}
 
@@ -58,25 +57,19 @@ class ProductImporter
 				$data = [
 					'name' => $row[0],
 					'category' => $row[1],
-					'price' => (int)$row[2],
-					'amount' => (int)$row[3],
-					'descr' => $row[4] ?? null,
+					'price' => $row[2],
+					'amount' => $row[3],
+					'descr' => $row[4] ?? '',
 					'imagePath' => $row[5] ?? null,
 					'length' => $row[6] ?? null,
 					'width' => $row[7] ?? null,
 					'height' => $row[8] ?? null,
 					'weight' => $row[9] ?? null,
-					'colors' => array_slice($row, 10) ?? []
+					'colors' => $row[10] ?? '',
 				];
 
-				try {
-					$product = $this->serializer->deserialize(json_encode($data), Product::class, 'json');
-					$this->processRow($product, $data, $rowNumber);
-				} catch (\Exception $e) {
-					$this->addWarningMessage("Error deserializing row {$rowNumber}: " . $e->getMessage());
-					$this->status = false;
-					continue;
-				}
+				$product = new Product();
+				$this->processRow($product, $data, $rowNumber);
 
 				$this->productModel->preSaveOrUpdateProduct($product, $userId);
 				$this->entityManager->persist($product);
@@ -95,23 +88,22 @@ class ProductImporter
 			if (!$this->status) {
 				$this->entityManager->rollback();
 				$this->entityManager->clear();
-				$this->updateImportProductEntity($importSlug);
+				$this->updateImport($importSlug);
 				return;
 			}
 
 			$this->entityManager->flush();
 			$this->entityManager->commit();
-
 			$this->entityManager->clear();
 
-			$this->updateImportProductEntity($importSlug, $i);
+			$this->updateImport($importSlug, $i);
 		} catch (\Exception $e) {
 			$this->entityManager->rollback();
 			$this->entityManager->clear();
 
 			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());
 
-			$this->updateImportProductEntity($importSlug);
+			$this->updateImport($importSlug);
 		}
 	}
 
@@ -120,9 +112,9 @@ class ProductImporter
 		$preMessage = "Error [Row №{$rowNumber}] | ";
 
 		try {
-			$this->setProductColumns($product, $data);
-		} catch (Exception $exception) {
-			$this->addWarningMessage($preMessage . $exception->getMessage());
+			$this->setProductColumns($product, $data, $preMessage);
+		} catch (Exception $e) {
+			$this->addWarningMessage($preMessage . $e->getMessage());
 			$this->status = false;
 		}
 
@@ -134,54 +126,81 @@ class ProductImporter
 		}
 	}
 
-	private function setProductColumns(Product $product, array $data): void
+	private function setProductColumns(Product $product, array $data, string $preMessage): void
 	{
-		$product->setName($data['name']);
+		$errors = [];
 
+		$product->setName($data['name']);
 		$category = $this->entityManager->getRepository(Category::class)->findOneBy(['slug' => $data['category']]);
 
 		if (!$category) {
-			throw new \Exception("Category '{$data['category']}' not found");
+			$errors[] = "Category '{$data['category']}' not found";
 		}
 
 		$product->setCategory($category);
 
-		$product->setPrice((int)$data['price']);
-		$product->setAmount((int)$data['amount']);
-		$product->setDescr($data['descr'] ?? '');
+		$price = $this->checkIsInteger('Price', $data['price'], $errors);
+		$product->setPrice($price);
+
+		$amount = $this->checkIsInteger('Amount', $data['amount'], $errors);
+		$product->setAmount($amount);
+
+		$product->setDescr($data['descr']);
 
 		if (!empty($data['imagePath'])) {
 			$imagePath = $this->fetchProductImage($data['imagePath']);
 
 			if (!empty($imagePath)) {
 				$product->setImagePath($imagePath);
+				$this->images[] = $imagePath;
 			}
 		}
 
-		$this->setProductAttributes($product, $data);
+		$this->setProductAttributes($product, $data, $errors);
 		$this->setProductColors($product, $data['colors']);
-
 		$product->setDraft(true);
+
+		foreach ($errors as $error) {
+			$this->addWarningMessage($preMessage . $error);
+			$this->status = false;
+		}
 	}
 
-	private function setProductAttributes(Product $product, array $data): void
+	private function setProductAttributes(Product $product, array $data, array $errors): void
 	{
 		$productAttr = new ProductAttr();
 
-		if (!empty($data['length'])) $productAttr->setLength((int)$data['length']);
-		if (!empty($data['width'])) $productAttr->setWidth((int)$data['width']);
-		if (!empty($data['height'])) $productAttr->setHeight((int)$data['height']);
-		if (!empty($data['weight'])) $productAttr->setWeight((int)$data['weight']);
+		if (!empty($data['length'])) {
+			$length = $this->checkIsInteger('Length', $data['length'], $errors);
+			$productAttr->setLength($length);
+		}
+
+		if (!empty($data['width'])) {
+			$width = $this->checkIsInteger('Width', $data['width'], $errors);
+			$productAttr->setWidth($width);
+		}
+
+		if (!empty($data['height'])) {
+			$height = $this->checkIsInteger('Height', $data['height'], $errors);
+			$productAttr->setHeight($height);
+		}
+
+		if (!empty($data['weight'])) {
+			$weight = $this->checkIsInteger('Weight', $data['weight'], $errors);
+			$productAttr->setWeight($weight);
+		}
 
 		$product->setProductAttr($productAttr);
 	}
 
-	private function setProductColors(Product $product, array $colors): void
+	private function setProductColors(Product $product, string $colors): void
 	{
-		foreach ($colors as $colorName) {
-			if (!empty($colorName)) {
+		$colors = preg_split("/[\s,]+/", $colors);
+
+		foreach ($colors as $name) {
+			if (!empty($name)) {
 				$color = new Color();
-				$color->setName($colorName);
+				$color->setName($name);
 				$product->addColor($color);
 			}
 		}
@@ -197,50 +216,54 @@ class ProductImporter
 			]);
 
 			$content = $response->getContent();
-
 			return $this->fileUploader->uploadAndDumpFile($content, pathinfo($url, PATHINFO_EXTENSION), 'products');
 		} catch (Exception|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
 			throw new Exception($e->getMessage());
 		}
 	}
 
-	private function updateImportProductEntity(string $slug, int $countImportedProducts = 0): void
+	private function updateImport(string $importSlug, int $countImportedProducts = 0): void
 	{
-		$importProduct = $this->entityManager->getRepository(ImportProduct::class)->findOneBy(['slug' => $slug]);
+		$this->importProductModel->updateImportProduct($importSlug, $this->status, $this->messages, $countImportedProducts);
 
-		if (ImportProduct::getImportStatus()[$importProduct->getStatus()] === 'Error') {
-			$this->deleteAllMessages($importProduct);
-		}
-
-		if ($this->status) {
-			$importProduct->setStatus(ImportProduct::STATUS_SUCCESS);
-			$importProduct->setCountImportedProducts($countImportedProducts);
-		} else {
-			$importProduct->setStatus(ImportProduct::STATUS_ERROR);
-
-			if (!empty($this->messages)) {
-				foreach ($this->messages as $message) {
-					$importProductMessage = new ImportProductMessage();
-					$importProductMessage->setMessage($message);
-
-					$importProduct->addMessage($importProductMessage);
-
-					$this->entityManager->persist($importProductMessage);
-				}
-			}
-		}
-
-		$this->entityManager->persist($importProduct);
-		$this->entityManager->flush();
-	}
-
-	private function deleteAllMessages(ImportProduct $importProduct): void
-	{
-		$this->importProductModel->clearAllMessages($importProduct);
+		$this->clearImages();
+		$this->clearMessages();
+		$this->updateStatus();
 	}
 
 	private function addWarningMessage(string $message): void
 	{
 		$this->messages[] = $message;
+	}
+
+	private function clearMessages(): void
+	{
+		$this->messages = [];
+	}
+
+	private function clearImages(): void
+	{
+		if (!empty($this->images) && !$this->status) {
+			foreach ($this->images as $image) {
+				$this->fileSystem->remove($this->uploadsDirectory . $image);
+			}
+		}
+
+		$this->images = [];
+	}
+
+	private function updateStatus(): void
+	{
+		$this->status = true;
+	}
+
+	private function checkIsInteger(string $name, mixed $value, array &$errors): int
+	{
+		if (!is_numeric($value)) {
+			$errors[] = "$name is not a integer";
+			return 0;
+		}
+
+		return (int)$value;
 	}
 }

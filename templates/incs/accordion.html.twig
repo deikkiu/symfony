@@ -4,9 +4,7 @@
                 data-bs-target="#collapse{{ import.id }}" aria-expanded="true"
                 aria-controls="collapseOne">
             <div class="acc-div">
-                <span>ID: {{ import.id }}</span>
-                <span>Path: {{ import.path }}</span>
-                <span>Status: {{ import.status|status }}</span>
+                <span>File: {{ import.path }}</span>
             </div>
         </button>
     </h2>
@@ -14,26 +12,32 @@
          data-bs-parent="#accordionExample">
         <div class="accordion-body">
             {% if import.status|status == 'Error' %}
-                <p style="color: red;">{{ import.status|statusMessage }}</p>
+                <h4 style="color: red;">{{ import.status|status }}</h4>
+                <p class="mt-2">Message: {{ import.status|statusMessage }}</p>
+                <p class="mb-2">Date: {{ import.updatedAt|date("d.m.Y | H:i") }}</p>
 
                 {% set row = 1 %}
                 {% set messages = import.messages %}
                 {% if messages %}
                     {% for column in messages %}
-                        <p class="{% if row == 1 %}mt-2{% endif %}" style="color: red;">{{ row }}
-                            . {{ column.message }}</p>
+                        <p style="color: red;">{{ row }}. {{ column.message }}</p>
 
                         {% set row = row + 1 %}
                     {% endfor %}
                 {% endif %}
 
-                <a class="btn btn-primary mt-4" href="{{ path('product_reimport', {'slug': import.slug}) }}">Reimport file</a>
-                <a class="btn btn-primary mt-4" href="{{ path('product_import_edit', {'slug': import.slug}) }}">Edit file</a>
+                <a class="btn btn-success mt-4" href="{{ path('reimport', {'slug': import.slug}) }}">Reimport</a>
+                <a class="btn btn-primary mt-4" href="{{ path('import_edit', {'slug': import.slug}) }}">Edit</a>
+                <a class="btn btn-danger mt-4" href="{{ path('import_delete', {'slug': import.slug}) }}">Delete</a>
             {% elseif import.status|status == 'Success' %}
-                <p style="color: green;">{{ import.status|statusMessage }}</p>
-                <p style="color: green; margin-top: 8px">Imported products: {{ import.countImportedProducts }}</p>
+                <h4 style="color: green;">{{ import.status|status }}</h4>
+                <p class="mt-2">Message: {{ import.status|statusMessage }}</p>
+                <p>Imported products: {{ import.countImportedProducts }}</p>
+                <p>Date: {{ import.updatedAt|date("d.m.Y | H:i") }}</p>
+                <a class="btn btn-danger mt-4" href="{{ path('import_delete', {'slug': import.slug}) }}">Delete</a>
             {% else %}
-                <p style="color: #eeee83;">{{ import.status|statusMessage }}</p>
+                <p>{{ import.status|statusMessage }}</p>
+                <a class="btn btn-danger mt-4" href="{{ path('import_delete', {'slug': import.slug}) }}">Delete</a>
             {% endif %}
         </div>
     </div>

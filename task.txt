@@ -1,5 +1,4 @@
-1. Validate cart
-2. Refactor validation func cart
-3. Payment controller response
-4. Fix login and register flash errors
-5. Import messages
+1. Refactor validation func cart
+2. Payment controller response
+3. Fix login and register flash errors
+4. Import messages

@@ -1,0 +1,35 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    <h1>Edit Import file</h1>
+
+    <form method="post" class="import-form">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                {% for column in columns %}
+                    {% if column.show %}
+                        <th>{{ column.label }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for rowIndex, row in rows %}
+                <tr>
+                    {% for columnIndex, column in columns %}
+                        {% if column.show %}
+                            <td>
+                                <input type="text" class="form-control" name="csv[{{ rowIndex }}][{{ columnIndex }}]"
+                                       value="{{ row[columnIndex] }}">
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary" type="submit">Update file</button>
+    </form>
+{% endblock %}
