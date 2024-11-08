@@ -25,10 +25,10 @@ final readonly class OrderListener
 	{
 		$cart = $this->cartService->getCart();
 
-		foreach ($cart->getProducts() as $cartProduct) {
-			if ($cartProduct->isInStock()) {
-				$product = $this->productRepository->find($cartProduct->getId());
-				$newAmount = $product->getAmount() - $cartProduct->getQuantity();
+		foreach ($cart->getList() as $cartItem) {
+			if ($cartItem->isInStock()) {
+				$product = $this->productRepository->find($cartItem->getId());
+				$newAmount = $product->getAmount() - $cartItem->getQuantity();
 				$product->setAmount($newAmount);
 
 				$this->entityManager->persist($product);

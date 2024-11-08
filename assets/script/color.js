@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		addColorFormDeleteLink(item);
 
 		collectionHolder.appendChild(item);
-
 		collectionHolder.dataset.index++;
 	}
 

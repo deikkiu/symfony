@@ -57,7 +57,6 @@ class OrderController extends AbstractController
 		$bus->dispatch(new SendOrderByEmailMessage($orderId));
 
 		$this->addFlash('success', 'Your order has been placed!');
-
 		return $this->redirectToRoute('orders');
 	}
 
@@ -71,8 +70,8 @@ class OrderController extends AbstractController
 		}
 
 		$orderModel->deleteOrder($order);
-		$this->addFlash('success', 'Your order has been removed!');
 
+		$this->addFlash('success', 'Your order has been removed!');
 		return $this->redirectToRoute('orders');
 	}
 }

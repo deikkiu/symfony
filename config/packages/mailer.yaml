@@ -3,6 +3,6 @@ framework:
         dsn: '%env(MAILER_DSN)%'
 
         envelope:
-            sender: '%admin_email%'
+            sender: '%app.admin_email%'
         headers:
-            From: 'Market Admin <%admin_email%>'
+            From: 'Market Admin <%app.admin_email%>'

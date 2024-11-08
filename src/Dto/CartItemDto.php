@@ -2,7 +2,7 @@
 
 namespace App\Dto;
 
-class CartProductDto
+class CartItemDto
 {
 	private bool $inStock = true;
 

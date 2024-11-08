@@ -20,12 +20,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProductController extends AbstractController
 {
+	private const UPLOAD_FOLDER = 'products';
+
 	public function store(Request $request, ProductModel $productModel): Response
 	{
 		$slug = $request->get('slug');
 		$product = $productModel->getOrCreateProduct($slug);
-
-		$uploadsFolder = 'products';
 
 		if (!$product) {
 			throw $this->createNotFoundException('Product not found for this slug: ' . $slug);
@@ -54,7 +54,7 @@ class ProductController extends AbstractController
 			$image = $form->get('imagePath')->getData();
 
 			if ($image) {
-				$productModel->setOrUpdateImage($product, $image, $uploadsFolder);
+				$productModel->setOrUpdateImage($product, $image, self::UPLOAD_FOLDER);
 			}
 
 			$productModel->saveOrUpdateProduct($product, $colors);
@@ -135,7 +135,7 @@ class ProductController extends AbstractController
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$categoryProducts = $productRepository->findProductsInCategory($product, $isUser, 3);
-		$productQuantityInCart = $cartService->getProductQuantityInCart($product->getId());
+		$productQuantityInCart = $cartService->getItemQuantityInCart($product->getId());
 
 		return $this->render('product/product.html.twig', [
 			'product' => $product,

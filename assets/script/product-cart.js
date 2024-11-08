@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
             main.insertAdjacentHTML('afterbegin', flash);
         }
 
-
         function setupCounterButtons() {
             const decreaseBtn = document.getElementById('decreaseBtn');
             const increaseBtn = document.getElementById('increaseBtn');

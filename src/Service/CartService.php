@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Dto\CartDto;
-use App\Dto\CartProductDto;
+use App\Dto\CartItemDto;
 use App\Dto\ProductDto;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -23,186 +23,11 @@ class CartService
 	public function getCart(): CartDto
 	{
 		$cart = $this->getCartFromSession();
+
 		$this->validateCart($cart);
+		$this->updateCartQuantity();
+
 		return $cart;
-	}
-
-	public function addProductToCart(int $id): void
-	{
-		$cart = $this->getCartFromSession();
-
-		$this->updateCartWithProduct($cart, $id);
-		$this->saveCartToSession($cart);
-	}
-
-	public function deleteProductFromCart(int $id): void
-	{
-		$cart = $this->getCartFromSession();
-		$cartProduct = $cart->getProducts()[$id] ?? null;
-
-		if ($cartProduct) {
-			if ($cartProduct->getQuantity() - 1 > 0) {
-				$cartProduct->setQuantity($cartProduct->getQuantity() - 1);
-			} else {
-				$this->removeProductFromCart($id);
-			}
-
-			$cart->setQuantity($cart->getQuantity() - 1);
-		}
-
-		$this->saveCartToSession($cart);
-	}
-
-	public function removeProductFromCart(int $id): void
-	{
-		$cart = $this->getCartFromSession();
-		$cartProducts = $cart->getProducts();
-		$cartProduct = $cartProducts[$id] ?? null;
-
-		if ($cartProduct) {
-			$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
-			unset($cartProducts[$id]);
-		}
-
-		$cart->setProducts($cartProducts);
-	}
-
-	private function validateCart(CartDto $cart): void
-	{
-		$cartProducts = $cart->getProducts();
-
-		if (empty($cartProducts)) return;
-
-		foreach ($cartProducts as $cartProduct) {
-			$product = $this->productRepository->find($cartProduct->getId());
-
-			if (!$product || $product->isDraft()) {
-				$this->removeProductFromCart($cartProduct->getId());
-
-				$this->isValid = false;
-				$this->messages['notice'] = "Product with id:{$cartProduct->getId()} was delete!";
-
-				continue;
-			}
-
-			if ($product->getAmount() < 1) {
-				if ($cartProduct->isInStock()) {
-					$cartProduct->setInStock(false);
-					$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
-
-					$this->isValid = false;
-					$this->messages['notice'] = "Product with id:{$cartProduct->getId()} is out of stock!";
-				}
-
-				continue;
-			}
-
-			if (!$cartProduct->isInStock()) {
-				$cartProduct->setInStock(true);
-
-				if ($cartProduct->getQuantity() > $product->getAmount()) {
-					$cart->setQuantity(max($cart->getQuantity() + $product->getAmount(), 0));
-					$cartProduct->setQuantity($product->getAmount());
-				} else {
-					$cart->setQuantity(max($cart->getQuantity() + $cartProduct->getQuantity(), 0));
-				}
-
-				continue;
-			}
-
-			if ($cartProduct->getQuantity() > $product->getAmount()) {
-				$cart->setQuantity(max($cart->getQuantity() - ($cartProduct->getQuantity() - $product->getAmount()), 0));
-				$cartProduct->setQuantity($product->getAmount());
-
-				$this->isValid = false;
-				$this->messages['notice'] = "Product with id:{$cartProduct->getId()} quantity is less than in stock. And we changed the quantity.";
-			}
-		}
-	}
-
-	private function updateCartWithProduct(CartDto $cart, int $id): void
-	{
-		$cartProducts = $cart->getProducts();
-		$cartProduct = $cartProducts[$id] ?? null;
-
-		if ($cartProduct && $cartProduct->isInStock()) {
-			$added = $this->setQuantity($cartProduct);
-
-			if ($added) {
-				$cart->setQuantity($cart->getQuantity() + 1);
-			}
-		} else {
-			$cartProducts[$id] = new CartProductDto($id, 1);
-			$cart->setQuantity($cart->getQuantity() + 1);
-		}
-
-		$cart->setProducts($cartProducts);
-		$this->saveCartToSession($cart);
-	}
-
-	private function setQuantity(CartProductDto $cartProduct): bool
-	{
-		$flag = true;
-
-		$productAmount = $this->productRepository->find($cartProduct->getId())->getAmount();
-		$productQuantity = $cartProduct->getQuantity() + 1;
-
-		$productQuantity > $productAmount
-			? $flag = false
-			: $cartProduct->setQuantity($productQuantity);
-
-		return $flag;
-	}
-
-	public function getDetailedProducts(CartDto $cart): array
-	{
-		$cartProducts = [];
-		$cartProductsIsNotStock = [];
-
-		foreach ($cart->getProducts() as $cartProduct) {
-			$product = $this->productRepository->find($cartProduct->getId());
-			$productDto = new ProductDto($product, $cartProduct->getQuantity(), $cartProduct->isInStock());
-
-			$cartProduct->isInStock()
-				? $cartProducts[] = $productDto
-				: $cartProductsIsNotStock[] = $productDto;
-		}
-
-		return [$cartProducts, $cartProductsIsNotStock];
-	}
-
-	public function clearCart(): void
-	{
-		$cart = $this->getCartFromSession();
-		$cartProducts = $cart->getProducts();
-
-		foreach ($cartProducts as $cartProduct) {
-			if ($cartProduct->isInStock()) {
-				$cart->setQuantity(max($cart->getQuantity() - $cartProduct->getQuantity(), 0));
-				unset($cartProducts[$cartProduct->getId()]);
-			}
-		}
-
-		$cart->setProducts($cartProducts);
-	}
-
-	public function calculateTotalPrice(CartDto $cart): int
-	{
-		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
-			if ($cartProduct->isInStock()) {
-				$productPrice = $this->productRepository->find($cartProduct->getId())->getPrice();
-				return $total + ($productPrice * $cartProduct->getQuantity());
-			}
-
-			return $total;
-		}, 0);
-	}
-
-	public function getProductQuantityInCart(int $id): int
-	{
-		$cartProduct = $this->getCartFromSession()->getProducts()[$id] ?? null;
-
-		return $cartProduct ? $cartProduct->getQuantity() : 0;
 	}
 
 	private function getCartFromSession(): CartDto
@@ -210,9 +35,166 @@ class CartService
 		return $this->stack->getSession()->get('cart', new CartDto());
 	}
 
-	private function saveCartToSession(CartDto $cart): void
+	private function validateCart(CartDto $cart): void
 	{
-		$this->stack->getSession()->set('cart', $cart);
+		$cartList = $cart->getList();
+
+		if (empty($cartList)) return;
+
+		foreach ($cartList as $cartItem) {
+			$product = $this->productRepository->find($cartItem->getId());
+
+			if (!$product || $product->isDraft()) {
+				$this->removeItemFromCart($cartItem->getId());
+
+				$this->isValid = false;
+				$this->messages['notice'] = "Product with id:{$cartItem->getId()} was delete!";
+
+				continue;
+			}
+
+			if ($product->getAmount() < 1) {
+				if ($cartItem->isInStock()) {
+					$cartItem->setInStock(false);
+
+					$this->isValid = false;
+					$this->messages['notice'] = "Product with id:{$cartItem->getId()} is out of stock!";
+				}
+
+				continue;
+			}
+
+			if (!$cartItem->isInStock()) {
+				$cartItem->setInStock(true);
+
+				if ($cartItem->getQuantity() > $product->getAmount()) {
+					$cartItem->setQuantity($product->getAmount());
+				}
+
+				continue;
+			}
+
+			if ($cartItem->getQuantity() > $product->getAmount()) {
+				$cartItem->setQuantity($product->getAmount());
+
+				$this->isValid = false;
+				$this->messages['notice'] = "Product with id:{$cartItem->getId()} quantity is less than in stock. And we changed the quantity.";
+			}
+		}
+	}
+
+	public function removeItemFromCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$cartList = $cart->getList();
+
+		if ($cartList[$id] ?? null) {
+			unset($cartList[$id]);
+		}
+
+		$cart->setList($cartList);
+		$this->updateCartQuantity();
+	}
+
+	private function setQuantity(CartItemDto $cartItem): void
+	{
+		$productAmount = $this->productRepository->find($cartItem->getId())->getAmount();
+		$productQuantity = $cartItem->getQuantity() + 1;
+
+		if ($productQuantity < $productAmount) {
+			$cartItem->setQuantity($productQuantity);
+		}
+	}
+
+	public function addItemToCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+
+		$this->updateCartWithItem($cart, $id);
+		$this->saveCartToSession($cart);
+	}
+
+	private function updateCartWithItem(CartDto $cart, int $id): void
+	{
+		$cartList = $cart->getList();
+		$cartItem = $cartList[$id] ?? null;
+
+		if ($cartItem && $cartItem->isInStock()) {
+			$this->setQuantity($cartItem);
+		} else {
+			$cartList[$id] = new CartItemDto($id, 1);
+		}
+
+		$cart->setList($cartList);
+		$this->updateCartQuantity();
+		$this->saveCartToSession($cart);
+	}
+
+	public function deleteItemFromCart(int $id): void
+	{
+		$cart = $this->getCartFromSession();
+		$cartItem = $cart->getList()[$id] ?? null;
+
+		if (!$cartItem) return;
+
+		if ($cartItem->getQuantity() - 1 > 0) {
+			$cartItem->setQuantity($cartItem->getQuantity() - 1);
+		} else {
+			$this->removeItemFromCart($id);
+		}
+
+		$this->updateCartQuantity();
+		$this->saveCartToSession($cart);
+	}
+
+	public function getDetailedProducts(CartDto $cart): array
+	{
+		$productList = [];
+		$productListIsNotStock = [];
+
+		foreach ($cart->getList() as $cartItem) {
+			$product = $this->productRepository->find($cartItem->getId());
+			$productDto = new ProductDto($product, $cartItem->getQuantity(), $cartItem->isInStock());
+
+			$cartItem->isInStock()
+				? $productList[] = $productDto
+				: $productListIsNotStock[] = $productDto;
+		}
+
+		return [$productList, $productListIsNotStock];
+	}
+
+	public function clearCart(): void
+	{
+		$cart = $this->getCartFromSession();
+		$cartList = $cart->getList();
+
+		foreach ($cartList as $cartItem) {
+			if ($cartItem->isInStock()) {
+				unset($cartList[$cartItem->getId()]);
+			}
+		}
+
+		$cart->setList($cartList);
+		$this->updateCartQuantity();
+	}
+
+	public function calculateTotalPrice(CartDto $cart): int
+	{
+		return array_reduce($cart->getList(), function ($total, $cartItem) {
+			if ($cartItem->isInStock()) {
+				$productPrice = $this->productRepository->find($cartItem->getId())->getPrice();
+				return $total + ($productPrice * $cartItem->getQuantity());
+			}
+
+			return $total;
+		}, 0);
+	}
+
+	public function getItemQuantityInCart(int $id): int
+	{
+		$cartItem = $this->getCartFromSession()->getList()[$id] ?? null;
+		return $cartItem ? $cartItem->getQuantity() : 0;
 	}
 
 	public function cartIsValid(): bool
@@ -224,5 +206,24 @@ class CartService
 	{
 		return $this->messages;
 	}
-}
 
+	private function updateCartQuantity(): void
+	{
+		$cart = $this->getCartFromSession();
+
+		$quantity = array_reduce($cart->getList(), function ($quantity, $cartItem) {
+			if ($cartItem->isInStock()) {
+				$quantity += $cartItem->getQuantity();
+			}
+
+			return $quantity;
+		}, 0);
+
+		$cart->setQuantity($quantity);
+	}
+
+	private function saveCartToSession(CartDto $cart): void
+	{
+		$this->stack->getSession()->set('cart', $cart);
+	}
+}

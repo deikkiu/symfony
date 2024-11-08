@@ -100,9 +100,9 @@ class Product
 	private ?\DateTimeImmutable $deletedAt = null;
 
 	/**
-	 * @var Collection<int, OrderProduct>
+	 * @var Collection<int, OrderItem>
 	 */
-	#[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
+	#[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'product')]
 	private Collection $orderProducts;
 
 	public function __construct()
@@ -302,14 +302,14 @@ class Product
 	}
 
 	/**
-	 * @return Collection<int, OrderProduct>
+	 * @return Collection<int, OrderItem>
 	 */
 	public function getOrderProducts(): Collection
 	{
 		return $this->orderProducts;
 	}
 
-	public function addOrderProduct(OrderProduct $orderProduct): static
+	public function addOrderProduct(OrderItem $orderProduct): static
 	{
 		if (!$this->orderProducts->contains($orderProduct)) {
 			$this->orderProducts->add($orderProduct);
@@ -319,7 +319,7 @@ class Product
 		return $this;
 	}
 
-	public function removeOrderProduct(OrderProduct $orderProduct): static
+	public function removeOrderProduct(OrderItem $orderProduct): static
 	{
 		if ($this->orderProducts->removeElement($orderProduct)) {
 			// set the owning side to null (unless already changed)

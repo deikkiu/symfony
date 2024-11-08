@@ -47,7 +47,7 @@ class CartController extends AbstractController
 			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
-		$this->cartService->addProductToCart($id);
+		$this->cartService->addItemToCart($id);
 
 		$cart = $this->cartService->getCart();
 		$totalPrice = $this->cartService->calculateTotalPrice($cart);
@@ -60,13 +60,13 @@ class CartController extends AbstractController
 	{
 		$id = $request->get('id');
 		$cart = $this->cartService->getCart();
-		$cartProduct = $cart->getProducts()[$id] ?? null;
+		$cartItem = $cart->getList()[$id] ?? null;
 
-		if (!$cartProduct) {
+		if (!$cartItem) {
 			return $this->json(['message' => "Product with ID $id not found."], 404);
 		}
 
-		$this->cartService->deleteProductFromCart($id);
+		$this->cartService->deleteItemFromCart($id);
 
 		$totalPrice = $this->cartService->calculateTotalPrice($cart);
 		$quantity = $cart->getQuantity();
@@ -83,7 +83,7 @@ class CartController extends AbstractController
 			$this->createNotFoundException("Product with ID $id not found.");
 		}
 
-		$this->cartService->removeProductFromCart($id);
+		$this->cartService->removeItemFromCart($id);
 
 		return $this->redirectToRoute('cart');
 	}

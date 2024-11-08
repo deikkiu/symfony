@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\OrderProduct;
+use App\Entity\ImportMessage;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<OrderProduct>
+ * @extends ServiceEntityRepository<ImportMessage>
  */
-class OrderProductRepository extends ServiceEntityRepository
+class ImportMessageRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OrderProduct::class);
+        parent::__construct($registry, ImportMessage::class);
     }
 
     //    /**
-    //     * @return OrderProduct[] Returns an array of OrderProduct objects
+    //     * @return ImportMessage[] Returns an array of ImportMessage objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
+    //            ->orderBy('i.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?OrderProduct
+    //    public function findOneBySomeField($value): ?ImportMessage
     //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()

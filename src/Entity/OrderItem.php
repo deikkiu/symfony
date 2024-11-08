@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\OrderProductRepository;
+use App\Repository\OrderItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: OrderProductRepository::class)]
-class OrderProduct
+#[ORM\Entity(repositoryClass: OrderItemRepository::class)]
+class OrderItem
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\ImportProduct;
+use App\Entity\Import;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ImportProduct>
+ * @extends ServiceEntityRepository<Import>
  */
-class ImportProductRepository extends ServiceEntityRepository
+class ImportRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ImportProduct::class);
+        parent::__construct($registry, Import::class);
     }
 
     //    /**
-    //     * @return ImportProduct[] Returns an array of ImportProduct objects
+    //     * @return Import[] Returns an array of Import objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class ImportProductRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?ImportProduct
+    //    public function findOneBySomeField($value): ?Import
     //    {
     //        return $this->createQueryBuilder('i')
     //            ->andWhere('i.exampleField = :val')

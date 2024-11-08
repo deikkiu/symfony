@@ -2,7 +2,7 @@
 
 namespace App\Twig\Extension;
 
-use App\Entity\ImportProduct;
+use App\Entity\Import;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -42,11 +42,11 @@ class AppExtension extends AbstractExtension
 
 	public function formatStatus(int $status): string
 	{
-		return ImportProduct::getImportStatus()[$status] ?? '';
+		return Import::getImportStatus()[$status] ?? '';
 	}
 
 	public function formatStatusMessage(int $status): string
 	{
-		return ImportProduct::getImportStatusMessage()[$status] ?? '';
+		return Import::getImportStatusMessage()[$status] ?? '';
 	}
 }

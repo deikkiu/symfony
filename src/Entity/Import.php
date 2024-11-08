@@ -2,15 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\ImportProductRepository;
+use App\Repository\ImportRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation\Slug;
 use Gedmo\Mapping\Annotation\Timestampable;
 
-#[ORM\Entity(repositoryClass: ImportProductRepository::class)]
-class ImportProduct
+#[ORM\Entity(repositoryClass: ImportRepository::class)]
+class Import
 {
 	public const STATUS_PENDING = 1;
 	public const STATUS_SUCCESS = 2;
@@ -36,9 +36,9 @@ class ImportProduct
 	private ?\DateTimeImmutable $updatedAt = null;
 
 	/**
-	 * @var Collection<int, ImportProductMessage>
+	 * @var Collection<int, ImportMessage>
 	 */
-	#[ORM\OneToMany(targetEntity: ImportProductMessage::class, mappedBy: 'importProduct', cascade: ['persist'], orphanRemoval: true)]
+	#[ORM\OneToMany(targetEntity: ImportMessage::class, mappedBy: 'importProduct', cascade: ['persist'], orphanRemoval: true)]
 	private Collection $messages;
 
 	#[ORM\Column(nullable: true)]
@@ -107,14 +107,14 @@ class ImportProduct
 	}
 
 	/**
-	 * @return Collection<int, ImportProductMessage>
+	 * @return Collection<int, ImportMessage>
 	 */
 	public function getMessages(): Collection
 	{
 		return $this->messages;
 	}
 
-	public function addMessage(ImportProductMessage $message): static
+	public function addMessage(ImportMessage $message): static
 	{
 		if (!$this->messages->contains($message)) {
 			$this->messages->add($message);
@@ -124,7 +124,7 @@ class ImportProduct
 		return $this;
 	}
 
-	public function removeMessage(ImportProductMessage $message): static
+	public function removeMessage(ImportMessage $message): static
 	{
 		if ($this->messages->contains($message)) {
 			$this->messages->removeElement($message);

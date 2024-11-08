@@ -44,9 +44,9 @@ class Order
 	private ?\DateTimeImmutable $updatedAt = null;
 
 	/**
-	 * @var Collection<int, OrderProduct>
+	 * @var Collection<int, OrderItem>
 	 */
-	#[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'appOrder')]
+	#[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'appOrder')]
 	private Collection $orderProducts;
 
 	#[ORM\Column(nullable: true)]
@@ -123,14 +123,14 @@ class Order
 	}
 
 	/**
-	 * @return Collection<int, OrderProduct>
+	 * @return Collection<int, OrderItem>
 	 */
 	public function getOrderProducts(): Collection
 	{
 		return $this->orderProducts;
 	}
 
-	public function addOrderProduct(OrderProduct $orderProduct): static
+	public function addOrderProduct(OrderItem $orderProduct): static
 	{
 		if (!$this->orderProducts->contains($orderProduct)) {
 			$this->orderProducts->add($orderProduct);
@@ -140,7 +140,7 @@ class Order
 		return $this;
 	}
 
-	public function removeOrderProduct(OrderProduct $orderProduct): static
+	public function removeOrderProduct(OrderItem $orderProduct): static
 	{
 		if ($this->orderProducts->removeElement($orderProduct)) {
 			// set the owning side to null (unless already changed)

@@ -4,7 +4,7 @@ namespace App\Model;
 
 use App\Dto\CartDto;
 use App\Entity\Order;
-use App\Entity\OrderProduct;
+use App\Entity\OrderItem;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -37,18 +37,12 @@ class OrderModel
 		return $order->getId();
 	}
 
-	public function deleteOrder(Order $order): void
-	{
-		$this->entityManager->remove($order);
-		$this->entityManager->flush();
-	}
-
 	private function calculateTotalPrice(CartDto $cart): int
 	{
-		return array_reduce($cart->getProducts(), function ($total, $cartProduct) {
-			if ($cartProduct->isInStock()) {
-				$productPrice = $this->productRepository->find($cartProduct->getId())->getPrice();
-				return $total + ($productPrice * $cartProduct->getQuantity());
+		return array_reduce($cart->getList(), function ($total, $cartItem) {
+			if ($cartItem->isInStock()) {
+				$productPrice = $this->productRepository->find($cartItem->getId())->getPrice();
+				return $total + ($productPrice * $cartItem->getQuantity());
 			}
 
 			return $total;
@@ -57,19 +51,25 @@ class OrderModel
 
 	private function setOrderProducts(Order $order, CartDto $cart): void
 	{
-		foreach ($cart->getProducts() as $cartProduct) {
-			$product = $this->productRepository->find($cartProduct->getId());
+		foreach ($cart->getList() as $cartItem) {
+			$product = $this->productRepository->find($cartItem->getId());
 
-			if ($cartProduct->isInStock()) {
-				$orderProduct = new OrderProduct();
+			if ($cartItem->isInStock()) {
+				$orderProduct = new OrderItem();
 				$orderProduct->setAppOrder($order)
 					->setPriceForOne($product->getPrice())
-					->setQuantity($cartProduct->getQuantity())
+					->setQuantity($cartItem->getQuantity())
 					->setProduct($product);
 
 				$this->entityManager->persist($orderProduct);
 			}
 		}
+	}
+
+	public function deleteOrder(Order $order): void
+	{
+		$this->entityManager->remove($order);
+		$this->entityManager->flush();
 	}
 }
 

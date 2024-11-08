@@ -2,51 +2,56 @@
 
 namespace App\Controller;
 
-use App\Entity\ImportProduct;
+use App\Entity\Import;
 use App\Form\Object\ProductImport;
 use App\Form\ProductImportType;
 use App\Messenger\Message\ImportProductsMessage;
-use App\Model\ImportProductModel;
+use App\Model\ImportModel;
 use App\Service\FileUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted("ROLE_ADMIN")]
 class ImportController extends AbstractController
 {
+	private const IMPORT_FOLDER = 'import';
+
 	public function __construct(
 		private readonly Security            $security,
 		private readonly MessageBusInterface $bus,
 		private readonly FileUploader        $fileUploader,
-		private readonly ImportProductModel  $importProductModel,
+		private readonly ImportModel         $importModel,
 	)
 	{
 	}
 
-	#[IsGranted('ROLE_ADMIN')]
 	public function import(Request $request): Response
 	{
-		$folder = 'import';
-
 		$userId = $this->security->getUser()->getId();
-		$imports = $this->importProductModel->getAllImportProducts();
+		$imports = $this->importModel->getAllImportProducts();
 
 		$form = $this->createForm(ProductImportType::class, new ProductImport());
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
 			$file = $form->get('file')->getData();
-			$filePath = $this->fileUploader->upload($file, $folder);
+			$filePath = $this->fileUploader->upload($file, self::IMPORT_FOLDER);
 
-			$importProduct = $this->importProductModel->createImportProduct($filePath);
+			$importProduct = $this->importModel->createImportProduct($filePath);
 
-			$this->bus->dispatch(new ImportProductsMessage($this->getParameter('uploads_directory') . $filePath, $userId, $importProduct->getSlug()));
+			try {
+				$this->bus->dispatch(new ImportProductsMessage($this->getParameter('app.uploads_directory') . $filePath, $userId, $importProduct->getSlug()));
+			} catch (ExceptionInterface $e) {
+				$this->addFlash('warning', 'Import product failed: ' . $e->getMessage());
+				return $this->redirectToRoute('import');
+			}
 
 			$this->addFlash('notice', 'The products are being loaded. After the full download, you will receive a notification.');
-
 			return $this->redirectToRoute('import');
 		}
 
@@ -56,43 +61,47 @@ class ImportController extends AbstractController
 		]);
 	}
 
-	#[IsGranted('ROLE_ADMIN')]
 	public function reimport(Request $request): Response
 	{
 		$slug = $request->get('slug');
 		$userId = $this->security->getUser()->getId();
 
-		$importProduct = $this->importProductModel->getImportProduct($slug);
+		$importProduct = $this->importModel->getImportProduct($slug);
 
 		if (!$importProduct) {
 			throw $this->createNotFoundException('No import product found for slug = ' . $slug);
 		}
 
-		if ($importProduct->getStatus() !== ImportProduct::STATUS_ERROR) {
+		if ($importProduct->getStatus() !== Import::STATUS_ERROR) {
 			return $this->redirectToRoute('import');
 		}
 
-		$this->importProductModel->clearAllMessages($importProduct);
-		$this->importProductModel->updateStatus($importProduct, ImportProduct::STATUS_PENDING);
+		$this->importModel->clearAllMessages($importProduct);
+		$this->importModel->updateStatus($importProduct, Import::STATUS_PENDING);
 
-		$path = $this->getParameter('uploads_directory') . $importProduct->getPath();
-		$this->bus->dispatch(new ImportProductsMessage($path, $userId, $importProduct->getSlug()));
+		$path = $this->getParameter('app.uploads_directory') . $importProduct->getPath();
+
+		try {
+			$this->bus->dispatch(new ImportProductsMessage($path, $userId, $importProduct->getSlug()));
+		} catch (ExceptionInterface $e) {
+			$this->addFlash('warning', 'Import product failed: ' . $e->getMessage());
+			return $this->redirectToRoute('import');
+		}
 
 		$this->addFlash('notice', 'The products are being loaded. After the full download, you will receive a notification.');
-
 		return $this->redirectToRoute('import');
 	}
 
 	public function delete(Request $request): Response
 	{
 		$slug = $request->get('slug');
-		$importProduct = $this->importProductModel->getImportProduct($slug);
+		$importProduct = $this->importModel->getImportProduct($slug);
 
 		if (!$importProduct) {
 			throw $this->createNotFoundException('No import product found for slug = ' . $slug);
 		}
 
-		$this->importProductModel->deleteImportProduct($importProduct);
+		$this->importModel->deleteImportProduct($importProduct);
 
 		return $this->redirectToRoute('import');
 	}
@@ -100,18 +109,22 @@ class ImportController extends AbstractController
 	public function edit(Request $request): Response
 	{
 		$slug = $request->get('slug');
-		$importProduct = $this->importProductModel->getImportProduct($slug);
+		$importProduct = $this->importModel->getImportProduct($slug);
 
 		if (!$importProduct) {
 			throw $this->createNotFoundException(sprintf('No import product found for slug = %s', $slug));
 		}
 
 		$columns = $this->initializeColumns();
-		$filePath = $this->getParameter('uploads_directory') . $importProduct->getPath();
+		$filePath = $this->getParameter('app.uploads_directory') . $importProduct->getPath();
 		$rows = $this->readCsvFile($filePath, $columns);
 
 		if ($request->isMethod('POST')) {
 			$file = $request->get('csv');
+
+			if (!$file) {
+				return $this->redirectToRoute('import');
+			}
 
 			if (is_array($file)) {
 				$handle = fopen($filePath, 'w');
@@ -127,7 +140,6 @@ class ImportController extends AbstractController
 			}
 
 			$this->addFlash('error', 'Invalid data format.');
-
 			return $this->redirectToRoute('import');
 		}
 

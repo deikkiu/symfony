@@ -6,7 +6,7 @@ use App\Entity\Category;
 use App\Entity\Color;
 use App\Entity\Product;
 use App\Entity\ProductAttr;
-use App\Model\ImportProductModel;
+use App\Model\ImportModel;
 use App\Model\ProductModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -20,7 +20,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ProductImporter
 {
-	private int $BATCH_SIZE = 20;
+	private const BATCH_SIZE = 20;
 	private bool $status = true;
 	private array $messages = [];
 	private array $images = [];
@@ -31,7 +31,7 @@ class ProductImporter
 		private readonly ValidatorInterface     $validator,
 		private readonly ProductModel           $productModel,
 		private readonly FileUploader           $fileUploader,
-		private readonly ImportProductModel     $importProductModel,
+		private readonly ImportModel            $importModel,
 		private readonly Filesystem             $fileSystem,
 		private readonly string                 $uploadsDirectory,
 	)
@@ -77,7 +77,7 @@ class ProductImporter
 				++$rowNumber;
 				++$i;
 
-				if (($i % $this->BATCH_SIZE) === 0) {
+				if (($i % self::BATCH_SIZE) === 0) {
 					$this->entityManager->flush();
 					$this->entityManager->clear();
 				}
@@ -97,7 +97,7 @@ class ProductImporter
 			$this->entityManager->clear();
 
 			$this->updateImport($importSlug, $i);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->entityManager->rollback();
 			$this->entityManager->clear();
 
@@ -166,6 +166,22 @@ class ProductImporter
 		}
 	}
 
+	private function fetchProductImage(string $url): string
+	{
+		try {
+			$response = $this->httpClient->request('GET', $url, [
+				'headers' => [
+					'Accept' => 'image/png, image/jpeg, image/webp, image/svg+xml',
+				],
+			]);
+
+			$content = $response->getContent();
+			return $this->fileUploader->uploadAndDumpFile($content, pathinfo($url, PATHINFO_EXTENSION), 'products');
+		} catch (Exception|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+			throw new Exception($e->getMessage());
+		}
+	}
+
 	private function setProductAttributes(Product $product, array $data, array $errors): void
 	{
 		$productAttr = new ProductAttr();
@@ -206,39 +222,13 @@ class ProductImporter
 		}
 	}
 
-	private function fetchProductImage(string $url): string
-	{
-		try {
-			$response = $this->httpClient->request('GET', $url, [
-				'headers' => [
-					'Accept' => 'image/png, image/jpeg, image/webp, image/svg+xml',
-				],
-			]);
-
-			$content = $response->getContent();
-			return $this->fileUploader->uploadAndDumpFile($content, pathinfo($url, PATHINFO_EXTENSION), 'products');
-		} catch (Exception|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
-			throw new Exception($e->getMessage());
-		}
-	}
-
 	private function updateImport(string $importSlug, int $countImportedProducts = 0): void
 	{
-		$this->importProductModel->updateImportProduct($importSlug, $this->status, $this->messages, $countImportedProducts);
+		$this->importModel->updateImportProduct($importSlug, $this->status, $this->messages, $countImportedProducts);
 
 		$this->clearImages();
 		$this->clearMessages();
 		$this->updateStatus();
-	}
-
-	private function addWarningMessage(string $message): void
-	{
-		$this->messages[] = $message;
-	}
-
-	private function clearMessages(): void
-	{
-		$this->messages = [];
 	}
 
 	private function clearImages(): void
@@ -250,6 +240,11 @@ class ProductImporter
 		}
 
 		$this->images = [];
+	}
+
+	private function clearMessages(): void
+	{
+		$this->messages = [];
 	}
 
 	private function updateStatus(): void
@@ -265,5 +260,10 @@ class ProductImporter
 		}
 
 		return (int)$value;
+	}
+
+	private function addWarningMessage(string $message): void
+	{
+		$this->messages[] = $message;
 	}
 }

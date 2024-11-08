@@ -5,24 +5,24 @@ namespace App\Dto;
 class CartDto
 {
 	/**
-	 * @var array<int, CartProductDto>
+	 * @var array<int, CartItemDto>
 	 */
-	private array $products = [];
+	private array $list = [];
 	private int $quantity = 0;
 
-	public function getProducts(): array
+	public function getList(): array
 	{
-		return $this->products;
+		return $this->list;
+	}
+
+	public function setList(array $list): void
+	{
+		$this->list = $list;
 	}
 
 	public function getQuantity(): int
 	{
 		return $this->quantity;
-	}
-
-	public function setProducts(array $products): void
-	{
-		$this->products = $products;
 	}
 
 	public function setQuantity(int $quantity): void

@@ -2,28 +2,28 @@
 
 namespace App\Model;
 
-use App\Entity\ImportProduct;
-use App\Entity\ImportProductMessage;
-use App\Repository\ImportProductRepository;
+use App\Entity\Import;
+use App\Entity\ImportMessage;
+use App\Repository\ImportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-readonly class ImportProductModel
+readonly class ImportModel
 {
 	public function __construct(
-		private ImportProductRepository $importProductRepository,
-		private EntityManagerInterface  $entityManager,
-		private Filesystem              $filesystem,
-		private string                  $uploadsDirectory,
+		private ImportRepository       $importRepository,
+		private EntityManagerInterface $entityManager,
+		private Filesystem             $filesystem,
+		private string                 $uploadsDirectory,
 	)
 	{
 	}
 
-	public function createImportProduct(string $path): ImportProduct
+	public function createImportProduct(string $path): Import
 	{
-		$importProduct = new ImportProduct();
+		$importProduct = new Import();
 
-		$importProduct->setStatus(ImportProduct::STATUS_PENDING);
+		$importProduct->setStatus(Import::STATUS_PENDING);
 		$importProduct->setPath($path);
 
 		$this->entityManager->persist($importProduct);
@@ -32,22 +32,20 @@ readonly class ImportProductModel
 		return $importProduct;
 	}
 
-	public function getImportProduct(?string $slug): ImportProduct|null
+	public function getImportProduct(?string $slug): Import|null
 	{
-		if (!$slug) return new ImportProduct();
-
-		return $this->importProductRepository->findOneBy(['slug' => $slug]);
+		return $this->importRepository->findOneBy(['slug' => $slug]);
 	}
 
 	public function updateImportProduct(string $slug, bool $status, array $messages, int $countImportedProducts = 0): void
 	{
-		$importProduct = $this->entityManager->getRepository(ImportProduct::class)->findOneBy(['slug' => $slug]);
+		$importProduct = $this->entityManager->getRepository(Import::class)->findOneBy(['slug' => $slug]);
 
 		if (!$importProduct) {
 			throw new \RuntimeException("Import product with slug '{$slug}' not found.");
 		}
 
-		$importProduct->setStatus($status ? ImportProduct::STATUS_SUCCESS : ImportProduct::STATUS_ERROR);
+		$importProduct->setStatus($status ? Import::STATUS_SUCCESS : Import::STATUS_ERROR);
 
 		if ($status) {
 			$importProduct->setCountImportedProducts($countImportedProducts);
@@ -59,10 +57,10 @@ readonly class ImportProductModel
 		$this->entityManager->flush();
 	}
 
-	public function addImportMessages(ImportProduct $importProduct, array $messages): void
+	public function addImportMessages(Import $importProduct, array $messages): void
 	{
 		foreach ($messages as $message) {
-			$importProductMessage = new ImportProductMessage();
+			$importProductMessage = new ImportMessage();
 
 			$importProductMessage->setMessage($message);
 			$importProduct->addMessage($importProductMessage);
@@ -73,10 +71,10 @@ readonly class ImportProductModel
 
 	public function getAllImportProducts(): array
 	{
-		return $this->importProductRepository->findAll();
+		return $this->importRepository->findBy([], orderBy: ['updatedAt' => 'DESC']);
 	}
 
-	public function clearAllMessages(ImportProduct $importProduct): void
+	public function clearAllMessages(Import $importProduct): void
 	{
 		foreach ($importProduct->getMessages() as $message) {
 			$this->entityManager->remove($message);
@@ -85,7 +83,7 @@ readonly class ImportProductModel
 		$this->entityManager->flush();
 	}
 
-	public function deleteImportProduct(ImportProduct $importProduct): void
+	public function deleteImportProduct(Import $importProduct): void
 	{
 		$this->entityManager->remove($importProduct);
 		$this->entityManager->flush();
@@ -93,7 +91,7 @@ readonly class ImportProductModel
 		$this->filesystem->remove($this->uploadsDirectory . $importProduct->getPath());
 	}
 
-	public function updateStatus(ImportProduct $importProduct, int $status): void
+	public function updateStatus(Import $importProduct, int $status): void
 	{
 		$importProduct->setStatus($status);
 

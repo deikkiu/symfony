@@ -15,13 +15,13 @@ class PaymentController extends AbstractController
 	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse|Response
 	{
 		$cart = $cartService->getCart();
-		$cartProducts = $cart->getProducts();
+		$cartList = $cart->getList();
 
 		$stripeProducts = [];
 
-		foreach ($cartProducts as $cartProduct) {
-			if ($cartProduct->isInStock()) {
-				$product = $productRepository->find($cartProduct->getId());
+		foreach ($cartList as $cartItem) {
+			if ($cartItem->isInStock()) {
+				$product = $productRepository->find($cartItem->getId());
 
 				$stripeProducts[] = [
 					'price_data' => [
@@ -31,12 +31,12 @@ class PaymentController extends AbstractController
 							'name' => $product->getName(),
 						]
 					],
-					'quantity' => $cartProduct->getQuantity()
+					'quantity' => $cartItem->getQuantity()
 				];
 			}
 		}
 
-		$stripe = new StripeClient($this->getParameter('stripe_secret_key'));
+		$stripe = new StripeClient($this->getParameter('stripe.secret_key'));
 		$DOMAIN = $request->getSchemeAndHttpHost();
 
 		$checkout_session = $stripe->checkout->sessions->create([
@@ -59,7 +59,7 @@ class PaymentController extends AbstractController
 			return $this->redirectToRoute('cart');
 		}
 
-		$stripe = new StripeClient($this->getParameter('stripe_secret_key'));
+		$stripe = new StripeClient($this->getParameter('stripe.secret_key'));
 
 		try {
 			$session = $stripe->checkout->sessions->retrieve($checkoutSessionId);
