@@ -12,8 +12,11 @@
         <h2>Products import list:</h2>
 
         <div class="accordion mt-3" id="accordionExample">
+            {% set flag = true %}
             {% for import in imports %}
-                {% include 'incs/accordion.html.twig' %}
+                {% include 'incs/accordion.html.twig' with {'flag': flag} %}
+
+                {% set flag = false %}
             {% endfor %}
         </div>
     {% endif %}

@@ -8,6 +8,7 @@ use App\Form\ProductImportType;
 use App\Messenger\Message\ImportProductsMessage;
 use App\Model\ImportModel;
 use App\Service\FileUploader;
+use App\Utils\CSVUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,7 +46,7 @@ class ImportController extends AbstractController
 			$importProduct = $this->importModel->createImportProduct($filePath);
 
 			try {
-				$this->bus->dispatch(new ImportProductsMessage($this->getParameter('app.uploads_directory') . $filePath, $userId, $importProduct->getSlug()));
+				$this->bus->dispatch(new ImportProductsMessage($importProduct->getSlug(), $userId));
 			} catch (ExceptionInterface $e) {
 				$this->addFlash('warning', 'Import product failed: ' . $e->getMessage());
 				return $this->redirectToRoute('import');
@@ -79,10 +80,8 @@ class ImportController extends AbstractController
 		$this->importModel->clearAllMessages($importProduct);
 		$this->importModel->updateStatus($importProduct, Import::STATUS_PENDING);
 
-		$path = $this->getParameter('app.uploads_directory') . $importProduct->getPath();
-
 		try {
-			$this->bus->dispatch(new ImportProductsMessage($path, $userId, $importProduct->getSlug()));
+			$this->bus->dispatch(new ImportProductsMessage($importProduct->getSlug(), $userId));
 		} catch (ExceptionInterface $e) {
 			$this->addFlash('warning', 'Import product failed: ' . $e->getMessage());
 			return $this->redirectToRoute('import');
@@ -106,6 +105,7 @@ class ImportController extends AbstractController
 		return $this->redirectToRoute('import');
 	}
 
+	// TODO:refactor method
 	public function edit(Request $request): Response
 	{
 		$slug = $request->get('slug');
@@ -115,9 +115,21 @@ class ImportController extends AbstractController
 			throw $this->createNotFoundException(sprintf('No import product found for slug = %s', $slug));
 		}
 
-		$columns = $this->initializeColumns();
+		$columns = [
+			['label' => 'Name', 'show' => false],
+			['label' => 'Category', 'show' => false],
+			['label' => 'Price', 'show' => false],
+			['label' => 'Amount', 'show' => false],
+			['label' => 'Description', 'show' => false],
+			['label' => 'Image', 'show' => false],
+			['label' => 'Length', 'show' => false],
+			['label' => 'Width', 'show' => false],
+			['label' => 'Height', 'show' => false],
+			['label' => 'Weight', 'show' => false],
+			['label' => 'Colors', 'show' => false],
+		];
 		$filePath = $this->getParameter('app.uploads_directory') . $importProduct->getPath();
-		$rows = $this->readCsvFile($filePath, $columns);
+		$rows = CSVUtil::readCSV($filePath, $columns);
 
 		if ($request->isMethod('POST')) {
 			$file = $request->get('csv');
@@ -147,44 +159,5 @@ class ImportController extends AbstractController
 			'rows' => $rows,
 			'columns' => $columns,
 		]);
-	}
-
-	private function initializeColumns(): array
-	{
-		return [
-			['label' => 'Name', 'show' => false],
-			['label' => 'Category', 'show' => false],
-			['label' => 'Price', 'show' => false],
-			['label' => 'Amount', 'show' => false],
-			['label' => 'Description', 'show' => false],
-			['label' => 'Image', 'show' => false],
-			['label' => 'Length', 'show' => false],
-			['label' => 'Width', 'show' => false],
-			['label' => 'Height', 'show' => false],
-			['label' => 'Weight', 'show' => false],
-			['label' => 'Colors', 'show' => false],
-		];
-	}
-
-	private function readCsvFile(string $filePath, array &$columns): array
-	{
-		$rows = [];
-
-		if (($handle = fopen($filePath, "r")) !== false) {
-			while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-				$row = array_slice($data, 0, 11);
-				$rows[] = $row;
-
-				foreach ($row as $index => $value) {
-					if (!empty($value) && $index < count($columns)) {
-						$columns[$index]['show'] = true;
-					}
-				}
-			}
-
-			fclose($handle);
-		}
-
-		return $rows;
 	}
 }

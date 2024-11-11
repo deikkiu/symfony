@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends AbstractController
 {
-	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse|Response
+	public function paymentCheckout(Request $request, CartService $cartService, ProductRepository $productRepository): JsonResponse
 	{
 		$cart = $cartService->getCart();
 		$cartList = $cart->getList();

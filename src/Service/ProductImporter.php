@@ -38,12 +38,14 @@ class ProductImporter
 	{
 	}
 
-	public function import(string $filePath, int $userId, string $importSlug): void
+	public function import(string $slug, int $userId): void
 	{
-		if (($fp = fopen($filePath, "r")) === false) {
+		$import = $this->importModel->getImportProduct($slug);
+
+		if (($fp = fopen($this->uploadsDirectory . $import->getPath(), "r")) === false) {
 			$this->status = false;
 			$this->addWarningMessage('Cannot read the file, please upload in the format - csv');
-			$this->updateImport($importSlug);
+			$this->updateImport($slug);
 			return;
 		}
 
@@ -88,7 +90,7 @@ class ProductImporter
 			if (!$this->status) {
 				$this->entityManager->rollback();
 				$this->entityManager->clear();
-				$this->updateImport($importSlug);
+				$this->updateImport($slug);
 				return;
 			}
 
@@ -96,14 +98,14 @@ class ProductImporter
 			$this->entityManager->commit();
 			$this->entityManager->clear();
 
-			$this->updateImport($importSlug, $i);
+			$this->updateImport($slug, $i);
 		} catch (Exception $e) {
 			$this->entityManager->rollback();
 			$this->entityManager->clear();
 
 			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());
 
-			$this->updateImport($importSlug);
+			$this->updateImport($slug);
 		}
 	}
 
@@ -128,22 +130,24 @@ class ProductImporter
 
 	private function setProductColumns(Product $product, array $data, string $preMessage): void
 	{
-		$errors = [];
-
 		$product->setName($data['name']);
+
 		$category = $this->entityManager->getRepository(Category::class)->findOneBy(['slug' => $data['category']]);
 
-		if (!$category) {
-			$errors[] = "Category '{$data['category']}' not found";
+		if ($category) {
+			$product->setCategory($category);
+		} else {
+			$this->addWarningMessage($preMessage . sprintf('Category with slug: %s not found', $data['category']));
+			$this->status = false;
 		}
 
-		$product->setCategory($category);
+		if (is_numeric($data['price'])) {
+			$product->setPrice($data['price']);
+		}
 
-		$price = $this->checkIsInteger('Price', $data['price'], $errors);
-		$product->setPrice($price);
-
-		$amount = $this->checkIsInteger('Amount', $data['amount'], $errors);
-		$product->setAmount($amount);
+		if (is_numeric($data['amount'])) {
+			$product->setAmount($data['amount']);
+		}
 
 		$product->setDescr($data['descr']);
 
@@ -156,14 +160,9 @@ class ProductImporter
 			}
 		}
 
-		$this->setProductAttributes($product, $data, $errors);
+		$this->setProductAttributes($product, $data, $preMessage);
 		$this->setProductColors($product, $data['colors']);
 		$product->setDraft(true);
-
-		foreach ($errors as $error) {
-			$this->addWarningMessage($preMessage . $error);
-			$this->status = false;
-		}
 	}
 
 	private function fetchProductImage(string $url): string
@@ -182,31 +181,38 @@ class ProductImporter
 		}
 	}
 
-	private function setProductAttributes(Product $product, array $data, array $errors): void
+	private function setProductAttributes(Product $product, array $data, string $preMessage): void
 	{
 		$productAttr = new ProductAttr();
 
-		if (!empty($data['length'])) {
-			$length = $this->checkIsInteger('Length', $data['length'], $errors);
-			$productAttr->setLength($length);
-		}
+		$valid = $this->validateProductAttribute($data['length'], 'length', $preMessage);
+		if ($valid) $productAttr->setLength($data['length']);
 
-		if (!empty($data['width'])) {
-			$width = $this->checkIsInteger('Width', $data['width'], $errors);
-			$productAttr->setWidth($width);
-		}
+		$valid = $this->validateProductAttribute($data['width'], 'width', $preMessage);
+		if ($valid) $productAttr->setWidth($data['width']);
 
-		if (!empty($data['height'])) {
-			$height = $this->checkIsInteger('Height', $data['height'], $errors);
-			$productAttr->setHeight($height);
-		}
+		$valid = $this->validateProductAttribute($data['height'], 'height', $preMessage);
+		if ($valid) $productAttr->setHeight($data['height']);
 
-		if (!empty($data['weight'])) {
-			$weight = $this->checkIsInteger('Weight', $data['weight'], $errors);
-			$productAttr->setWeight($weight);
-		}
+		$valid = $this->validateProductAttribute($data['weight'], 'weight', $preMessage);
+		if ($valid) $productAttr->setWeight($data['weight']);
 
 		$product->setProductAttr($productAttr);
+	}
+
+	private function validateProductAttribute(mixed $value, string $name, string $preMessage): bool
+	{
+		if (empty($value)) {
+			return false;
+		}
+
+		if (!is_numeric($value)) {
+			$this->addWarningMessage($preMessage . sprintf('Value of %s must be a integer.', $name));
+			$this->status = false;
+			return false;
+		}
+
+		return true;
 	}
 
 	private function setProductColors(Product $product, string $colors): void
@@ -250,16 +256,6 @@ class ProductImporter
 	private function updateStatus(): void
 	{
 		$this->status = true;
-	}
-
-	private function checkIsInteger(string $name, mixed $value, array &$errors): int
-	{
-		if (!is_numeric($value)) {
-			$errors[] = "$name is not a integer";
-			return 0;
-		}
-
-		return (int)$value;
 	}
 
 	private function addWarningMessage(string $message): void

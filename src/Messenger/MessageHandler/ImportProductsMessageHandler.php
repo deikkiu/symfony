@@ -17,6 +17,6 @@ final readonly class ImportProductsMessageHandler
 
 	public function __invoke(ImportProductsMessage $message): void
 	{
-		$this->importer->import($message->getFilePath(), $message->getUserId(), $message->getImportSlug());
+		$this->importer->import($message->getSlug(), $message->getUserId());
 	}
 }
