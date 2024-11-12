@@ -47,10 +47,6 @@ product_list:
   path: /product/list
   controller: App\Controller\ProductController::showAll
 
-product_list_category:
-  path: /product/list/{category}
-  controller: App\Controller\ProductController::showAll
-
 product_create:
   path: /product/store
   controller: App\Controller\ProductController::store

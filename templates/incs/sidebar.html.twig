@@ -3,7 +3,7 @@
 
     <div class="categories">
         {% for category in categories %}
-            <a href="{{ path('product_list_category', {category: category.slug}) }}">
+            <a href="{{ path('product_list', {'category': category.slug}) }}">
                 {{ category.name }}
                 |
                 {% if isUser %}

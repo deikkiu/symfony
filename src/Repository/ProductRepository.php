@@ -18,7 +18,7 @@ class ProductRepository extends ServiceEntityRepository
 		parent::__construct($registry, Product::class);
 	}
 
-	public function findAllOrderedByAttr(ProductSearch $data, bool $isUser = false): array
+	public function findAllOrderedByAttr(ProductSearch $data, bool $isUser = false): \Doctrine\ORM\Query
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
 
@@ -78,7 +78,7 @@ class ProductRepository extends ServiceEntityRepository
 			};
 		}
 
-		return $queryBuilder->getQuery()->getResult();
+		return $queryBuilder->getQuery();
 	}
 
 	public function findProductsInCategory($product, bool $isUser = false, ?int $limit = null): array

@@ -13,9 +13,11 @@ use App\Security\Voter\ProductVoter;
 use App\Service\CartService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProductController extends AbstractController
@@ -82,39 +84,37 @@ class ProductController extends AbstractController
 		return $this->redirectToRoute('product_list');
 	}
 
-	public function showAll(Request $request, EntityManagerInterface $entityManager): Response
+	public function showAll(Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
 	{
-		$productSearch = new ProductSearch();
-		$slug = $request->get('category');
-
-		$form = $this->createForm(ProductSearchType::class, $productSearch, [
+		$form = $this->createForm(ProductSearchType::class, new ProductSearch(), [
 			'action' => $this->generateUrl('product_list'),
+			'method' => 'GET',
 		]);
+
 		$form->handleRequest($request);
 
-		if ($request->isMethod('GET') && $slug) {
-			$category = $entityManager->getRepository(Category::class)->findOneBy(['slug' => $slug]);
-
-			if (!$category) {
-				throw $this->createNotFoundException('Products not found for this category = ' . $slug);
-			}
-
-			$form->get('category')->setData($category);
-			$productSearch->setCategory($category);
-		}
-
+		// TODO: infinity redirect fix
 		if ($form->isSubmitted() && $form->isValid()) {
-			$productSearch = $form->getData();
+			$queryParams = array_filter($request->query->all(), function ($value) {
+				return !empty($value) && $value !== '';
+			});
+
+			$url = $this->generateUrl('product_list', $queryParams);
+
+			if ($request->getUri() !== $url) return $this->redirect($url);
 		}
 
 		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
-		$products = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch, $isUser);
+		$page = $request->query->get('page', 1);
+		$query = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($form->getData(), $isUser);
+
+		$pagination = $paginator->paginate($query, $page, 4);
 
 		return $this->render('product/index.html.twig', [
 			'form' => $form,
-			'products' => $products
+			'pagination' => $pagination
 		]);
 	}
 

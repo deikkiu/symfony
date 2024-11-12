@@ -102,6 +102,8 @@ return array(
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
     'Liip\\ImagineBundle\\' => array($vendorDir . '/liip/imagine-bundle'),
+    'Knp\\Component\\' => array($vendorDir . '/knplabs/knp-components/src/Knp/Component'),
+    'Knp\\Bundle\\PaginatorBundle\\' => array($vendorDir . '/knplabs/knp-paginator-bundle/src'),
     'Imagine\\' => array($vendorDir . '/imagine/imagine/src'),
     'Gedmo\\' => array($vendorDir . '/gedmo/doctrine-extensions/src'),
     'Egulias\\EmailValidator\\' => array($vendorDir . '/egulias/email-validator/src'),

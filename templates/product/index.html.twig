@@ -1,10 +1,16 @@
 {% extends "base.html.twig" %}
 
+{% block head %}
+    {{ parent() }}
+
+    {{ knp_pagination_rel_links(pagination) }}
+{% endblock %}
+
 {% block title %}Product list{% endblock %}
 
 {% form_theme form _self %}
 
-{% block _product_search_isAmount_row %}
+{% block _isAmount_row %}
     <div class="amount">
         {{ form_label(form) }}
         {{ form_widget(form) }}
@@ -24,9 +30,10 @@
     <br/>
 
     <h1>Product list:</h1>
-    {% if products %}
+
+    {% if pagination.getTotalItemCount > 0 %}
         <div class="cards">
-            {% for product in products %}
+            {% for product in pagination %}
                 {% embed 'cards/card.html.twig' %}
                     {% block buttons %}
                         {% if is_granted('ROLE_ADMIN') %}
@@ -47,4 +54,14 @@
     {% else %}
         <p>The list of products is empty</p>
     {% endif %}
+
+    <div class="navigation">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+
+    {# <script src="{{ asset('script/pagination.js') }}"></script> #}
 {% endblock %}

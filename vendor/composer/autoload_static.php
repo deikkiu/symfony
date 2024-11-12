@@ -23,9 +23,9 @@ class ComposerStaticInit8116c249f0b4dbcd995d077b53ca826b
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '6a47392539ca2329373e0d33e1dba053' => __DIR__ . '/..' . '/symfony/polyfill-intl-icu/bootstrap.php',
+        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '92c8763cd6170fce6fcfe7e26b4e8c10' => __DIR__ . '/..' . '/symfony/phpunit-bridge/bootstrap.php',
-        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '4368e4d537f3da342a5a97079f340105' => __DIR__ . '/..' . '/twig/cssinliner-extra/Resources/functions.php',
     );
 
@@ -146,6 +146,11 @@ class ComposerStaticInit8116c249f0b4dbcd995d077b53ca826b
         'L' => 
         array (
             'Liip\\ImagineBundle\\' => 19,
+        ),
+        'K' => 
+        array (
+            'Knp\\Component\\' => 14,
+            'Knp\\Bundle\\PaginatorBundle\\' => 27,
         ),
         'I' => 
         array (
@@ -580,6 +585,14 @@ class ComposerStaticInit8116c249f0b4dbcd995d077b53ca826b
         'Liip\\ImagineBundle\\' => 
         array (
             0 => __DIR__ . '/..' . '/liip/imagine-bundle',
+        ),
+        'Knp\\Component\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/knplabs/knp-components/src/Knp/Component',
+        ),
+        'Knp\\Bundle\\PaginatorBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/knplabs/knp-paginator-bundle/src',
         ),
         'Imagine\\' => 
         array (
