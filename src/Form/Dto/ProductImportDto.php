@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Form\Object;
+namespace App\Form\Dto;
 
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ProductImport
+class ProductImportDto
 {
 	#[Assert\NotBlank(message: 'Please upload a csv file')]
 	#[Assert\File(maxSize: '1M', mimeTypes: ['text/csv'], mimeTypesMessage: 'Please upload a valid CSV file.')]

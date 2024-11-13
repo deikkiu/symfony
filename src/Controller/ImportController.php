@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Import;
-use App\Form\Object\ProductImport;
+use App\Form\Dto\ProductImportDto;
 use App\Form\ProductImportType;
 use App\Messenger\Message\ImportProductsMessage;
 use App\Model\ImportModel;
@@ -36,7 +36,7 @@ class ImportController extends AbstractController
 		$userId = $this->security->getUser()->getId();
 		$imports = $this->importModel->getAllImportProducts();
 
-		$form = $this->createForm(ProductImportType::class, new ProductImport());
+		$form = $this->createForm(ProductImportType::class, new ProductImportDto());
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {

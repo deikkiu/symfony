@@ -4,8 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Category;
 use App\Entity\Product;
-use App\Form\Object\ProductSearch;
+use App\Form\Dto\ProductSearchDto;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,7 +19,7 @@ class ProductRepository extends ServiceEntityRepository
 		parent::__construct($registry, Product::class);
 	}
 
-	public function findAllOrderedByAttr(ProductSearch $data, bool $isUser = false): \Doctrine\ORM\Query
+	public function findAllOrderedByAttr(ProductSearchDto $data, bool $isUser = false): QueryBuilder
 	{
 		$queryBuilder = $this->createQueryBuilder('p');
 
@@ -78,7 +79,7 @@ class ProductRepository extends ServiceEntityRepository
 			};
 		}
 
-		return $queryBuilder->getQuery();
+		return $queryBuilder;
 	}
 
 	public function findProductsInCategory($product, bool $isUser = false, ?int $limit = null): array

@@ -43,6 +43,13 @@
                     Colors: {% for color in product.colors %}{{ color.name|capitalize }}&nbsp;{% endfor %}
                 </li>
             {% endif %}
+
+            {% if product.productAttr %}
+                <li class="list-group-item">
+                   Weight: {% if product.productAttr.weight %}{{ product.productAttr.weight }}{% else %}0{% endif %} g
+                </li>
+            {% endif %}
+
         {% endblock %}
     </ul>
 

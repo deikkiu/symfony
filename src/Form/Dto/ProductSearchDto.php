@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Form\Object;
+namespace App\Form\Dto;
 
 use App\Entity\Category;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ProductSearch
+class ProductSearchDto
 {
 	#[Assert\Length(min: 2, max: 255)]
 	private ?string $name = null;

@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Category;
 use App\Entity\Product;
-use App\Form\Object\ProductSearch;
+use App\Form\Dto\ProductSearchDto;
 use App\Form\ProductSearchType;
 use App\Form\ProductType;
 use App\Model\ProductModel;
@@ -17,7 +16,6 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProductController extends AbstractController
@@ -86,29 +84,26 @@ class ProductController extends AbstractController
 
 	public function showAll(Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
 	{
-		$form = $this->createForm(ProductSearchType::class, new ProductSearch(), [
+		$productSearch = new ProductSearchDto();
+
+		$form = $this->createForm(ProductSearchType::class, $productSearch, [
 			'action' => $this->generateUrl('product_list'),
 			'method' => 'GET',
 		]);
 
 		$form->handleRequest($request);
 
-		// TODO: infinity redirect fix
 		if ($form->isSubmitted() && $form->isValid()) {
-			$queryParams = array_filter($request->query->all(), function ($value) {
-				return !empty($value) && $value !== '';
-			});
-
-			$url = $this->generateUrl('product_list', $queryParams);
-
-			if ($request->getUri() !== $url) return $this->redirect($url);
+			$productSearch = $form->getData();
+		} else {
+			$productSearch = new ProductSearchDto();
 		}
 
 		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
 		$page = $request->query->get('page', 1);
-		$query = $entityManager->getRepository(Product::class)->findAllOrderedByAttr($form->getData(), $isUser);
+		$query = ($entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch, $isUser))->getQuery();
 
 		$pagination = $paginator->paginate($query, $page, 4);
 

@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Form\Object\ProductImport;
+use App\Form\Dto\ProductImportDto;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -25,7 +25,7 @@ class ProductImportType extends AbstractType
 	public function configureOptions(OptionsResolver $resolver): void
 	{
 		$resolver->setDefaults([
-			'data_class' => ProductImport::class
+			'data_class' => ProductImportDto::class
 		]);
 	}
 }

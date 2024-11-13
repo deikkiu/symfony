@@ -85,27 +85,25 @@ class ProductImporter
 				}
 			}
 
+			$this->entityManager->flush();
+			$this->entityManager->clear();
+
 			fclose($fp);
 
 			if (!$this->status) {
 				$this->entityManager->rollback();
-				$this->entityManager->clear();
 				$this->updateImport($slug);
 				return;
 			}
 
-			$this->entityManager->flush();
 			$this->entityManager->commit();
-			$this->entityManager->clear();
 
 			$this->updateImport($slug, $i);
 		} catch (Exception $e) {
 			$this->entityManager->rollback();
-			$this->entityManager->clear();
-
-			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());
 
 			$this->updateImport($slug);
+			$this->addWarningMessage('Error while saving products: ' . $e->getMessage());
 		}
 	}
 
@@ -202,9 +200,7 @@ class ProductImporter
 
 	private function validateProductAttribute(mixed $value, string $name, string $preMessage): bool
 	{
-		if (empty($value)) {
-			return false;
-		}
+		if (empty($value)) return false;
 
 		if (!is_numeric($value)) {
 			$this->addWarningMessage($preMessage . sprintf('Value of %s must be a integer.', $name));
