@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+    db:
+        image: mysql
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    web:
+        build: .
+        ports:
+            - "8080:80"
