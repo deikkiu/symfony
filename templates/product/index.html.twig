@@ -56,7 +56,7 @@
         <p>The list of products is empty</p>
     {% endif %}
 
-    <div class="navigation d-flex justify-content-center">
+    <div class="navigation">
         {{ knp_pagination_render(pagination) }}
     </div>
 {% endblock %}
@@ -64,6 +64,6 @@
 {% block scripts %}
     {{ parent() }}
 
-    <script src="{{ asset('script/search.js') }}"></script>
+    <script src="{{ asset('script/filterForm.js') }}"></script>
     {# <script src="{{ asset('script/pagination.js') }}"></script> #}
 {% endblock %}

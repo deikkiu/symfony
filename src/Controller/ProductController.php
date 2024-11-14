@@ -99,10 +99,9 @@ class ProductController extends AbstractController
 			$productSearch = new ProductSearchDto();
 		}
 
-		// @TODO: checking role user
 		$isUser = in_array('ROLE_USER', $this->getUser()->getRoles());
 
-		$page = $request->query->get('page', 1);
+		$page = $request->query->get('p', 1);
 		$query = ($entityManager->getRepository(Product::class)->findAllOrderedByAttr($productSearch, $isUser))->getQuery();
 
 		$pagination = $paginator->paginate($query, $page, 4);

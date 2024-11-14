@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('form-submit').addEventListener('click', handleFormSubmit);
 });
 
-function handleFormSubmit(e) {
-    e.preventDefault();
+function handleFormSubmit(event) {
+    event.preventDefault();
 
     const form = document.querySelector('form');
     const params = {};
@@ -13,21 +13,17 @@ function handleFormSubmit(e) {
             input.value = input.checked ? 1 : 0;
         }
 
-        if (input.value.trim() === '') {
+        if (input.value.trim() === '' || input.value < 1) {
             return;
         }
 
-        if (input.value < 1) {
-            return;
-        }
-
-        return params[input.name] = input.value;
+        params[input.name] = input.value;
     });
 
-    const uri = window.location.origin + window.location.pathname;
-    const query = new URLSearchParams(params).toString();
+    const uri = window.location.origin.concat(window.location.pathname);
+    const query = new URLSearchParams(params).toString().trim();
 
-    const url = query.trim() !== '' ? uri.concat('?', query) : uri;
+    const url = query ? uri.concat('?', query) : uri;
 
     window.location.replace(url);
 }
