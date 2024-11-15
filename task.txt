@@ -1,7 +1,7 @@
 1. Refactor validation func cart
 2. Payment controller response
+3. Json in Import messages
+4. DTO for importer
+5. Fix pagination link in docker
 
 
-KnpPaginatorBundle
-json in Import messages
-DTO for importer

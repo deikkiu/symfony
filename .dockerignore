@@ -6,7 +6,7 @@
 
 **/.classpath
 **/.dockerignore
-**/.env
+**/.env.local
 **/.git
 **/.gitignore
 **/.project
@@ -20,11 +20,11 @@
 **/*.dbmdl
 **/*.jfm
 **/charts
-**/docker-compose*
+docker-compose.yml
 **/compose.y*ml
 !**/composer.json
 !**/composer.lock
-**/Dockerfile*
+Dockerfile
 **/node_modules
 **/npm-debug.log
 **/obj
@@ -33,3 +33,6 @@
 **/vendor
 LICENSE
 README.md
+
+**/public/uploads
+**/public/media

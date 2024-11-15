@@ -1,25 +1,33 @@
 FROM php:8.2-apache
 
+# PHP and required modules
+RUN apt-get update && apt-get install -y \
+    git zip unzip libpng-dev \
+    libzip-dev default-mysql-client libmagickwand-dev librabbitmq-dev libssh-dev \
+    && docker-php-ext-install pdo mysqli pdo_mysql zip sockets \
+    && pecl install imagick amqp \
+    && docker-php-ext-enable imagick amqp
+
+# Apache rewrite
 RUN a2enmod rewrite
 
-RUN apt-get update \
-  && apt-get install -y libzip-dev git wget --no-install-recommends \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN docker-php-ext-install pdo mysqli pdo_mysql zip;
-
-RUN wget https://getcomposer.org/download/2.8.1/composer.phar \
-    && mv composer.phar /usr/bin/composer && chmod +x /usr/bin/composer
-
+# Apache configuration
 COPY docker/apache.conf /etc/apache2/sites-enabled/000-default.conf
-COPY docker/entrypoint.sh /entrypoint.sh
-COPY . /var/www/market
 
-WORKDIR /var/www/market
+COPY . /var/www
+WORKDIR /var/www
 
-RUN chmod +x /entrypoint.sh
+# Permissions
+RUN chown -R www-data:www-data /var/www && chmod -R 775 /var/www
 
-CMD ["apache2-foreground"]
+# Composer dependencies
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-scripts --no-autoloader --ignore-platform-req=ext-sockets --ignore-platform-req=ext-amqp
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Symfony commands
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+CMD ["docker-entrypoint.sh"]
