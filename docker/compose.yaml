@@ -1,12 +1,9 @@
 services:
     php-fpm:
-        container_name: php-fpm
+        container_name: market_php-fpm
         build:
             context: ./../
             dockerfile: ./docker/php-fpm/Dockerfile
-            args:
-                - PUID=1000
-                - PGID=1000
         networks:
             - market
 
@@ -16,7 +13,7 @@ services:
             context: ./../
             dockerfile: ./docker/apache/Dockerfile
         ports:
-            - "888:80"
+            - "8080:80"
         depends_on:
             - php-fpm
         volumes:
@@ -31,9 +28,6 @@ services:
         volumes:
             - db-data:/var/lib/mysql
         environment:
-            MYSQL_DATABASE: 'Store'
-            MYSQL_USER: 'timur'
-            MYSQL_PASSWORD: 'admin'
             MYSQL_ROOT_PASSWORD: 'admin'
         ports:
             - "3306:3306"
