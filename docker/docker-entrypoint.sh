@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec php-fpm
+
 # Wait for MySQL to be ready
 echo "Waiting for MySQL..."
 until mysqladmin ping -h db_container -u timur -padmin --silent; do

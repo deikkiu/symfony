@@ -20,11 +20,11 @@
 **/*.dbmdl
 **/*.jfm
 **/charts
-docker-compose.yml
+docker/compose.yaml
 **/compose.y*ml
 !**/composer.json
 !**/composer.lock
-Dockerfile
+docker/Dockerfile
 **/node_modules
 **/npm-debug.log
 **/obj

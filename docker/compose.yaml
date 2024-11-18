@@ -1,0 +1,59 @@
+services:
+    php-fpm:
+        container_name: php-fpm
+        build:
+            context: ./../
+            dockerfile: ./docker/php-fpm/Dockerfile
+            args:
+                - PUID=1000
+                - PGID=1000
+        networks:
+            - market
+
+    apache:
+        container_name: apache
+        build:
+            context: ./../
+            dockerfile: ./docker/apache/Dockerfile
+        ports:
+            - "888:80"
+        depends_on:
+            - php-fpm
+        volumes:
+            - ..:/var/www:rw
+        networks:
+            - market
+
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        restart: always
+        volumes:
+            - db-data:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: 'Store'
+            MYSQL_USER: 'timur'
+            MYSQL_PASSWORD: 'admin'
+            MYSQL_ROOT_PASSWORD: 'admin'
+        ports:
+            - "3306:3306"
+        networks:
+            - market
+
+    rabbitmq:
+        image: rabbitmq:management
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - rabbitmq_data:/data
+        networks:
+            - market
+
+networks:
+    market:
+
+volumes:
+    db-data:
+    rabbitmq_data:
